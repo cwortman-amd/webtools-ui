@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/cwortman-amd/shared-ui/blob/main/docs/templates/demo-track.schema.json",
+  "title": "Demo Track",
+  "description": "Canonical schema for narrated dashboard demo tracks. Promoted in harmonization Phase 5.1 from the dc-planner format. Each consumer ships its own per-domain track JSON files in `data/demo-tracks/<track>.json` (the engine that consumes them is the shared `shared/js/demo-engine.js`).\n\nA TRACK is one end-to-end narrated walkthrough (e.g. \"presales\", \"onboarding\", \"engineering\"). It contains a sequence of SCENES (typically one scene per dashboard tab). Each SCENE contains a sequence of STEPS. Each STEP has narration text and a list of ACTIONS the engine executes against the dashboard via the agent bridge.",
+  "type": "object",
+  "required": ["track", "title", "version", "scenes"],
+  "properties": {
+    "track": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Stable identifier; matches the filename (track.json)."
+    },
+    "title": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "audience": {
+      "type": "string",
+      "description": "Free-text audience descriptor — e.g. \"external customer demo\", \"new hire onboarding\", \"engineering training\"."
+    },
+    "estimated_minutes": { "type": "number", "minimum": 0 },
+    "scenario_url": {
+      "type": "string",
+      "description": "Optional path (relative to the page) to a JSON file containing pre-staged dashboard state to load at track start."
+    },
+    "voice": {
+      "type": "object",
+      "description": "Voice configuration for narration. Currently only the browser SpeechSynthesis provider is supported.",
+      "properties": {
+        "provider": { "type": "string", "enum": ["speechSynthesis"] },
+        "preferred_voices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered list of preferred SpeechSynthesisVoice names. The engine picks the first one matched on the user's machine."
+        },
+        "rate":  { "type": "number", "minimum": 0.1, "maximum": 10 },
+        "pitch": { "type": "number", "minimum": 0,   "maximum": 2 },
+        "step_pause_ms": { "type": "integer", "minimum": 0,
+                           "description": "Pause inserted between steps before the next action runs." }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/scene" }
+    }
+  },
+
+  "definitions": {
+
+    "scene": {
+      "type": "object",
+      "required": ["id", "title", "steps"],
+      "properties": {
+        "id":    { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+        "tab":   {
+          "type": "string",
+          "description": "Dashboard tab to navigate to before any step runs (passed to agent bridge `navigate` action)."
+        },
+        "title": { "type": "string" },
+        "estimated_seconds": { "type": "number", "minimum": 0 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/step" }
+        }
+      }
+    },
+
+    "step": {
+      "type": "object",
+      "required": ["id", "narration"],
+      "properties": {
+        "id":         { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+        "narration":  {
+          "type": "string",
+          "description": "Plain-text narration spoken aloud and shown in the transcript panel. May span multiple sentences; the engine highlights one sentence at a time using SpeechSynthesis boundary events."
+        },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/action" }
+        }
+      }
+    },
+
+    "action": {
+      "type": "object",
+      "required": ["type"],
+      "description": "Action object. Types map to functions in `demo-engine.js`. Most actions take a `hook` (the value of a `data-agent-hook` attribute on the dashboard) so the engine can resolve the target via the agent bridge.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "highlight",
+            "fill",
+            "click",
+            "scroll_to",
+            "scroll_tour",
+            "wait",
+            "navigate",
+            "set_state",
+            "set_field",
+            "expect",
+            "assert"
+          ]
+        },
+        "hook":  { "type": "string", "description": "Value of a `data-agent-hook` attribute on the target element." },
+        "value": { "description": "For `fill`/`set_field`: the value to write (string|number|boolean)." },
+        "ms":    { "type": "integer", "minimum": 0,
+                   "description": "For `wait`: pause duration in milliseconds." },
+        "from":  { "type": "string", "description": "For `scroll_tour`: starting position (e.g. \"top\")." },
+        "to":    { "type": "string", "description": "For `scroll_tour`: ending position (e.g. \"panel-bottom\")." },
+        "duration_ms": { "description": "For `scroll_tour`: scroll duration; \"auto\" lets the engine compute from height + WPM." },
+        "easing":      { "type": "string",
+                         "enum": ["linear", "ease-in", "ease-out", "ease-in-out"],
+                         "description": "For `scroll_tour`: easing curve for smooth scrolling." },
+        "parallel":    { "type": "boolean",
+                         "description": "If true, this action runs concurrently with the step's narration; otherwise the engine waits for narration to finish before executing." },
+        "pause_at_end_ms": { "type": "integer", "minimum": 0,
+                             "description": "Extra pause inserted after the action completes." },
+        "params":      { "type": "object",
+                         "description": "Free-form parameter map for action types that need it (e.g. `set_state`)." },
+        "expect":      { "type": "object",
+                         "description": "For `assert`: predicate to evaluate after the action chain. Used by the regression harness to detect demo drift." }
+      }
+    }
+  }
+}

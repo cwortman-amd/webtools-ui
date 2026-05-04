@@ -1,0 +1,162 @@
+/* ──────────────────────────────────────────────────────────────────────
+ * AMD — official AMD Red brand skin
+ * Palette: AMD Red #ED1C24 (RGB 237 / 28 / 36) / deep red #B8141A
+ *   on AMD canonical greys. Mirrors the mi455x-pitch master template
+ *   (pages/mi455x-pitch.html).
+ * Light variant flips the canvas to white while keeping AMD red as the
+ * primary accent.
+ *
+ * AMD canonical greys (per AMD brand guidance — also exposed as
+ * --amd-gray-N tokens for consumers):
+ *   --amd-gray-1  #262626   Dark Gray 1   (RGB  38/ 38/ 38) panel
+ *   --amd-gray-2  #404040   Dark Gray 2   (RGB  64/ 64/ 64) elevated
+ *   --amd-gray-3  #595959   Medium Gray   (RGB  89/ 89/ 89) muted-text light
+ *   --amd-gray-4  #A6A6A6   Light Grey 1  (RGB 166/166/166) muted-text dark
+ *   --amd-gray-5  #D9D9D9   Light Grey 2  (RGB 217/217/217) divider light
+ * Shared verbatim across css/skins/amd.css, amd-gold.css, amd-teal.css.
+ * ─────────────────────────────────────────────────────────────────────── */
+:root[data-skin="amd"] {
+  /* AMD Red palette */
+  --amd-red: #ED1C24;       /* RGB 237, 28, 36 — canonical brand red */
+  --amd-red-deep: #B8141A;
+  --amd-black: #000000;
+  --amd-white: #FFFFFF;
+
+  /* AMD canonical greys */
+  --amd-gray-1: #262626;
+  --amd-gray-2: #404040;
+  --amd-gray-3: #595959;
+  --amd-gray-4: #A6A6A6;
+  --amd-gray-5: #D9D9D9;
+
+  /* App-shared design tokens (consumed by dc-planner.css + shared-chrome.css) */
+  --ui-bg: #000000;
+  --ui-bg-soft: var(--amd-gray-1);
+  --ui-panel: var(--amd-gray-1);
+  --ui-line: rgba(255, 255, 255, 0.10);
+  --ui-text: #FFFFFF;
+  --ui-muted: var(--amd-gray-4);
+  --ui-accent: #ED1C24;
+  --ui-header: #FFFFFF;
+  --ui-link: #ED1C24;
+  --ui-link-hover: #FF4951;
+  --ui-accent-soft: rgba(237, 28, 36, 0.12);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(237, 28, 36, 0.04);
+  --ui-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(237, 28, 36, 0.06);
+  --ui-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(237, 28, 36, 0.08);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #2B1A0A;
+  --ui-warning-text: #FFB000;
+
+  --skin-btn-bg: linear-gradient(180deg, #ED1C24 0%, #B8141A 100%);
+  --skin-btn-color: #FFFFFF;
+  --skin-btn-border: none;
+  --skin-btn2-bg: rgba(255, 255, 255, 0.04);
+  --skin-btn2-border: 1px solid rgba(255, 255, 255, 0.18);
+  --skin-btn2-color: rgba(255, 255, 255, 0.85);
+  --skin-tab-bg: rgba(255, 255, 255, 0.03);
+  --skin-tab-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-tab-color: rgba(255, 255, 255, 0.65);
+  --skin-tab-active-bg: linear-gradient(180deg, rgba(237, 28, 36, 0.18) 0%, rgba(184, 20, 26, 0.10) 100%);
+  --skin-tab-active-border: var(--amd-red);
+  --skin-tab-active-color: #FFFFFF;
+  --skin-panel-bg: linear-gradient(180deg, #2C2C2C 0%, #262626 100%);
+  --skin-hero-bg: #000000;
+  --skin-hero-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-input-bg: #1A1A1A;
+  --skin-input-border: rgba(255, 255, 255, 0.18);
+  --skin-input-color: #FFFFFF;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23ED1C24' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  /* Presentation-viewer tokens (pages/present.html reads these) */
+  --pres-bg: #000000;
+  --pres-text: rgba(255, 255, 255, 0.85);
+  --pres-text-strong: #FFFFFF;
+  --pres-muted: var(--amd-gray-4);
+  --pres-card-bg: var(--amd-gray-1);
+  --pres-card-border: rgba(255, 255, 255, 0.10);
+  --pres-progress: var(--amd-red);
+  --pres-link: var(--amd-red);
+  --pres-svg-text: rgba(255, 255, 255, 0.72);
+  --pres-svg-line: rgba(255, 255, 255, 0.12);
+
+  /* Shared chrome (toolbar) */
+  --chrome-bg: #000000;
+  --chrome-line: rgba(255, 255, 255, 0.10);
+  --chrome-text: #FFFFFF;
+  --chrome-muted: var(--amd-gray-4);
+
+  /* Report cover (read by pages/report.html) */
+  --rpt-primary: #000000;
+  --rpt-accent: #ED1C24;
+  --rpt-accent-deep: #B8141A;
+  --rpt-bg: #FFFFFF;
+  --rpt-muted: rgba(0, 0, 0, 0.60);
+  --rpt-border: rgba(0, 0, 0, 0.12);
+  --rpt-section-bg: #FAFAFA;
+}
+
+/* Light variant — white canvas, AMD red accents preserved */
+[data-skin="amd"][data-theme="light"] {
+  --ui-bg: #FFFFFF;
+  --ui-bg-soft: #F4F4F4;
+  --ui-panel: #FFFFFF;
+  --ui-line: rgba(0, 0, 0, 0.10);
+  --ui-text: #000000;
+  --ui-muted: var(--amd-gray-3);
+  --ui-accent: #ED1C24;
+  --ui-header: #000000;
+  --ui-link: #B8141A;
+  --ui-link-hover: #ED1C24;
+  --ui-accent-soft: rgba(237, 28, 36, 0.08);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ui-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --ui-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #FEF3CD;
+  --ui-warning-text: #856404;
+
+  --skin-btn-bg: linear-gradient(180deg, #ED1C24 0%, #B8141A 100%);
+  --skin-btn-color: #FFFFFF;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid rgba(0, 0, 0, 0.14);
+  --skin-btn2-color: rgba(0, 0, 0, 0.70);
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid rgba(0, 0, 0, 0.12);
+  --skin-tab-color: rgba(0, 0, 0, 0.60);
+  --skin-tab-active-bg: rgba(237, 28, 36, 0.08);
+  --skin-tab-active-border: var(--amd-red);
+  --skin-tab-active-color: #B8141A;
+  --skin-panel-bg: #FFFFFF;
+  --skin-hero-bg: rgba(255, 255, 255, 0.96);
+  --skin-hero-border: 1px solid rgba(0, 0, 0, 0.10);
+  --skin-input-bg: #FFFFFF;
+  --skin-input-border: rgba(0, 0, 0, 0.18);
+  --skin-input-color: #000000;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23B8141A' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  --pres-bg: #FFFFFF;
+  --pres-text: rgba(0, 0, 0, 0.78);
+  --pres-text-strong: #000000;
+  --pres-muted: var(--amd-gray-3);
+  --pres-card-bg: #FAFAFA;
+  --pres-card-border: rgba(0, 0, 0, 0.08);
+  --pres-progress: var(--amd-red);
+  --pres-link: var(--amd-red);
+  --pres-svg-text: rgba(0, 0, 0, 0.72);
+  --pres-svg-line: rgba(0, 0, 0, 0.12);
+
+  --chrome-bg: #FFFFFF;
+  --chrome-line: rgba(0, 0, 0, 0.08);
+  --chrome-text: #000000;
+  --chrome-muted: var(--amd-gray-3);
+
+  --rpt-primary: #000000;
+  --rpt-accent: #ED1C24;
+  --rpt-accent-deep: #B8141A;
+  --rpt-bg: #FFFFFF;
+  --rpt-muted: rgba(0, 0, 0, 0.60);
+  --rpt-border: rgba(0, 0, 0, 0.10);
+  --rpt-section-bg: #FAFAFA;
+}

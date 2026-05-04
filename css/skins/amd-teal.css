@@ -1,0 +1,174 @@
+/* ──────────────────────────────────────────────────────────────────────
+ * AMD Teal — official AMD Teal accent skin
+ * Palette: AMD Teal #00C2DE (RGB 0 / 194 / 222) on AMD canonical
+ *   greys. Companion bright (#5BD8E8) and deep (#007F92) tokens are
+ *   derived from the base for hover lifts and gradient/pressed
+ *   states. The base value was supplied by AMD brand.
+ *
+ * Companion to css/skins/amd.css (#ED1C24 — AMD Red) and
+ * css/skins/amd-gold.css (#C1A968 — AMD Gold). Same structural
+ * token contract — swap the accent triplet, keep the AMD canonical
+ * greys for the surrounding chrome.
+ *
+ * AMD canonical greys (per AMD brand guidance — also available as
+ * --amd-gray-N tokens for consumers):
+ *   --amd-gray-1  #262626   Dark Gray 1   (RGB  38/ 38/ 38) panel
+ *   --amd-gray-2  #404040   Dark Gray 2   (RGB  64/ 64/ 64) elevated
+ *   --amd-gray-3  #595959   Medium Gray   (RGB  89/ 89/ 89) muted-text light
+ *   --amd-gray-4  #A6A6A6   Light Grey 1  (RGB 166/166/166) muted-text dark
+ *   --amd-gray-5  #D9D9D9   Light Grey 2  (RGB 217/217/217) divider light
+ *
+ * Light-variant note: AMD Teal #00C2DE against pure white is only
+ * ~2.1:1 contrast (well below WCAG-AA). The light variant therefore
+ * promotes the deep token #007F92 to --ui-accent / --ui-link so
+ * accent text stays AA-legible (~4.66:1, passes AA-body 4.5:1).
+ * ─────────────────────────────────────────────────────────────────────── */
+:root[data-skin="amd-teal"] {
+  /* AMD Teal palette */
+  --amd-teal:        #00C2DE;   /* RGB 0, 194, 222 — canonical brand teal */
+  --amd-teal-bright: #5BD8E8;   /* lift, used for hover/link-hover */
+  --amd-teal-deep:   #007F92;   /* darken, used in gradients + light AA accent */
+
+  /* AMD canonical greys */
+  --amd-gray-1:      #262626;   /* Dark Gray 1   — panel surface (dark) */
+  --amd-gray-2:      #404040;   /* Dark Gray 2   — elevated surface (dark) */
+  --amd-gray-3:      #595959;   /* Medium Gray   — muted text (light) */
+  --amd-gray-4:      #A6A6A6;   /* Light Grey 1  — muted text (dark) */
+  --amd-gray-5:      #D9D9D9;   /* Light Grey 2  — divider/bg-soft (light) */
+
+  --amd-black:       #000000;
+  --amd-white:       #FFFFFF;
+
+  /* App-shared design tokens (consumed by dc-planner.css + shared-chrome.css) */
+  --ui-bg: #000000;
+  --ui-bg-soft: var(--amd-gray-1);
+  --ui-panel: var(--amd-gray-1);
+  --ui-line: rgba(255, 255, 255, 0.10);
+  --ui-text: #FFFFFF;
+  --ui-muted: var(--amd-gray-4);
+  --ui-accent: #00C2DE;
+  --ui-header: #FFFFFF;
+  --ui-link: #5BD8E8;
+  --ui-link-hover: #8BE5F0;
+  --ui-accent-soft: rgba(0, 194, 222, 0.14);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(0, 194, 222, 0.06);
+  --ui-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 194, 222, 0.10);
+  --ui-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(0, 194, 222, 0.14);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #2B1A0A;
+  --ui-warning-text: #FFB000;
+
+  --skin-btn-bg: linear-gradient(180deg, #00C2DE 0%, #007F92 100%);
+  --skin-btn-color: #001A1F;
+  --skin-btn-border: none;
+  --skin-btn2-bg: rgba(255, 255, 255, 0.04);
+  --skin-btn2-border: 1px solid rgba(255, 255, 255, 0.18);
+  --skin-btn2-color: rgba(255, 255, 255, 0.85);
+  --skin-tab-bg: rgba(255, 255, 255, 0.03);
+  --skin-tab-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-tab-color: rgba(255, 255, 255, 0.65);
+  --skin-tab-active-bg: linear-gradient(180deg, rgba(0, 194, 222, 0.20) 0%, rgba(0, 127, 146, 0.10) 100%);
+  --skin-tab-active-border: var(--amd-teal);
+  --skin-tab-active-color: #FFFFFF;
+  --skin-panel-bg: linear-gradient(180deg, #2C2C2C 0%, #262626 100%);
+  --skin-hero-bg: #000000;
+  --skin-hero-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-input-bg: #1A1A1A;
+  --skin-input-border: rgba(255, 255, 255, 0.18);
+  --skin-input-color: #FFFFFF;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%2300C2DE' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  /* Presentation-viewer tokens (pages/present.html reads these) */
+  --pres-bg: #000000;
+  --pres-text: rgba(255, 255, 255, 0.85);
+  --pres-text-strong: #FFFFFF;
+  --pres-muted: var(--amd-gray-4);
+  --pres-card-bg: var(--amd-gray-1);
+  --pres-card-border: rgba(255, 255, 255, 0.10);
+  --pres-progress: var(--amd-teal);
+  --pres-link: var(--amd-teal-bright);
+  --pres-svg-text: rgba(255, 255, 255, 0.72);
+  --pres-svg-line: rgba(255, 255, 255, 0.12);
+
+  /* Shared chrome (toolbar) */
+  --chrome-bg: #000000;
+  --chrome-line: rgba(255, 255, 255, 0.10);
+  --chrome-text: #FFFFFF;
+  --chrome-muted: var(--amd-gray-4);
+
+  /* Report cover (read by pages/report.html) */
+  --rpt-primary: #000000;
+  --rpt-accent: #00C2DE;
+  --rpt-accent-deep: #007F92;
+  --rpt-bg: #FFFFFF;
+  --rpt-muted: var(--amd-gray-3);
+  --rpt-border: rgba(0, 0, 0, 0.12);
+  --rpt-section-bg: #F4FAFB;
+}
+
+/* Light variant — white canvas, deep-teal accent for legibility.
+   #00C2DE vs #FFFFFF is only ~2.1:1 (fails AA). The deep token
+   #007F92 lifts that to ~4.66:1 — meets WCAG-AA-body (4.5:1). */
+[data-skin="amd-teal"][data-theme="light"] {
+  --ui-bg: #FFFFFF;
+  --ui-bg-soft: #F4FAFB;
+  --ui-panel: #FFFFFF;
+  --ui-line: rgba(0, 0, 0, 0.10);
+  --ui-text: #0A0A0A;
+  --ui-muted: var(--amd-gray-3);
+  --ui-accent: #007F92;
+  --ui-header: #0A0A0A;
+  --ui-link: #007F92;
+  --ui-link-hover: #00C2DE;
+  --ui-accent-soft: rgba(0, 194, 222, 0.10);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ui-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --ui-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #FEF3CD;
+  --ui-warning-text: #856404;
+
+  --skin-btn-bg: linear-gradient(180deg, #00C2DE 0%, #007F92 100%);
+  --skin-btn-color: #001A1F;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid rgba(0, 0, 0, 0.14);
+  --skin-btn2-color: rgba(0, 0, 0, 0.70);
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid var(--amd-gray-5);
+  --skin-tab-color: rgba(0, 0, 0, 0.60);
+  --skin-tab-active-bg: rgba(0, 194, 222, 0.10);
+  --skin-tab-active-border: var(--amd-teal);
+  --skin-tab-active-color: #007F92;
+  --skin-panel-bg: #FFFFFF;
+  --skin-hero-bg: rgba(255, 255, 255, 0.96);
+  --skin-hero-border: 1px solid rgba(0, 0, 0, 0.10);
+  --skin-input-bg: #FFFFFF;
+  --skin-input-border: rgba(0, 0, 0, 0.18);
+  --skin-input-color: #0A0A0A;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23007F92' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  --pres-bg: #FFFFFF;
+  --pres-text: rgba(0, 0, 0, 0.78);
+  --pres-text-strong: #0A0A0A;
+  --pres-muted: var(--amd-gray-3);
+  --pres-card-bg: #F4FAFB;
+  --pres-card-border: rgba(0, 0, 0, 0.08);
+  --pres-progress: var(--amd-teal);
+  --pres-link: var(--amd-teal-deep);
+  --pres-svg-text: rgba(0, 0, 0, 0.72);
+  --pres-svg-line: rgba(0, 0, 0, 0.12);
+
+  --chrome-bg: #FFFFFF;
+  --chrome-line: rgba(0, 0, 0, 0.08);
+  --chrome-text: #0A0A0A;
+  --chrome-muted: var(--amd-gray-3);
+
+  --rpt-primary: #0A0A0A;
+  --rpt-accent: #00C2DE;
+  --rpt-accent-deep: #007F92;
+  --rpt-bg: #FFFFFF;
+  --rpt-muted: var(--amd-gray-3);
+  --rpt-border: rgba(0, 0, 0, 0.10);
+  --rpt-section-bg: #F4FAFB;
+}

@@ -1,0 +1,120 @@
+/* Minimal Monochrome — editorial ink-on-paper with precise contrast */
+:root[data-skin="minimal-monochrome"] {
+  --ui-bg: #fafafa;
+  --ui-bg-soft: #f3f3f4;
+  --ui-panel: #ffffff;
+  --ui-line: #e0e1e4;
+  --ui-text: #141516;
+  --ui-muted: #6a6e74;
+  --ui-accent: #1a1a1a;
+  --ui-header: #0a0a0a;
+  --ui-link: #1a1a1a;
+  --ui-link-hover: #4a4a4a;
+  --ui-accent-soft: #ededef;
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ui-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --ui-shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.08);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fef7e0;
+  --ui-warning-text: #8a6205;
+
+  --skin-btn-bg: #1a1a1a;
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #e0e1e4;
+  --skin-btn2-color: #6a6e74;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #e0e1e4;
+  --skin-tab-color: #6a6e74;
+  --skin-tab-active-bg: #ededef;
+  --skin-tab-active-border: #1a1a1a;
+  --skin-tab-active-color: #1a1a1a;
+  --skin-panel-bg: #ffffff;
+  --skin-hero-bg: rgba(250, 250, 250, 0.95);
+  --skin-hero-border: 1px solid #e0e1e4;
+  --skin-input-bg: #ffffff;
+  --skin-input-border: #d4d6da;
+  --skin-input-color: #141516;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%236a6e74' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="minimal-monochrome"][data-theme="light"] {
+  --ui-bg: #fafafa;
+  --ui-bg-soft: #f3f3f4;
+  --ui-panel: #ffffff;
+  --ui-line: #e0e1e4;
+  --ui-text: #141516;
+  --ui-muted: #6a6e74;
+  --ui-accent: #1a1a1a;
+  --ui-header: #0a0a0a;
+  --ui-link: #1a1a1a;
+  --ui-link-hover: #4a4a4a;
+  --ui-accent-soft: #ededef;
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ui-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --ui-shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.08);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fef7e0;
+  --ui-warning-text: #8a6205;
+
+  --skin-btn-bg: #1a1a1a;
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #e0e1e4;
+  --skin-btn2-color: #6a6e74;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #e0e1e4;
+  --skin-tab-color: #6a6e74;
+  --skin-tab-active-bg: #ededef;
+  --skin-tab-active-border: #1a1a1a;
+  --skin-tab-active-color: #1a1a1a;
+  --skin-panel-bg: #ffffff;
+  --skin-hero-bg: rgba(250, 250, 250, 0.95);
+  --skin-hero-border: 1px solid #e0e1e4;
+  --skin-input-bg: #ffffff;
+  --skin-input-border: #d4d6da;
+  --skin-input-color: #141516;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%236a6e74' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="minimal-monochrome"][data-theme="dark"] {
+  --ui-bg: #0e0f11;
+  --ui-bg-soft: #151618;
+  --ui-panel: #18191c;
+  --ui-line: #292b30;
+  --ui-text: #f0f1f3;
+  --ui-muted: #929599;
+  --ui-accent: #e8e9ec;
+  --ui-header: #ffffff;
+  --ui-link: #e8e9ec;
+  --ui-link-hover: #c8cad0;
+  --ui-accent-soft: #222428;
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --ui-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.22);
+  --ui-shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.28);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #362c12;
+  --ui-warning-text: #ffd995;
+
+  --skin-btn-bg: #e8e9ec;
+  --skin-btn-color: #111111;
+  --skin-btn-border: none;
+  --skin-btn2-bg: rgba(255, 255, 255, 0.03);
+  --skin-btn2-border: 1px solid #30333a;
+  --skin-btn2-color: #a0a3a8;
+  --skin-tab-bg: rgba(255, 255, 255, 0.02);
+  --skin-tab-border: 1px solid #292b30;
+  --skin-tab-color: #929599;
+  --skin-tab-active-bg: #222428;
+  --skin-tab-active-border: #e8e9ec;
+  --skin-tab-active-color: #ffffff;
+  --skin-panel-bg: #18191c;
+  --skin-hero-bg: #121315;
+  --skin-hero-border: 1px solid #292b30;
+  --skin-input-bg: #141518;
+  --skin-input-border: #2e3038;
+  --skin-input-color: #f0f1f3;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23929599' stroke-width='1.5'/%3E%3C/svg%3E");
+}

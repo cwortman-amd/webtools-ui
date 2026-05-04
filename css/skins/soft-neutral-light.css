@@ -1,0 +1,120 @@
+/* Soft Neutral Light — warm-toned calm enterprise theme with subtle depth */
+:root[data-skin="soft-neutral-light"] {
+  --ui-bg: #f7f7f9;
+  --ui-bg-soft: #f0f1f4;
+  --ui-panel: #ffffff;
+  --ui-line: #e2e4ea;
+  --ui-text: #1c2028;
+  --ui-muted: #6b7280;
+  --ui-accent: #5b6ef0;
+  --ui-header: #0f1218;
+  --ui-link: #4f62e0;
+  --ui-link-hover: #3a4cc8;
+  --ui-accent-soft: #ebe8ff;
+  --ui-shadow-sm: 0 1px 2px rgba(15, 18, 24, 0.03), 0 1px 4px rgba(91, 110, 240, 0.03);
+  --ui-shadow-md: 0 6px 18px rgba(15, 18, 24, 0.06), 0 2px 8px rgba(91, 110, 240, 0.04);
+  --ui-shadow-lg: 0 16px 38px rgba(15, 18, 24, 0.09), 0 4px 12px rgba(91, 110, 240, 0.05);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fff6d6;
+  --ui-warning-text: #8a6205;
+
+  --skin-btn-bg: linear-gradient(180deg, #6574f0 0%, #5060db 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #e2e4ea;
+  --skin-btn2-color: #6b7280;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #e2e4ea;
+  --skin-tab-color: #6b7280;
+  --skin-tab-active-bg: #ebe8ff;
+  --skin-tab-active-border: #5b6ef0;
+  --skin-tab-active-color: #4f62e0;
+  --skin-panel-bg: linear-gradient(180deg, #fcfcfd 0%, #ffffff 100%);
+  --skin-hero-bg: rgba(255, 255, 255, 0.94);
+  --skin-hero-border: 1px solid #e2e4ea;
+  --skin-input-bg: #ffffff;
+  --skin-input-border: #d8dbe2;
+  --skin-input-color: #1c2028;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%236b7280' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="soft-neutral-light"][data-theme="light"] {
+  --ui-bg: #f7f7f9;
+  --ui-bg-soft: #f0f1f4;
+  --ui-panel: #ffffff;
+  --ui-line: #e2e4ea;
+  --ui-text: #1c2028;
+  --ui-muted: #6b7280;
+  --ui-accent: #5b6ef0;
+  --ui-header: #0f1218;
+  --ui-link: #4f62e0;
+  --ui-link-hover: #3a4cc8;
+  --ui-accent-soft: #ebe8ff;
+  --ui-shadow-sm: 0 1px 2px rgba(15, 18, 24, 0.03), 0 1px 4px rgba(91, 110, 240, 0.03);
+  --ui-shadow-md: 0 6px 18px rgba(15, 18, 24, 0.06), 0 2px 8px rgba(91, 110, 240, 0.04);
+  --ui-shadow-lg: 0 16px 38px rgba(15, 18, 24, 0.09), 0 4px 12px rgba(91, 110, 240, 0.05);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fff6d6;
+  --ui-warning-text: #8a6205;
+
+  --skin-btn-bg: linear-gradient(180deg, #6574f0 0%, #5060db 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #e2e4ea;
+  --skin-btn2-color: #6b7280;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #e2e4ea;
+  --skin-tab-color: #6b7280;
+  --skin-tab-active-bg: #ebe8ff;
+  --skin-tab-active-border: #5b6ef0;
+  --skin-tab-active-color: #4f62e0;
+  --skin-panel-bg: linear-gradient(180deg, #fcfcfd 0%, #ffffff 100%);
+  --skin-hero-bg: rgba(255, 255, 255, 0.94);
+  --skin-hero-border: 1px solid #e2e4ea;
+  --skin-input-bg: #ffffff;
+  --skin-input-border: #d8dbe2;
+  --skin-input-color: #1c2028;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%236b7280' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="soft-neutral-light"][data-theme="dark"] {
+  --ui-bg: #131518;
+  --ui-bg-soft: #1a1d22;
+  --ui-panel: #1e2128;
+  --ui-line: #2e3340;
+  --ui-text: #edf0f5;
+  --ui-muted: #939aab;
+  --ui-accent: #8190f8;
+  --ui-header: #ffffff;
+  --ui-link: #9aa6ff;
+  --ui-link-hover: #c0c8ff;
+  --ui-accent-soft: #252840;
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.16), 0 1px 4px rgba(129, 144, 248, 0.05);
+  --ui-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.20), 0 2px 8px rgba(129, 144, 248, 0.06);
+  --ui-shadow-lg: 0 16px 38px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(129, 144, 248, 0.08);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #362c12;
+  --ui-warning-text: #ffd995;
+
+  --skin-btn-bg: linear-gradient(180deg, #7080f5 0%, #5c6ce0 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: rgba(255, 255, 255, 0.03);
+  --skin-btn2-border: 1px solid #363c4c;
+  --skin-btn2-color: #a0a8b8;
+  --skin-tab-bg: rgba(255, 255, 255, 0.02);
+  --skin-tab-border: 1px solid #2e3340;
+  --skin-tab-color: #939aab;
+  --skin-tab-active-bg: #252840;
+  --skin-tab-active-border: #8190f8;
+  --skin-tab-active-color: #eaedff;
+  --skin-panel-bg: linear-gradient(180deg, #22262e 0%, #1e2128 100%);
+  --skin-hero-bg: #161920;
+  --skin-hero-border: 1px solid #2e3340;
+  --skin-input-bg: #191c22;
+  --skin-input-border: #343a48;
+  --skin-input-color: #edf0f5;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23939aab' stroke-width='1.5'/%3E%3C/svg%3E");
+}

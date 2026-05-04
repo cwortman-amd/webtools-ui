@@ -1,0 +1,176 @@
+/* ──────────────────────────────────────────────────────────────────────
+ * AMD Gold — official AMD Gold accent skin
+ * Palette: AMD Gold #C1A968 (RGB 193 / 169 / 104) — the canonical AMD
+ *   brand gold. Companion bright (#D6C18F) and deep (#8C7A4D) tokens
+ *   are derived from the base for hover lifts and gradient/pressed
+ *   states. The base value was supplied by AMD brand; visual reference
+ *   for in-the-wild use:  https://developer.amd.com/playbooks/
+ *
+ * Companion to css/skins/amd.css (the AMD Red brand skin which uses
+ * #ED1C24 = RGB 237 / 28 / 36). Same structural token contract — swap
+ * red → gold throughout.
+ *
+ * Light-variant note: AMD Gold #C1A968 against pure white is only
+ * ~2.3:1 contrast (well below WCAG-AA). The light variant therefore
+ * promotes the deep token (#8C7A4D, ~4.2:1) to --ui-accent / --ui-link
+ * so accent text stays legible on white. The base gold is still used
+ * in gradients and decorative surfaces where the gradient endpoint
+ * (deep) carries the contrast.
+ * ─────────────────────────────────────────────────────────────────────── */
+:root[data-skin="amd-gold"] {
+  /* AMD Gold palette */
+  --amd-gold:        #C1A968;   /* RGB 193, 169, 104 — canonical brand gold */
+  --amd-gold-bright: #D6C18F;   /* +12% lift, used for hover/link-hover */
+  --amd-gold-deep:   #8C7A4D;   /* -28% darken, used in gradients + pressed */
+
+  /* AMD canonical greys (per AMD brand guidance — shared with amd.css + amd-teal.css)
+   *   --amd-gray-1  #262626   Dark Gray 1   panel
+   *   --amd-gray-2  #404040   Dark Gray 2   elevated
+   *   --amd-gray-3  #595959   Medium Gray   muted-text light
+   *   --amd-gray-4  #A6A6A6   Light Grey 1  muted-text dark
+   *   --amd-gray-5  #D9D9D9   Light Grey 2  divider light
+   */
+  --amd-gray-1:      #262626;
+  --amd-gray-2:      #404040;
+  --amd-gray-3:      #595959;
+  --amd-gray-4:      #A6A6A6;
+  --amd-gray-5:      #D9D9D9;
+
+  --amd-black:       #000000;
+  --amd-white:       #FFFFFF;
+
+  /* App-shared design tokens (consumed by dc-planner.css + shared-chrome.css) */
+  --ui-bg: #000000;
+  --ui-bg-soft: var(--amd-gray-1);
+  --ui-panel: var(--amd-gray-1);
+  --ui-line: rgba(255, 255, 255, 0.10);
+  --ui-text: #FFFFFF;
+  --ui-muted: var(--amd-gray-4);
+  --ui-accent: #C1A968;
+  --ui-header: #FFFFFF;
+  --ui-link: #D6C18F;
+  --ui-link-hover: #E5D3A8;
+  --ui-accent-soft: rgba(193, 169, 104, 0.14);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(193, 169, 104, 0.06);
+  --ui-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(193, 169, 104, 0.08);
+  --ui-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(193, 169, 104, 0.10);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #2B1A0A;
+  --ui-warning-text: #FFB000;
+
+  --skin-btn-bg: linear-gradient(180deg, #C1A968 0%, #8C7A4D 100%);
+  --skin-btn-color: #1A1200;
+  --skin-btn-border: none;
+  --skin-btn2-bg: rgba(255, 255, 255, 0.04);
+  --skin-btn2-border: 1px solid rgba(255, 255, 255, 0.18);
+  --skin-btn2-color: rgba(255, 255, 255, 0.85);
+  --skin-tab-bg: rgba(255, 255, 255, 0.03);
+  --skin-tab-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-tab-color: rgba(255, 255, 255, 0.65);
+  --skin-tab-active-bg: linear-gradient(180deg, rgba(193, 169, 104, 0.20) 0%, rgba(140, 122, 77, 0.10) 100%);
+  --skin-tab-active-border: var(--amd-gold);
+  --skin-tab-active-color: #FFFFFF;
+  --skin-panel-bg: linear-gradient(180deg, #2C2C2C 0%, #262626 100%);
+  --skin-hero-bg: #000000;
+  --skin-hero-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-input-bg: #1A1A1A;
+  --skin-input-border: rgba(255, 255, 255, 0.18);
+  --skin-input-color: #FFFFFF;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23C1A968' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  /* Presentation-viewer tokens (pages/present.html reads these) */
+  --pres-bg: #000000;
+  --pres-text: rgba(255, 255, 255, 0.85);
+  --pres-text-strong: #FFFFFF;
+  --pres-muted: var(--amd-gray-4);
+  --pres-card-bg: var(--amd-gray-1);
+  --pres-card-border: rgba(255, 255, 255, 0.10);
+  --pres-progress: var(--amd-gold);
+  --pres-link: var(--amd-gold-bright);
+  --pres-svg-text: rgba(255, 255, 255, 0.72);
+  --pres-svg-line: rgba(255, 255, 255, 0.12);
+
+  /* Shared chrome (toolbar) */
+  --chrome-bg: #000000;
+  --chrome-line: rgba(255, 255, 255, 0.10);
+  --chrome-text: #FFFFFF;
+  --chrome-muted: var(--amd-gray-4);
+
+  /* Report cover (read by pages/report.html) */
+  --rpt-primary: #000000;
+  --rpt-accent: #C1A968;
+  --rpt-accent-deep: #8C7A4D;
+  --rpt-bg: #FFFFFF;
+  --rpt-muted: rgba(0, 0, 0, 0.60);
+  --rpt-border: rgba(0, 0, 0, 0.12);
+  --rpt-section-bg: #FAF7EE;
+}
+
+/* Light variant — white canvas, deep-gold accent for legibility.
+   #C1A968 vs #FFFFFF is only ~2.3:1 (fails AA). The deep token
+   #8C7A4D lifts that to ~4.2:1 — meets WCAG-AA-large for UI
+   elements (3:1) and is the same trade-off amd.css makes with
+   #ED1C24 against white (~4.7:1). */
+[data-skin="amd-gold"][data-theme="light"] {
+  --ui-bg: #FFFFFF;
+  --ui-bg-soft: #FAF7EE;
+  --ui-panel: #FFFFFF;
+  --ui-line: rgba(0, 0, 0, 0.10);
+  --ui-text: #0A0A0A;
+  --ui-muted: var(--amd-gray-3);
+  --ui-accent: #8C7A4D;
+  --ui-header: #0A0A0A;
+  --ui-link: #8C7A4D;
+  --ui-link-hover: #C1A968;
+  --ui-accent-soft: rgba(193, 169, 104, 0.12);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ui-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --ui-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #FEF3CD;
+  --ui-warning-text: #856404;
+
+  --skin-btn-bg: linear-gradient(180deg, #C1A968 0%, #8C7A4D 100%);
+  --skin-btn-color: #1A1200;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid rgba(0, 0, 0, 0.14);
+  --skin-btn2-color: rgba(0, 0, 0, 0.70);
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid rgba(0, 0, 0, 0.12);
+  --skin-tab-color: rgba(0, 0, 0, 0.60);
+  --skin-tab-active-bg: rgba(193, 169, 104, 0.14);
+  --skin-tab-active-border: var(--amd-gold);
+  --skin-tab-active-color: #8C7A4D;
+  --skin-panel-bg: #FFFFFF;
+  --skin-hero-bg: rgba(255, 255, 255, 0.96);
+  --skin-hero-border: 1px solid rgba(0, 0, 0, 0.10);
+  --skin-input-bg: #FFFFFF;
+  --skin-input-border: rgba(0, 0, 0, 0.18);
+  --skin-input-color: #0A0A0A;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%238C7A4D' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  --pres-bg: #FFFFFF;
+  --pres-text: rgba(0, 0, 0, 0.78);
+  --pres-text-strong: #0A0A0A;
+  --pres-muted: var(--amd-gray-3);
+  --pres-card-bg: #FAF7EE;
+  --pres-card-border: rgba(0, 0, 0, 0.08);
+  --pres-progress: var(--amd-gold);
+  --pres-link: var(--amd-gold-deep);
+  --pres-svg-text: rgba(0, 0, 0, 0.72);
+  --pres-svg-line: rgba(0, 0, 0, 0.12);
+
+  --chrome-bg: #FFFFFF;
+  --chrome-line: rgba(0, 0, 0, 0.08);
+  --chrome-text: #0A0A0A;
+  --chrome-muted: var(--amd-gray-3);
+
+  --rpt-primary: #0A0A0A;
+  --rpt-accent: #C1A968;
+  --rpt-accent-deep: #8C7A4D;
+  --rpt-bg: #FFFFFF;
+  --rpt-muted: rgba(0, 0, 0, 0.60);
+  --rpt-border: rgba(0, 0, 0, 0.10);
+  --rpt-section-bg: #FAF7EE;
+}

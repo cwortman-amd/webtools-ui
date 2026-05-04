@@ -1,0 +1,120 @@
+/* Nebula Light Skin — airy cosmic light theme with lilac-blue accents */
+:root[data-skin="nebula-light"] {
+  --ui-bg: #f7f5ff;
+  --ui-bg-soft: #f1effc;
+  --ui-panel: #ffffff;
+  --ui-line: #ddd8f3;
+  --ui-text: #241d3a;
+  --ui-muted: #766f94;
+  --ui-accent: #7b5cff;
+  --ui-header: #1f1832;
+  --ui-link: #6a4bf0;
+  --ui-link-hover: #5638d6;
+  --ui-accent-soft: #ede7ff;
+  --ui-shadow-sm: 0 1px 4px rgba(59, 44, 110, 0.05);
+  --ui-shadow-md: 0 8px 20px rgba(59, 44, 110, 0.10);
+  --ui-shadow-lg: 0 16px 36px rgba(59, 44, 110, 0.14);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fff0c7;
+  --ui-warning-text: #8a6205;
+
+  --skin-btn-bg: linear-gradient(180deg, #8a69ff 0%, #6f52e8 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #ddd8f3;
+  --skin-btn2-color: #766f94;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #ddd8f3;
+  --skin-tab-color: #766f94;
+  --skin-tab-active-bg: #ede7ff;
+  --skin-tab-active-border: #7b5cff;
+  --skin-tab-active-color: #6a4bf0;
+  --skin-panel-bg: linear-gradient(180deg, #faf8ff 0%, #ffffff 100%);
+  --skin-hero-bg: rgba(255, 255, 255, 0.88);
+  --skin-hero-border: 1px solid #ddd8f3;
+  --skin-input-bg: #ffffff;
+  --skin-input-border: #d7d1ef;
+  --skin-input-color: #241d3a;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23766f94' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="nebula-light"][data-theme="light"] {
+  --ui-bg: #f7f5ff;
+  --ui-bg-soft: #f1effc;
+  --ui-panel: #ffffff;
+  --ui-line: #ddd8f3;
+  --ui-text: #241d3a;
+  --ui-muted: #766f94;
+  --ui-accent: #7b5cff;
+  --ui-header: #1f1832;
+  --ui-link: #6a4bf0;
+  --ui-link-hover: #5638d6;
+  --ui-accent-soft: #ede7ff;
+  --ui-shadow-sm: 0 1px 4px rgba(59, 44, 110, 0.05);
+  --ui-shadow-md: 0 8px 20px rgba(59, 44, 110, 0.10);
+  --ui-shadow-lg: 0 16px 36px rgba(59, 44, 110, 0.14);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fff0c7;
+  --ui-warning-text: #8a6205;
+
+  --skin-btn-bg: linear-gradient(180deg, #8a69ff 0%, #6f52e8 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #ddd8f3;
+  --skin-btn2-color: #766f94;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #ddd8f3;
+  --skin-tab-color: #766f94;
+  --skin-tab-active-bg: #ede7ff;
+  --skin-tab-active-border: #7b5cff;
+  --skin-tab-active-color: #6a4bf0;
+  --skin-panel-bg: linear-gradient(180deg, #faf8ff 0%, #ffffff 100%);
+  --skin-hero-bg: rgba(255, 255, 255, 0.88);
+  --skin-hero-border: 1px solid #ddd8f3;
+  --skin-input-bg: #ffffff;
+  --skin-input-border: #d7d1ef;
+  --skin-input-color: #241d3a;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23766f94' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="nebula-light"][data-theme="dark"] {
+  --ui-bg: #131124;
+  --ui-bg-soft: #19162d;
+  --ui-panel: #1d1934;
+  --ui-line: #332d59;
+  --ui-text: #eeeaff;
+  --ui-muted: #a69ec6;
+  --ui-accent: #9f87ff;
+  --ui-header: #faf8ff;
+  --ui-link: #c0b2ff;
+  --ui-link-hover: #ddd4ff;
+  --ui-accent-soft: #2f2852;
+  --ui-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.18);
+  --ui-shadow-md: 0 8px 20px rgba(0, 0, 0, 0.24);
+  --ui-shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.32);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #36280d;
+  --ui-warning-text: #ffd995;
+
+  --skin-btn-bg: linear-gradient(180deg, #8a69ff 0%, #6f52e8 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: transparent;
+  --skin-btn2-border: 1px solid #40376d;
+  --skin-btn2-color: #b5add2;
+  --skin-tab-bg: transparent;
+  --skin-tab-border: 1px solid #40376d;
+  --skin-tab-color: #a69ec6;
+  --skin-tab-active-bg: #2f2852;
+  --skin-tab-active-border: #9f87ff;
+  --skin-tab-active-color: #f3efff;
+  --skin-panel-bg: linear-gradient(180deg, #241f40 0%, #1d1934 100%);
+  --skin-hero-bg: #17142b;
+  --skin-hero-border: 1px solid #332d59;
+  --skin-input-bg: #19162d;
+  --skin-input-border: #40376d;
+  --skin-input-color: #eeeaff;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23a69ec6' stroke-width='1.5'/%3E%3C/svg%3E");
+}

@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/cwortman-amd/shared-ui/blob/main/docs/templates/voice-config.schema.json",
+  "title": "Voice Bridge Config",
+  "description": "Canonical schema for the configuration object passed to `window.voiceBridge.configure(opts)` (Phase 6). Each consumer ships its own per-repo `js/voice-config.js` (or equivalent module) that calls this with its phonetic dictionary, personas, and chat-target preference. The shape is documented here so consumers stay in sync as the voice bridge evolves.\n\nReference: `shared/js/voice.js`.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "sessionStorageKey": {
+      "type": "string",
+      "description": "localStorage key used to persist the auto-speak session flag. Default: `shared-voice-session`. Each consumer SHOULD prefix this with its own namespace (e.g. `llm-benchmark-voice-session`) so multiple sibling apps in the same browser don't share session state."
+    },
+    "personaStorageKey": {
+      "type": "string",
+      "description": "localStorage key used to persist the active persona id. Default: `shared-voice-persona`. Same namespacing recommendation as `sessionStorageKey`."
+    },
+    "storagePrefix": {
+      "type": "string",
+      "description": "Prefix consumer-scoped storage keys with this string. Reserved for future use (the bridge currently uses the explicit *StorageKey fields)."
+    },
+    "lang": {
+      "type": "string",
+      "description": "BCP-47 language tag for STT recognition and TTS playback. If null/unset, the bridge falls back to `navigator.language` and then `en-US`."
+    },
+    "chatTarget": {
+      "type": "string",
+      "enum": ["auto", "chat-orb", "chat-llm"],
+      "default": "auto",
+      "description": "Where finalized STT transcripts are routed.\n  - `auto`: try the canonical Phase 2/3 orb (`window.ChatOrb.dispatch`), then the legacy facade (`window.chatOrb.send`), then `window.chatLLM.handle`. Recommended for new consumers.\n  - `chat-orb`: only try the orb path. Use when the consumer has fully migrated off the legacy chat-llm router.\n  - `chat-llm`: only try chat-llm. Use only as a temporary bridge."
+    },
+    "phoneticReplacements": {
+      "type": "object",
+      "description": "Pronunciation overrides. Keys are matched case-insensitively as whole words; longer keys win (so `MI300X` beats `MI300` if both are present). The replacement string is what TTS actually speaks. Use this to fix domain-specific pronunciations (e.g. acronyms, model names). Multiple `configure({})` calls MERGE into the existing dictionary.",
+      "additionalProperties": { "type": "string" },
+      "examples": [
+        {
+          "MI300X":   "em eye three hundred ex",
+          "MI355X":   "em eye three fifty-five ex",
+          "vLLM":     "vee L L M",
+          "TTFT":     "T T F T",
+          "RCCL":     "R C C L"
+        }
+      ]
+    },
+    "personas": {
+      "type": "object",
+      "description": "Map of persona id → persona config. Persona-aware fields (rate, pitch, voice, lang) are applied to every TTS call when that persona is active (see `setPersona(id)`).",
+      "additionalProperties": { "$ref": "#/definitions/persona" },
+      "examples": [
+        {
+          "executive": {
+            "rate": 0.92, "pitch": 1.0,
+            "preferred_voices": ["Microsoft Aria Online (Natural) - English (United States)", "Google US English"],
+            "tone": "Confident, customer-facing",
+            "audience": { "decimalPlaces": 0, "useDollarSigns": true, "skipKernelLevel": true }
+          },
+          "presales": {
+            "rate": 0.95, "pitch": 1.0,
+            "preferred_voices": ["Microsoft Jenny Online (Natural) - English (United States)"],
+            "audience": { "decimalPlaces": 1, "useDollarSigns": true, "skipKernelLevel": false }
+          },
+          "engineer": {
+            "rate": 1.0, "pitch": 1.0,
+            "preferred_voices": ["Samantha", "Alex"],
+            "audience": { "decimalPlaces": 2, "useDollarSigns": false, "skipKernelLevel": false }
+          }
+        }
+      ]
+    },
+    "defaultPersona": {
+      "type": "string",
+      "description": "Persona id to set active on first load (only if the user has not already pinned a different persona via `/voice persona <id>`)."
+    }
+  },
+
+  "definitions": {
+    "persona": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Per-persona voice tuning. All fields are optional; the bridge falls back to browser defaults when a field is missing.",
+      "properties": {
+        "rate":  { "type": "number", "minimum": 0.1, "maximum": 10,
+                   "description": "TTS rate (1.0 = normal speed)." },
+        "pitch": { "type": "number", "minimum": 0,   "maximum": 2,
+                   "description": "TTS pitch (1.0 = normal)." },
+        "volume": { "type": "number", "minimum": 0,  "maximum": 1,
+                    "description": "TTS volume (0–1)." },
+        "lang":  { "type": "string",
+                   "description": "Per-persona BCP-47 language override." },
+        "voice": {
+          "type": "string",
+          "description": "Hard-coded SpeechSynthesisVoice name (case-insensitive). Prefer `preferred_voices` for graceful fallback."
+        },
+        "preferred_voices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered list of preferred SpeechSynthesisVoice names; the first one found on the user's machine wins. Same field name and semantics as `demo-track.schema.json` so `say()` calls coming from the demo engine and the orb behave identically."
+        },
+        "tone": {
+          "type": "string",
+          "description": "Free-text descriptor of the persona's intended voice tone. Not consumed by the bridge directly — exposed for downstream consumers (e.g. an executive-narrator skill) that want to surface tone hints in the UI."
+        },
+        "audience": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Per-persona renderer-side preferences (decimal places, dollar signs, etc.). Not consumed by the bridge directly — passed through verbatim so consumers can read `voiceBridge.getPersona().audience` and adjust their own rendering. See `llm-benchmark/data/present-script.json` for a worked example.",
+          "properties": {
+            "decimalPlaces":   { "type": "integer", "minimum": 0 },
+            "showRawCounters": { "type": "boolean" },
+            "useDollarSigns":  { "type": "boolean" },
+            "skipKernelLevel": { "type": "boolean" }
+          }
+        },
+        "openings":    { "type": "array", "items": { "type": "string" },
+                         "description": "Persona-specific opening lines (used by the executive-narrator skill in llm-benchmark)." },
+        "closings":    { "type": "array", "items": { "type": "string" },
+                         "description": "Persona-specific closing lines." },
+        "transitions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Persona-specific transition phrases (next, drill-in, back, compare, recommendation)."
+        }
+      }
+    }
+  }
+}

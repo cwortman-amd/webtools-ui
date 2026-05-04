@@ -1,0 +1,200 @@
+/*!
+ * shared-ui/css/notes-panel.css
+ *
+ * Canonical right-side speaker-notes panel for all three sibling pitch decks
+ * (`llm-benchmark`, `gpu-planner`, `cluster-manager`).
+ *
+ * Originally extracted from `gpu-planner/pages/pitch.html` (the canonical
+ * implementation per the harmonization plan, `shared/docs/PLAN.md` Phase 1.2).
+ *
+ * USAGE: Each consumer's pitch.html includes this stylesheet via:
+ *
+ *   <link rel="stylesheet" href="../shared/css/notes-panel.css">
+ *
+ * …and uses the following HTML skeleton inside its presentation chrome:
+ *
+ *   <aside id="notesPanel" class="notes-panel"
+ *          aria-hidden="true" aria-label="Speaker notes">
+ *     <header class="notes-panel-head">
+ *       <span><span class="notes-slide-pill" id="notesSlidePill">Slide 01</span>
+ *             &middot; Speaker Notes</span>
+ *       <button id="notes-close" title="Close (N)"
+ *               aria-label="Close speaker notes">&times;</button>
+ *     </header>
+ *     <div id="notesPanelBody" class="notes-panel-body"></div>
+ *   </aside>
+ *
+ * Toggle visibility by adding/removing the `.open` class on `.notes-panel`.
+ * Each consumer's own pitch.html JS still owns the toggle behavior, slide-aware
+ * rendering, and entity decoding — those vary slightly per deck and are
+ * deferred to a later harmonization phase.
+ *
+ * STYLE GOALS (the contract this file enforces):
+ *   - Right-side fixed drawer; slides in from translateX(110%) to
+ *     translateX(0) on `.open`.
+ *   - 360px width; max width capped to leave 32px gutter on small screens.
+ *   - z-index 55 — above the deck (z 1) and progress bar (z 60 sits above
+ *     this intentionally so global progress is always visible).
+ *   - Hidden in print so PDF export stays slide-only (presenter handouts
+ *     are rendered on dedicated notes pages by the deck's own print rules).
+ *   - AMD-red accent on left border + slide pill; falls back to a generic
+ *     accent when consumer doesn't define `--notes-accent`.
+ *
+ * LAYOUT SHIFT (`body.notes-open`):
+ *   When the notes panel is open, the consumer's `setNotesOpen()`
+ *   toggles `body.notes-open` in addition to `.notes-panel.open`.
+ *   That body class adds `padding-right: var(--notes-reserve)`
+ *   (376px = 360px panel + 16px gutter) which, combined with the
+ *   consumer's existing `body { display: flex; justify-content: center }`,
+ *   re-centers the deck in the leftover viewport WITHOUT it slipping
+ *   under the panel.
+ *
+ *   The consumer's `fitDeck()` (or equivalent scale-to-fit routine)
+ *   should ALSO read `--notes-reserve` and subtract it from the
+ *   available width before computing the scale, so the deck shrinks
+ *   to fit the leftover space rather than overflowing it. JS pattern:
+ *
+ *     const notesReservePx = parseFloat(
+ *       getComputedStyle(document.body).getPropertyValue('--notes-reserve')
+ *     ) || 0;
+ *     const availW = window.innerWidth - notesReservePx;
+ *     const fit = Math.min(availW / DECK_W, window.innerHeight / DECK_H);
+ *
+ *   `setNotesOpen()` should call `fitDeck()` after toggling the body
+ *   class so the re-fit animates alongside the panel slide-in.
+ */
+
+/* ── Layout shift: deck recenters left of the panel when open ───────
+ * Consumers' body has `display: flex; justify-content: center`. Adding
+ * padding-right shifts the flex content area left, so the centered
+ * deck visually re-centers in the leftover viewport. The transition
+ * matches the .notes-panel slide-in (0.22s ease) so the deck shift
+ * animates in lockstep with the panel sliding in.
+ *
+ * The `--notes-reserve` token is also consumed by the consumer's
+ * `fitDeck()` JS so the scale-to-fit math accounts for the panel.
+ * Default is 0 (panel closed); 376px = 360px panel + 16px gutter.
+ */
+:root {
+  --notes-reserve: 0px;
+}
+
+body {
+  transition: padding-right 0.22s ease;
+}
+
+body.notes-open {
+  --notes-reserve: 376px;
+  padding-right: var(--notes-reserve);
+}
+
+@media print {
+  body.notes-open {
+    --notes-reserve: 0px;
+    padding-right: 0;
+  }
+}
+
+.notes-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  bottom: 78px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--notes-bg, rgba(20, 20, 20, 0.94));
+  border: 1px solid var(--notes-border, rgba(255, 255, 255, 0.18));
+  border-left: 3px solid var(--notes-accent, #ED1C24);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
+  font-size: 1rem; /* 13.5pt — presenter-readable */
+  color: var(--notes-text, #d8d8d8);
+  line-height: 1.55;
+  transform: translateX(110%);
+  transition: transform 0.22s ease;
+  pointer-events: none;
+  opacity: 1; /* opacity stays 1; visibility is driven by transform + pointer-events */
+}
+
+.notes-panel.open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.notes-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -2px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--notes-hairline, rgba(255, 255, 255, 0.10));
+  color: var(--notes-text-strong, #ffffff);
+  font-size: 0.9rem; /* 12.15pt — meets readability floor */
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.notes-panel-head .notes-slide-pill {
+  color: var(--notes-accent, #ED1C24);
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+}
+
+.notes-panel-head button {
+  background: transparent;
+  border: 1px solid var(--notes-border, rgba(255, 255, 255, 0.18));
+  color: var(--notes-text, #d8d8d8);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.notes-panel-head button:hover {
+  background: rgba(237, 28, 36, 0.10);
+  border-color: var(--notes-accent, #ED1C24);
+  color: var(--notes-text-strong, #ffffff);
+}
+
+.notes-panel-body {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+}
+
+.notes-panel-body p { margin: 0 0 12px; }
+.notes-panel-body p:last-child { margin-bottom: 0; }
+.notes-panel-body ul { padding-left: 18px; margin: 0 0 12px; }
+.notes-panel-body li { margin-bottom: 6px; }
+
+.notes-panel-body strong {
+  color: var(--notes-text-strong, #ffffff);
+  font-weight: 600;
+}
+
+.notes-panel-body em {
+  color: var(--notes-accent, #ED1C24);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.notes-panel-body .empty {
+  color: var(--notes-muted, #888);
+  font-style: italic;
+}
+
+@media print {
+  .notes-panel { display: none !important; }
+}

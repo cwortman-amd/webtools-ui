@@ -1,0 +1,80 @@
+/* Glass Dark — frosted midnight glassmorphism with luminous cyan-violet glow */
+:root[data-skin="glass-dark"] {
+  --ui-bg: #080e1e;
+  --ui-bg-soft: #0c142a;
+  --ui-panel: rgba(14, 22, 42, 0.68);
+  --ui-line: rgba(140, 175, 255, 0.14);
+  --ui-text: #edf2ff;
+  --ui-muted: #94a3c4;
+  --ui-accent: #6ec8f5;
+  --ui-header: #ffffff;
+  --ui-link: #7cd4ff;
+  --ui-link-hover: #b0e6ff;
+  --ui-accent-soft: rgba(110, 200, 245, 0.12);
+  --ui-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.18), 0 1px 6px rgba(110, 200, 245, 0.06);
+  --ui-shadow-md: 0 8px 28px rgba(0, 0, 0, 0.26), 0 2px 10px rgba(110, 200, 245, 0.08);
+  --ui-shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.34), 0 6px 16px rgba(110, 200, 245, 0.10);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: rgba(90, 64, 20, 0.52);
+  --ui-warning-text: #ffd88a;
+
+  --skin-btn-bg: linear-gradient(180deg, rgba(110, 200, 245, 0.28) 0%, rgba(100, 130, 240, 0.18) 100%);
+  --skin-btn-color: #f0f8ff;
+  --skin-btn-border: 1px solid rgba(120, 200, 255, 0.22);
+  --skin-btn2-bg: rgba(255, 255, 255, 0.03);
+  --skin-btn2-border: 1px solid rgba(140, 175, 255, 0.16);
+  --skin-btn2-color: #b8c8e8;
+  --skin-tab-bg: rgba(255, 255, 255, 0.02);
+  --skin-tab-border: 1px solid rgba(140, 175, 255, 0.12);
+  --skin-tab-color: #a0b0d0;
+  --skin-tab-active-bg: linear-gradient(180deg, rgba(80, 150, 245, 0.22) 0%, rgba(110, 200, 245, 0.14) 100%);
+  --skin-tab-active-border: rgba(110, 200, 245, 0.52);
+  --skin-tab-active-color: #f0faff;
+  --skin-panel-bg: linear-gradient(180deg, rgba(16, 24, 48, 0.76) 0%, rgba(12, 18, 36, 0.66) 100%);
+  --skin-hero-bg: rgba(8, 14, 30, 0.68);
+  --skin-hero-border: 1px solid rgba(140, 175, 255, 0.14);
+  --skin-input-bg: rgba(10, 18, 36, 0.78);
+  --skin-input-border: rgba(140, 175, 255, 0.16);
+  --skin-input-color: #edf2ff;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%2394a3c4' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+[data-skin="glass-dark"][data-theme="light"] {
+  --ui-bg: #edf3ff;
+  --ui-bg-soft: #e4ecfb;
+  --ui-panel: rgba(255, 255, 255, 0.72);
+  --ui-line: rgba(90, 120, 180, 0.18);
+  --ui-text: #141e38;
+  --ui-muted: #586d90;
+  --ui-accent: #3580d8;
+  --ui-header: #111c32;
+  --ui-link: #2d72c8;
+  --ui-link-hover: #1d56a0;
+  --ui-accent-soft: rgba(53, 128, 216, 0.12);
+  --ui-shadow-sm: 0 1px 3px rgba(40, 60, 100, 0.06), 0 1px 4px rgba(53, 128, 216, 0.04);
+  --ui-shadow-md: 0 8px 24px rgba(40, 60, 100, 0.10), 0 2px 8px rgba(53, 128, 216, 0.06);
+  --ui-shadow-lg: 0 20px 44px rgba(40, 60, 100, 0.14), 0 6px 14px rgba(53, 128, 216, 0.08);
+  --ui-shadow: var(--ui-shadow-md);
+  --ui-warning-bg: #fef3cd;
+  --ui-warning-text: #856404;
+
+  --skin-btn-bg: linear-gradient(180deg, rgba(53, 128, 216, 0.90) 0%, rgba(45, 100, 190, 0.90) 100%);
+  --skin-btn-color: #ffffff;
+  --skin-btn-border: none;
+  --skin-btn2-bg: rgba(255, 255, 255, 0.40);
+  --skin-btn2-border: 1px solid rgba(90, 120, 180, 0.18);
+  --skin-btn2-color: #586d90;
+  --skin-tab-bg: rgba(255, 255, 255, 0.32);
+  --skin-tab-border: 1px solid rgba(90, 120, 180, 0.16);
+  --skin-tab-color: #586d90;
+  --skin-tab-active-bg: rgba(53, 128, 216, 0.14);
+  --skin-tab-active-border: #3580d8;
+  --skin-tab-active-color: #2d72c8;
+  --skin-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(245, 249, 255, 0.78) 100%);
+  --skin-hero-bg: rgba(255, 255, 255, 0.68);
+  --skin-hero-border: 1px solid rgba(90, 120, 180, 0.16);
+  --skin-input-bg: rgba(255, 255, 255, 0.78);
+  --skin-input-border: rgba(90, 120, 180, 0.18);
+  --skin-input-color: #141e38;
+  --skin-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23586d90' stroke-width='1.5'/%3E%3C/svg%3E");
+}
