@@ -701,9 +701,14 @@ new canonical `shared/css/demo-mode.css`), Phase 9.7.1 (side-nav
 launcher chip opt-out gate `__demoUiSkipLauncher` +
 dc-planner-side `/demo` slash bug fix), Phase 9.7.2
 (`.hero-icon-btn` page-header style harmonized with sister
-consumers, dc-planner-only), and Phase 9.8a (`shared/css/base.css`
+consumers, dc-planner-only), Phase 9.8a (`shared/css/base.css`
 promoted from placeholder to canonical baseline; dc-planner is the
-first consumer; sister-consumer migration deferred to 9.8b). The canonical narrated-demo engine is
+first consumer; sister-consumer migration deferred to 9.8b), and
+Phase 9.8c (operational rename of the upstream UI repo from
+`shared-ui` to `webtools-ui` — symlinks, git remotes, Makefiles,
+scripts, and operational doc headers updated across all 3
+consumers; historical phase narratives intentionally preserved as
+archival record). The canonical narrated-demo engine is
 wired into all 3 consumers via `/demo-shared`. All 3 consumers'
 `docs/AGENT.md` files carry the canonical skeleton crosswalk + stub
 sections so the canonical spine is fully represented and
@@ -713,7 +718,11 @@ engine during the migration window. As of Phase 9, `shared/` in each
 consumer is a symlink to `~/workspace/shared-ui/` — canonical edits
 propagate instantly with no sync step. The `git subtree` workflow
 remains available via `make shared-restore` for CI / fresh-clone
-scenarios that need a self-contained checkout. As of Phase 9.5,
+scenarios that need a self-contained checkout. As of Phase 9.8c,
+the upstream repo lives at `~/workspace/webtools-ui/` (renamed from
+`~/workspace/shared-ui/` on 2026-05-04); each consumer's `shared/`
+symlink, local-path git remote, Makefile, and operational docs all
+point at the new path/name. As of Phase 9.5,
 dc-planner's dual-orb hybrid (legacy `chat-feedback.js` +
 `slash-coverage.js` bridge + `#aiDemoBtn`) is the recorded final
 state, not deferred work; the chat-orb migration that was deferred
@@ -772,4 +781,85 @@ across all 4 repos.
   with 2 skipped, 0 failed). Commits: shared-ui _(pending)_,
   llm-benchmark _(pending)_, cluster-manager _(pending)_,
   dc-planner _(pending)_.
+
+- **2026-05-04 — Phase 9.8c (complete) — directory rename: shared-ui →
+  webtools-ui.** Operational rename of the upstream UI repo. The user
+  manually changed the directory name `~/workspace/shared-ui/` →
+  `~/workspace/webtools-ui/` (and set up a new GitHub origin at
+  `https://github.com/cwortman-amd/webtools-ui`, replacing the
+  never-pushed `cwortman-amd/shared-ui` remote that had been added
+  the day before). The new repo was a fresh `git init` rather than a
+  rename, so the prior 42-commit shared-ui history was intentionally
+  retired in favor of a clean slate (working tree carried over
+  byte-identical, plus a parity `.gitignore` commit landed as
+  webtools-ui's second commit). All three sister consumers
+  (`dc-planner`, `llm-benchmark`, `cluster-manager`) need to follow
+  the rename or their `shared/` symlinks dangle and their `make
+  sync-shared` Makefile + `scripts/restore-shared-subtree.sh`
+  fallback both point at a path that no longer exists. Five sub-
+  changes per consumer (identical migration shape across all three):
+  - **Symlink repointed**: `shared/` target `../shared-ui` →
+    `../webtools-ui` (committed; mode 120000; same blob hash
+    `fbdb649d…` across all three consumers — confirms the symlink
+    target string is identical post-migration).
+  - **Git remote renamed**: `git remote rename shared-ui webtools-ui`
+    + `git remote set-url webtools-ui /home/cwortman/workspace/
+    webtools-ui`. Remote NAME chosen to follow the directory NAME for
+    consistency with the rename.
+  - **Makefile + scripts/restore-shared-subtree.sh updated**:
+    `~/workspace/shared-ui/` → `~/workspace/webtools-ui/` paths,
+    `git subtree pull --prefix=shared shared-ui main` → `… webtools-ui
+    main` remote-name refs, `ln -s ../shared-ui shared` → `ln -s
+    ../webtools-ui shared` symlink hints. Top-of-file comment block
+    in each documents the rename history so future-you can trace it
+    without spelunking git log.
+  - **Code-comment path refs**: `llm-benchmark/scripts/
+    regression_queue_api.py` line 172, `cluster-manager/scripts/
+    cluster_manager_api.py` line 612, `llm-benchmark/test_offline.sh`
+    §14 + §25 — all comment blocks describing where `shared/` is
+    mounted from now name `webtools-ui` (with a "was shared-ui pre
+    2026-05-04 directory rename" callout for traceability).
+  - **Operational doc updates**: each consumer's `docs/HARMONIZATION.
+    md` operational header (lines 1-138 — Quick reference / Initial
+    subtree setup / Fresh-clone bootstrap / Detecting which mode
+    you're in / Why this exists) updated to reflect the new path +
+    remote name; cluster-manager `docs/INDEX.md` cross-repo
+    harmonization paragraph updated; dc-planner `pages/index.html`
+    base.css link comment + `README.md` directory-tree caption
+    updated; cluster-manager `pages/*.html` (9 files) voice-bridge
+    promotion comments updated. Historical phase narratives (CHANGELOG
+    entries, deep Phase 9.x sections in HARMONIZATION.md, `STYLE.md`,
+    `DEMO.md`) were intentionally **left intact** — they describe
+    what landed in the upstream repo at the time it was named
+    shared-ui, and rewriting them would be a 50+ file sweep that
+    falsifies historical context for no functional benefit.
+
+  **What did NOT change**: the symlink directory NAME inside
+  consumers (`shared/` — that's an internal mount point unrelated to
+  the upstream repo name), and the conceptual "shared-ui" name in
+  historical phase docs (the directory rename is a deployment-layer
+  rename, not a project-identity rename — calling out "promoted to
+  shared-ui in Phase 5.1" in CHANGELOG entries is still accurate
+  history). The deferred Phase 9.8b sister-consumer base.css
+  migration is unaffected — it remains queued.
+
+  **Old directory disposition**: `~/workspace/shared-ui/` deleted
+  (after verifying no consumer symlink resolved to it any longer).
+  User retains a separate `~/workspace/shared-ui.old/` backup created
+  manually before the rename — that backup is untouched and stays as
+  archival reference. Final workspace state: `~/workspace/
+  webtools-ui/` (live canonical), `~/workspace/shared-ui.old/`
+  (user backup), `~/workspace/{dc-planner,llm-benchmark,
+  cluster-manager}/` (consumers, all symlinking to webtools-ui).
+
+  **Verified**: dc-planner `./test.sh --quick` 533 passed / 0 failed
+  post-deletion; symlink resolves; `make shared-status` reports
+  `webtools-ui HEAD: 60e6845 chore: add standard .gitignore (parity
+  with prior shared-ui repo)`. Commits landed in all 4 repos local
+  HEADs (push intentionally deferred — MCP credential cache was
+  empty; the user pushes from interactive terminal): webtools-ui
+  `60e6845` (parity .gitignore), dc-planner `c704850`, llm-benchmark
+  `4799907` (migration files only — tracelens WIP unrelated to the
+  rename was left unstaged for separate commits), cluster-manager
+  `22567c3`.
 
