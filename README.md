@@ -19,7 +19,7 @@ Each consumer mounts this repo at `shared/` via `git subtree`. See
 | `css/chat-orb.css` | Animated orb chrome + panel + LLM settings card | Extracted from `dc-planner/js/chat-feedback.js` |
 | `css/notes-panel.css` | Right-drawer speaker-notes panel for pitch decks | Extracted from `dc-planner/pages/pitch.html` |
 | `css/demo-engine.css` | Demo Mode chrome (overlay, captions, transcript) | From `dc-planner/css/demo-mode.css` |
-| `css/skins/*.css` | 8 canonical skins (amd, amber, blue, glass-dark, matte-dark, minimal-monochrome, nebula-light, soft-neutral-light) | Already byte-identical across consumers |
+| `css/skins/*.css` | 7 canonical skins, AMD triplet first then alphabetical (amd, amd-gold, amd-teal, glass-dark, matte-dark (default), minimal-monochrome, soft-neutral-light) — amber/blue/nebula-light retired 2026-05-04 | Already byte-identical across consumers |
 | `js/agent-bridge.js` | `window.agentBridge` + `window.mcpBridge` MCP bridge | Already nearly identical across consumers |
 | `js/chat-orb.js` | Animated orb + panel + slash router + LLM settings UI (no domain intents) | Extracted from `dc-planner/js/chat-feedback.js` |
 | `js/slash-router.js` | Pluggable slash-command dispatcher | New; consumers register their own handlers |

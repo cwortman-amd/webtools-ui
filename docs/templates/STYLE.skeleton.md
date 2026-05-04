@@ -133,22 +133,34 @@ Required:
 
 ## 10) Skin system · [CANONICAL]
 
-The 8 canonical skins promoted in Phase 1.1, served from
-`shared/css/skins/`. Required list:
+The 7 canonical skins served from `shared/css/skins/`. Required list,
+in canonical menu order — **AMD-branded triplet first (alphabetical),
+remaining skins alphabetically**:
 
 | Skin | File | Mood |
 | :--- | :--- | :--- |
-| `matte-dark` | `shared/css/skins/matte-dark.css` | Default, neutral |
-| `nebula-dark` | `shared/css/skins/nebula-dark.css` | Cool gradients |
-| `nebula-light` | `shared/css/skins/nebula-light.css` | Light mode |
-| `solar-light` | `shared/css/skins/solar-light.css` | Warm light |
-| `arctic-light` | `shared/css/skins/arctic-light.css` | High-contrast light |
-| `synthwave` | `shared/css/skins/synthwave.css` | Retro neon |
-| `terminal-green` | `shared/css/skins/terminal-green.css` | Mono terminal |
-| `amd` | `shared/css/skins/amd.css` | AMD red / corporate |
+| `amd` | `shared/css/skins/amd.css` | AMD Red — corporate brand red `#ED1C24` |
+| `amd-gold` | `shared/css/skins/amd-gold.css` | AMD Gold — `#C1A968` |
+| `amd-teal` | `shared/css/skins/amd-teal.css` | AMD Teal — `#00C2DE` |
+| `glass-dark` | `shared/css/skins/glass-dark.css` | Frosted midnight glassmorphism with cyan-violet glow |
+| `matte-dark` | `shared/css/skins/matte-dark.css` | Default, refined charcoal with slate-blue accents |
+| `minimal-monochrome` | `shared/css/skins/minimal-monochrome.css` | Editorial ink-on-paper |
+| `soft-neutral-light` | `shared/css/skins/soft-neutral-light.css` | Warm-toned calm enterprise (light) |
+
+The AMD-branded triplet shares a unified canonical-greys neutral
+system (`--amd-gray-1` … `--amd-gray-5`) so backgrounds, panels,
+and muted text stay consistent across the brand family.
 
 The skin picker (in the side-nav and on `index.html`) must list
-all 8 in the same order across consumers.
+all 7 in this exact order across consumers. The default is
+`matte-dark`, which `setSkin()` resolves on first load regardless
+of menu position.
+
+> **Retired 2026-05-04:** `amber`, `blue` (Corporate Blue),
+> `nebula-light` were removed to focus the picker on the AMD-branded +
+> neutral set. Existing localStorage values for those keys fall back to
+> `matte-dark` via the consumer-side `setSkin()` / `normalizeSkin()`
+> guard.
 
 ## 11) Print & export styling · [CANONICAL]
 

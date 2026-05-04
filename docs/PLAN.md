@@ -58,7 +58,7 @@ sibling repo, mounted via `git subtree` as `shared/` in each consumer.
 │   │   ├── chat-orb.css
 │   │   ├── notes-panel.css
 │   │   ├── demo-engine.css
-│   │   └── skins/   (8 canonical skins)
+│   │   └── skins/   (7 canonical skins; was 10 before retiring amber/blue/nebula-light 2026-05-04)
 │   ├── js/
 │   │   ├── agent-bridge.js
 │   │   ├── chat-orb.js
@@ -135,12 +135,15 @@ appended to as phases complete.
   `push-shared` targets and pointer `docs/HARMONIZATION.md` committed
   in each consumer.
 - **2026-05-02 — Phase 1.1 (complete)** — Skin inventory parity done.
-  All 8 canonical skins live only in `shared-ui/css/skins/`; each
+  All canonical skins live only in `shared-ui/css/skins/`; each
   consumer's `pages/*.html`, `js/*.js`, service worker, and skin-picker
   UI now reference `../shared/css/skins/`. Local `css/skins/`
   directories deleted. Consumer API servers
   (`regression_queue_api.py`, `cluster_manager_api.py`) extended with
-  `"shared/"` static prefix.
+  `"shared/"` static prefix. (Phase 1.1 originally promoted 8 skins;
+  the AMD-branded triplet `amd-gold` / `amd-teal` was added 2026-05-04
+  and `amber` / `blue` (Corporate Blue) / `nebula-light` were retired
+  the same day — current canonical set is 7.)
 - **2026-05-02 — Phase 1.2 (complete)** — `gpu-planner`'s right-drawer
   notes panel CSS promoted to `shared-ui/css/notes-panel.css`. All 3
   consumer `pitch.html` files refactored to link the shared sheet, use

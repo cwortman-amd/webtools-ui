@@ -55,7 +55,6 @@
 
 html[data-theme="light"],
 html[data-skin="soft-neutral-light"],
-html[data-skin="nebula-light"],
 html[data-skin="minimal-monochrome"] {
   --demo-bar-bg:           rgba(255, 255, 255, 0.96);
   --demo-bar-bg-strong:    rgba(252, 252, 252, 0.98);
