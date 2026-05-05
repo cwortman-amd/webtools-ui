@@ -1,0 +1,54 @@
+/*!
+ * shared-ui canonical asset: material-symbols.css
+ *
+ * Loads the self-hosted Material Symbols Outlined variable font + sets
+ * the canonical defaults for `.material-symbols-outlined` elements.
+ *
+ * USAGE: <link rel="stylesheet" href="../shared/css/material-symbols.css" />
+ *
+ * Pair with a preload hint in <head> for fastest first paint:
+ *   <link rel="preload"
+ *         href="../shared/css/fonts/material-symbols-outlined.woff2"
+ *         as="font" type="font/woff2" crossorigin>
+ *
+ * PROVENANCE: Promoted from `dc-planner/css/material-symbols.css` in
+ * Phase 9.8d-D.1 (2026-05-05). The accompanying woff2 was promoted from
+ * the byte-identical `llm-benchmark/css/fonts/` and
+ * `cluster-manager/css/fonts/` copies (md5: 998140309962b4c631d243c5baba487b).
+ *
+ * dc-planner currently ships a NEWER variable-font variant
+ * (md5: 8f59b4d5e20d96ccbb7bd27af949e2f9, ~3.88 MB vs 3.55 MB here).
+ * Per `webtools-ui/docs/CSS_HARMONIZATION.md` D.1, dc-planner stays on
+ * its larger variant locally until a Playwright "icon parity" test
+ * verifies the smaller canonical font has every glyph dc-planner uses.
+ *
+ * VARIATION AXES: This font supports `wght` (100..700), `FILL` (0/1),
+ * `GRAD` (-25..200), and `opsz` (20..48). Set defaults via
+ * `font-variation-settings` in your skin or per-component stylesheet.
+ * The canonical baseline (`shared/css/base.css`) sets the dashboard
+ * default `'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20`.
+ */
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url(fonts/material-symbols-outlined.woff2) format('woff2');
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}

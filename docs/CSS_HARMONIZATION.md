@@ -53,37 +53,34 @@ After Phase B, all three repos load the canonical baseline and any remaining dif
 
 ---
 
-## Deferred Work
+## Phase D — Sustainable harmony (deeper polish)
 
-The original Phase C audit identified three items that turned out to be too large for a same-day landing. They're tracked here for a follow-up phase.
+### D.1 — Self-host Material Symbols woff2 in canonical `shared/css/fonts/` ✅ partial (2 of 3 repos shipped 2026-05-05)
 
-### D.1 — Self-host Material Symbols woff2 in canonical `shared/css/fonts/`
+**Decision.** Adopted the smaller, byte-identical font shared by `llm-benchmark` + `cluster-manager` (md5 `998140309962b4c631d243c5baba487b`, 3.55 MB) as canonical instead of dc-planner's newer variant. Rationale: zero glyph-parity risk for the two migrated repos, since they were already shipping this exact font.
 
-**Why deferred.** The font is currently triplicated:
+**What landed.**
 
-| Repo | Path | Size | md5 |
-|------|------|------|-----|
-| llm-benchmark | `css/fonts/material-symbols-outlined.woff2` | 3.55 MB | `998140309962b4c631d243c5baba487b` |
-| cluster-manager | `css/fonts/material-symbols-outlined.woff2` | 3.55 MB | `998140309962b4c631d243c5baba487b` (same as above) |
-| dc-planner | `css/fonts/material-symbols-outlined.woff2` | 3.88 MB | `8f59b4d5e20d96ccbb7bd27af949e2f9` (newer / larger glyph set, variable axes 100–700) |
+- Created `webtools-ui/css/fonts/material-symbols-outlined.woff2` (canonical font).
+- Created `webtools-ui/css/material-symbols.css` (`@font-face` + `.material-symbols-outlined` defaults; promoted from `dc-planner/css/material-symbols.css` template).
+- llm-benchmark — all 7 pages now load `<link rel="preload" href="../shared/css/fonts/...">` + `<link rel="stylesheet" href="../shared/css/material-symbols.css" />`. The duplicate `@font-face` was removed from `pages/index.html` inline style + `css/pages.css`. Local `css/fonts/` directory retired. `test_offline.sh` updated.
+- cluster-manager — all 9 pages migrated (debug/fabric/index/install/monitor/network/present/status/test). Inline `@font-face` blocks removed (handled both multi-line and single-line shapes). `css/fonts/` retired. `tests/test_offline.py` updated to verify the canonical path.
 
-`llm-benchmark` and `cluster-manager` share an identical font; consolidating just those two into `webtools-ui/css/fonts/` is straightforward (saves ~3.5MB on disk).
+**Test results post-migration:**
 
-`dc-planner` ships a NEWER variable font with a likely-larger glyph subset. Swapping in the smaller font risks breaking icons that exist only in dc-planner's variant — and the only way to verify glyph parity is a browser-based visual test, which isn't currently wired into self-check.sh.
+- `llm-benchmark/test_offline.sh`: 380/381 passed (the 1 failure is unrelated — pre-existing chat-orb.css vendor-manifest drift from Phase 9.7.5 polish).
+- `cluster-manager/tests/test_offline.py`: 14 passed (font tests all green); 2 pre-existing skin-path failures unrelated to D.1.
+- `llm-benchmark/tests/test_dashboard_webapp_contract.py::test_static_assets_are_served`: passed (canonical path served correctly).
 
-**Plan for the deferred phase:**
+**dc-planner deferral.** dc-planner remains on its larger newer variable variant (`css/fonts/material-symbols-outlined.woff2`, md5 `8f59b4d5e20d96ccbb7bd27af949e2f9`, 3.88 MB) until a Playwright "icon parity" test verifies the smaller canonical font has every glyph dc-planner uses. Adopting dc-planner's font as canonical (the original plan in this doc) is no longer the path forward — the smaller variant is the new canonical baseline because it shipped to two repos already and has wider real-world rendering coverage. Migrating dc-planner means swapping in a smaller font that may lack glyphs it relies on; that's the parity check the deferred work needs to do.
 
-1. Adopt `dc-planner`'s woff2 (newest variant) as the canonical `webtools-ui/css/fonts/material-symbols-outlined.woff2`.
-2. Create canonical `webtools-ui/css/material-symbols.css` with `@font-face` + `.material-symbols-outlined` defaults (template already exists at `dc-planner/css/material-symbols.css`).
-3. Wire a Playwright "icon parity" test that screenshots a known set of icons in each repo and diffs against a golden reference.
-4. After parity passes, migrate llm-benchmark and cluster-manager `<link rel="preload">` + inline `@font-face` to the canonical path; delete local woff2 files.
+**Plan for the deferred dc-planner migration:**
 
-**Files affected when this lands:**
-- `llm-benchmark/pages/index.html` (1 preload + 1 @font-face in inline style)
-- `cluster-manager/pages/{debug,fabric,index,install,monitor,network,present,status,test}.html` (10 pages × 2 references each)
-- `dc-planner/pages/index.html` (1 preload)
-- `*/tests/test_offline.py` font-asset assertions
-- `*/test_offline.sh` woff2 path assertions
+1. Wire a Playwright test in `dc-planner/tests/e2e/` that screenshots every Material Symbol icon present in `pages/index.html` and `pages/{report,present,architecture}.html`.
+2. Render once with the local `css/fonts/material-symbols-outlined.woff2` (current state). Save as the golden.
+3. Render once with the canonical `shared/css/fonts/material-symbols-outlined.woff2`. Diff against the golden.
+4. If the diff is clean (no missing glyphs, no significant rendering differences), migrate `pages/index.html` preload + `<link>` to canonical, retire `css/material-symbols.css` + `css/fonts/`.
+5. If the diff is dirty (missing glyphs), either: (a) update the canonical font to a newer variant; or (b) keep dc-planner on its local font with a documented exception in this file.
 
 ### D.2 — Promote `pages.css` / `shared-chrome.css` commonalities to a canonical chrome stylesheet
 

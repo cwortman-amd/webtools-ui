@@ -67,7 +67,17 @@
   isolation: isolate;
   -webkit-tap-highlight-color: transparent;
   transition: transform .22s cubic-bezier(.22,1,.36,1), filter .22s ease;
-  filter: drop-shadow(0 14px 28px var(--ai-accent-glow));
+  /* Phase 9.7.5 (2026-05-04): boost the orb's accent halo by stacking a
+     centered radial drop-shadow on top of the existing offset shadow.
+     The single offset drop-shadow `(0 14px 28px var(--ai-accent-glow))`
+     produced a pleasant downward depth shadow but the haze was barely
+     perceptible at typical viewport scales — adding a centered halo
+     `(0 0 24px var(--ai-accent-glow))` makes the haze radiate equally in
+     every direction so the orb feels ambient-lit rather than
+     surface-dropped at normal viewing distance. dc-planner's legacy
+     js/chat-feedback.js orb mirrors this stack inline. */
+  filter: drop-shadow(0 0 24px var(--ai-accent-glow))
+          drop-shadow(0 14px 28px var(--ai-accent-glow));
 }
 .ai-orb::before {
   content: "";
@@ -145,7 +155,8 @@
 .ai-orb.is-typing .ai-orb-pulse { animation-play-state: paused; opacity: 0; }
 .ai-orb:hover {
   transform: translateY(-1px) scale(1.05);
-  filter: drop-shadow(0 18px 34px var(--ai-accent-glow));
+  filter: drop-shadow(0 0 32px var(--ai-accent-glow))
+          drop-shadow(0 18px 34px var(--ai-accent-glow));
 }
 .ai-orb:active { transform: scale(.97); }
 .ai-orb:focus-visible { outline: 2px solid var(--ai-accent); outline-offset: 5px; }
