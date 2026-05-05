@@ -2,7 +2,7 @@
 title: "Cross-Repo Harmonization Plan"
 description: "Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE feature surfaces across `llm-benchmark`, `gpu-planner`, and `cluster-manager` via a shared `shared-ui/` library."
 date: 2026-05-02
-updated: 2026-05-03
+updated: 2026-05-05
 status: complete
 owner: "Curt Wortman"
 category: architecture
@@ -865,4 +865,58 @@ across all 4 repos.
   `4799907` (migration files only — tracelens WIP unrelated to the
   rename was left unstaged for separate commits), cluster-manager
   `22567c3`.
+
+- **Phase 9.8d-mobile (2026-05-05)**: iPhone-friendly mobile shell
+  rolled out across all 3 consumers. Canonical mobile defaults moved
+  into a single `@media (max-width: 640px)` block in `webtools-ui/css/
+  base.css` (16px form inputs to defeat iOS auto-zoom; `min-height:
+  40px` tap targets; `safe-area-inset` padding for `.hero` and `body`;
+  `.table-scroll` overflow helper). Each consumer added `viewport-fit=
+  cover` to its viewport meta (so `env(safe-area-inset-*)` works on
+  iOS), an off-canvas hamburger drawer in `pages/index.html` (sidebar
+  slides in from the left on tap, backdrop overlay, Esc / backdrop /
+  nav-item-click all close), and per-page rules to collapse multi-
+  column grids and enable horizontal scroll on wide tables/SVG. The
+  top-bar tab buttons are also now text-only (no Material Symbols
+  glyph) across all 3 consumers — the sidebar nav variant keeps its
+  icons, only the top bar is text-only. **Commits**: webtools-ui
+  (`base.css` mobile block sha update via `scripts/build-vendor-
+  manifest.sh`), llm-benchmark `8ad7c61` (`feat(ui): mobile shell +
+  agent orb refresh + Plan/View polish`), cluster-manager `<hash>` and
+  dc-planner `<hash>` (parallel agent — see those repos' git logs).
+
+- **Phase 9.8e (2026-05-05)**: canonical demo-audience catalog
+  promoted to webtools-ui. New module `webtools-ui/js/demo-
+  audiences.js` exposes `window.DemoAudiences` — a 3-entry array
+  (`onboarding` / `advanced` / `expert`) with repo-agnostic `name` /
+  `time` / `desc` fields. The `name` field changed from "Onboarding &
+  Presales" to "Standard Onboarding" so the label reads correctly in
+  any of the three sibling dashboards (presales is a use case, not an
+  audience tier). Consumers can override per-audience copy via
+  `window.DemoAudienceOverrides = {...}` declared before the script
+  loads. **First adopter**: llm-benchmark (`js/dashboard-tutor.js`
+  reads `window.DemoAudiences` if present, falls back to an inline
+  copy; `pages/index.html` loads the canonical script before
+  dashboard-tutor.js). **Pending adopters**: cluster-manager and
+  dc-planner — neither ships an audience picker today, so the catalog
+  is wired but unused until those repos add their own picker (or until
+  Phase 9.8e-2 promotes the picker DOM construction itself into
+  `webtools-ui/js/demo-ui.js`). **Commits**: webtools-ui (new
+  `js/demo-audiences.js` + `scripts/vendor-manifest.json` regen),
+  llm-benchmark `<hash>` (`feat(demo): canonical audience catalog +
+  generic copy`).
+
+- **Phase 9.8e follow-up — agent orb chrome (2026-05-05)**: orb
+  panel renamed from "LLM Benchmark Copilot" to "LLM Benchmark Agent"
+  in `js/chat-orb-mount.js` (consumer-side title, not canonical).
+  `/help` now lists each command on its own line — `webtools-ui/js/
+  chat-orb.js builtinHelp` produces newline-separated output and the
+  submitInput dispatcher forwards the optional `result.html` flag
+  through to `addMessage("system", …)` so structured HTML help
+  responses render without escaping. The existing `white-space:
+  pre-line` CSS in `webtools-ui/css/chat-orb.css` handles the
+  newline-separated plain-text path with no extra work. **Commits**:
+  webtools-ui `56484c3` (`/help` newline output + dispatcher HTML
+  passthrough), llm-benchmark `8ad7c61` (orb rename, accent sync
+  observer).
 
