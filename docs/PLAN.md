@@ -4,6 +4,7 @@ description: "Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE 
 date: 2026-05-02
 updated: 2026-05-05
 status: complete
+phase: 9.8e P4
 owner: "Curt Wortman"
 category: architecture
 tags:
@@ -919,4 +920,38 @@ across all 4 repos.
   webtools-ui `56484c3` (`/help` newline output + dispatcher HTML
   passthrough), llm-benchmark `8ad7c61` (orb rename, accent sync
   observer).
+
+- **Phase 9.8e P4 — canonical `pages/index.html` skeleton (2026-05-05)**:
+  the first ~18 lines of every consumer's main entry (`<!doctype html>`
+  through the canonical chat-orb.css link) were drifting silently —
+  stylesheet load order swapped, viewport meta lost `viewport-fit=
+  cover`, dc-planner pointed font preload at a local `../css/...`
+  path, cluster-manager carried a redundant 17-line `<style>` block
+  redeclaring the Material Symbols font defaults already shipped in
+  `shared/css/material-symbols.css`. Closed the door with a strict-
+  diff template: `templates/index.skeleton.html` holds the canonical
+  shape with `{{NAME}}` (required) and `{{?NAME}}` (optional) place-
+  holders; each consumer ships `pages/index.skeleton.values.json`
+  filling the slots; `scripts/check_index_skeleton.py` renders the
+  template, extracts lines 1 through `<!-- end:skeleton -->` from
+  `pages/index.html`, and asserts byte-for-byte equality. The sentinel
+  comment demarcates the template-driven prefix from per-repo head
+  content (inline `<style>` blocks, page-specific scripts) that
+  legitimately diverges below it. Wired into all three test runners
+  (`llm-benchmark/test_offline.sh §25e`, `cluster-manager/scripts/
+  self-check.sh Stage 1b`, `dc-planner/tests/self-check.sh §2x`).
+  Alignment work landed alongside: `cluster-manager` lost the
+  redundant `<style>` block + moved chat-orb.css from body to head;
+  `dc-planner` switched font preload + material-symbols.css to canon-
+  ical paths, fixed `viewport=1.0` → `1`, swapped chat-orb↔skin order
+  to put skin AFTER per-repo CSS (so theme tokens win the cascade),
+  normalized void elements to ` />` self-close; `llm-benchmark`
+  swapped skin↔dashboard-tutor order to match canonical. See
+  [`docs/INDEX_SKELETON.md`](INDEX_SKELETON.md) for the schema, place-
+  holder grammar, adoption matrix, and the design dialogue (strict-
+  diff vs structural-lint vs snapshot). **Commits**: webtools-ui
+  `<hash>` (template + script + doc), llm-benchmark `<hash>` (head
+  alignment + 25e wire-in + values.json), cluster-manager `<hash>`
+  (head alignment + Stage 1b wire-in + values.json), dc-planner
+  `<hash>` (head alignment + 2x wire-in + values.json).
 
