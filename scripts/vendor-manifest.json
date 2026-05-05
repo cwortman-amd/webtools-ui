@@ -1,12 +1,13 @@
 {
-  "generated_at": "2026-05-04T20:45:26Z",
-  "head": "8b1268a1202868ff285cc5aed96b260890126688",
+  "generated_at": "2026-05-05T15:31:26Z",
+  "head": "48bf749564348cd2a468b97c703c17629295c665",
   "files": [
     { "path": "README.md", "sha256": "e9777abab18ea26dfa6c31d655384f92ece9bfe39341f013dde391e2d026d630", "size": 4022 },
-    { "path": "css/base.css", "sha256": "64d196aff1be19fc8d7a825dadcaa40ebade6a0a7016fec621016b4a517dd5da", "size": 15514 },
-    { "path": "css/chat-orb.css", "sha256": "cefb66b444eb586694ce0fb4f80e6850eca29437ba1cd43cebe32c29efb2b943", "size": 24385 },
+    { "path": "css/base.css", "sha256": "5377c8c9c741a3d5f1bf4abc6121139113c6857d31b7fa8fd2f4c0d6ba4c1ecd", "size": 19264 },
+    { "path": "css/chat-orb.css", "sha256": "32cbeee80d0cecfd46bf709b2b70e8f0159ebaaa7f9ab48408a389c4334127a6", "size": 25141 },
     { "path": "css/demo-engine.css", "sha256": "7f6ba8e18c2b1b0770b7f1a454dfea989f65fc0ca017b0b6386d2c1289ba5fae", "size": 353 },
     { "path": "css/demo-mode.css", "sha256": "64114f358d2d47e946434aab7e3a2f1b4a7ea6306bd35a6d38c33e749306e528", "size": 12137 },
+    { "path": "css/material-symbols.css", "sha256": "f5087064e0f42f9a82f3331924897c3a86a17da6f76b0b3370752ec7c72000f0", "size": 2022 },
     { "path": "css/notes-panel.css", "sha256": "cf29a570c10a687525b551cee6aafe52fb4fae37250f6e436eb15930490bcc1e", "size": 6618 },
     { "path": "css/skins/amd-gold.css", "sha256": "6d90b13182df8b5e90ccb01302b1bfdb34f82ecaeb71b04c7028d7162b9af04c", "size": 7542 },
     { "path": "css/skins/amd-teal.css", "sha256": "0936a21515fde7af1dc48ca5c0b5d92bcf423f502f9dcf1e4d52336b9a6f3cce", "size": 7639 },
@@ -15,6 +16,7 @@
     { "path": "css/skins/matte-dark.css", "sha256": "2aa2c6d39f3054524a45e0e4fb7123604ed2426fc36eb25832e11edc9087f352", "size": 3216 },
     { "path": "css/skins/minimal-monochrome.css", "sha256": "b733a592a41c9d840546d5c6dd3d37d5f23ddd4f964cbad30ba3c5ce8a135f99", "size": 4222 },
     { "path": "css/skins/soft-neutral-light.css", "sha256": "be71316c4aca950a57fd32c98c0ea4c2d458b2867e6759f8f139267dcb272d06", "size": 4828 },
+    { "path": "docs/CSS_HARMONIZATION.md", "sha256": "3e0ca1ae56687693d4a7302a0f48e72169a31e3628e562e1c548e825c9271efb", "size": 22072 },
     { "path": "docs/PLAN.md", "sha256": "fdcaa45797d35fb8a99768dcca164d9b2434f65d76b38483b06c9c220d880f38", "size": 51936 },
     { "path": "docs/templates/AGENT.skeleton.md", "sha256": "d55a66563b8cf263a1ea4f9417e15ed698dd2e7808f56ba4c40b1e1966cdfe94", "size": 5599 },
     { "path": "docs/templates/CHAT.skeleton.md", "sha256": "3983de8fa69c01f14a90c99ae7d1a1cbdc99b36b15f266bd9f844e24c5bd1ba7", "size": 5844 },
@@ -25,13 +27,13 @@
     { "path": "docs/templates/demo-track.schema.json", "sha256": "b3122b2a386e268c1cbeba9f87e85d724cd4ec64f7213b8c85e61bf3f4c21685", "size": 6119 },
     { "path": "docs/templates/voice-config.schema.json", "sha256": "67210a2012ccfaf862de4f8a91bb95504b058eb033e96e5af59ed441dfc19639", "size": 7275 },
     { "path": "js/agent-bridge.js", "sha256": "546141b2b6c28b899cc2d6f9b6b6a7dcf140c89e903fbcbf01e59ef7155c112a", "size": 353 },
-    { "path": "js/chat-orb.js", "sha256": "62db54fade534248a5f4a4d4ee36429a72952ac391e97f57e3d9efb10246bbc7", "size": 29504 },
+    { "path": "js/chat-orb.js", "sha256": "d61017a28bddc4fffe64f4a151d540cab287c3e8ea6bf06b036548f92a9a603d", "size": 31130 },
     { "path": "js/demo-engine.js", "sha256": "86dbea7eead0b65599be4ee5d86ccb0fc8f9f583b627894cd10723da8eef09ee", "size": 32239 },
-    { "path": "js/demo-ui.js", "sha256": "d6382ce2e53ba7af3da3ba93a2bb34dff9da9299e3bf1ccc40f71daf00616ae1", "size": 26231 },
+    { "path": "js/demo-ui.js", "sha256": "8e37e4a586d851fcd9be3a52fa490a244fd9d3c56ad523782da69c1e53408fe0", "size": 25190 },
     { "path": "js/demo-voice.js", "sha256": "695569949e3936fc54c993b2c519da26fe2c3f50927727f6cc16751e1b8c6b6b", "size": 5831 },
     { "path": "js/notes-panel.js", "sha256": "dde548b5f2d5b842f819a4e496229afdf489dc1a33de3810f21cd9a38132fb03", "size": 352 },
     { "path": "js/slash-catalog.js", "sha256": "72f34d54f03d1ef67ef46603ca518ae01c79a9106cbd8bc6f206f567e82d1557", "size": 7234 },
     { "path": "js/slash-router.js", "sha256": "b91a3922648eb54bcf0914edb45944acb2664b94cd0e1532547f1a760eb17c27", "size": 5546 },
-    { "path": "js/voice.js", "sha256": "733055d4c916aaf6031b467df7a0dc8d22d7a7e1c841eb1bbf79d3dac5b65965", "size": 25088 }
+    { "path": "js/voice.js", "sha256": "064baaf5a4ca298d1837b4e0c06ec4413db2438ead7f877726ed2dee356b59b9", "size": 40135 }
   ]
 }

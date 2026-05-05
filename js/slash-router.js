@@ -59,7 +59,8 @@
         return;
       }
       global.ChatOrb.register(cmd, entry.handler, {
-        description: entry.description || ""
+        description: entry.description || "",
+        hiddenInHelp: !!entry.hiddenInHelp
       });
     });
   }
@@ -128,7 +129,8 @@
       global.ChatOrb.register(cmd, function () {
         return { reply: msg, kind: "system" };
       }, {
-        description: entry.description + (native.length ? "  (lives in " + native.join("/") + ")" : "  (not in any consumer yet)")
+        description: entry.description + (native.length ? "  (lives in " + native.join("/") + ")" : "  (coming)"),
+        outOfDomain: true
       });
       registered++;
     });

@@ -97,6 +97,24 @@
              close: null, llmBtn: null, llmCard: null, demoBtn: null,
              feedbackBtn: null, feedbackCard: null };
 
+  function resolveVoiceModeLabel() {
+    try {
+      if (!global.voiceBridge || typeof global.voiceBridge.getTTSConfig !== "function") return "local";
+      var cfg = global.voiceBridge.getTTSConfig() || {};
+      var m = String(cfg.mode || "local").toLowerCase();
+      return m === "local" ? "local" : "cloud";
+    } catch (_) {
+      return "local";
+    }
+  }
+  function statusSubtitleText() {
+    return "Online  · " + resolveVoiceModeLabel();
+  }
+  function refreshStatusSubtitle() {
+    var el = document.getElementById("chatStatusSubtitle");
+    if (el) el.textContent = statusSubtitleText();
+  }
+
   // ── Persistence helpers ──────────────────────────────────────────
   function loadLLM() {
     try {
@@ -160,7 +178,7 @@
       '    <span class="ai-hdr-mark" aria-hidden="true">' + escapeHtml(state.cfg.initials) + "</span>",
       '    <span class="ai-hdr-text">',
       '      <span class="ai-hdr-title">' + escapeHtml(state.cfg.title) + "</span>",
-      '      <span class="ai-hdr-sub"><span class="ai-online-dot" aria-hidden="true"></span><span>' + escapeHtml(state.cfg.subtitle) + "</span></span>",
+      '      <span class="ai-hdr-sub"><span class="ai-online-dot" aria-hidden="true"></span><span id="chatStatusSubtitle">' + escapeHtml(statusSubtitleText()) + "</span></span>",
       "    </span>",
       "  </div>",
       '  <div class="ai-hdr-actions">',
@@ -443,7 +461,7 @@
     ui.msgs.appendChild(wrap);
     ui.msgs.scrollTop = ui.msgs.scrollHeight;
 
-    state.history.push({ role: role, text: text, ts: Date.now() });
+    state.history.push({ role: role, text: text, html: !!opts.html, ts: Date.now() });
     saveHistory();
   }
 
@@ -459,8 +477,8 @@
 
   // ── Slash-command router ─────────────────────────────────────────
   function register(command, handler, meta) {
-    if (!command || command.charAt(0) !== "/") {
-      throw new Error("ChatOrb.register: command must start with '/' (got '" + command + "')");
+    if (!command || (command !== "*" && command.charAt(0) !== "/")) {
+      throw new Error("ChatOrb.register: command must start with '/' or be '*' (got '" + command + "')");
     }
     state.handlers[command.toLowerCase()] = {
       handler: handler,
@@ -534,7 +552,9 @@
       }
       if (result.reply) {
         if (result.kind === "system") {
-          printSystem(result.reply);
+          // Forward `html: true` so callers like /help can render their
+          // own structured HTML (instead of relying on `pre-line` CSS).
+          addMessage("system", result.reply, { html: !!result.html });
         } else {
           printAi(result.reply, { html: !!result.html });
         }
@@ -547,20 +567,24 @@
 
   // ── Built-in slash handlers (/help, /clear, /llm) ────────────────
   function builtinHelp(args) {
-    var cmds = listCommands().filter(function (c) { return c !== "*"; });
-    var lines = [
-      "**Commands available in this chat orb:**",
-      ""
-    ];
+    var cmds = listCommands().filter(function (c) {
+      if (c === "*") return false;
+      var meta = (state.handlers[c] && state.handlers[c].meta) || {};
+      return !meta.outOfDomain && !meta.hiddenInHelp;
+    });
+    // Keep help as plain text so it survives history replay without
+    // exposing raw HTML tags in the message bubble.
+    var lines = ["Commands available in this chat orb:", ""];
     cmds.forEach(function (c) {
       var meta = state.handlers[c].meta || {};
-      lines.push("  `" + c + "` — " + (meta.description || "(no description)"));
+      var desc = meta.description || "(no description)";
+      lines.push(c + " — " + desc);
     });
     if (typeof state.cfg.onHelpExtra === "function") {
       var extra = state.cfg.onHelpExtra();
       if (extra) {
         lines.push("");
-        lines.push(extra);
+        lines.push(String(extra));
       }
     }
     return { reply: lines.join("\n"), kind: "system" };
@@ -652,11 +676,20 @@
     }
 
     wireEvents();
+    refreshStatusSubtitle();
+    global.addEventListener("voicebridge:tts-mode-changed", refreshStatusSubtitle);
 
     // Replay any persisted history (tail only, to keep things snappy).
     state.history = loadHistory();
     state.history.slice(-10).forEach(function (m) {
-      addMessage(m.role, m.text);
+      var html = !!m.html;
+      // Backward compatibility: older /help replies were persisted as raw
+      // HTML strings without an `html` flag, which rendered literal tags
+      // after reopening. Detect and render those as HTML once.
+      if (!html && m && m.role === "system" && /<(div|code|br)\b/i.test(String(m.text || ""))) {
+        html = true;
+      }
+      addMessage(m.role, m.text, { html: html });
       // Don't double-persist; remove the duplicate appended by addMessage.
       state.history.pop();
     });

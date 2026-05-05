@@ -3,7 +3,7 @@
  *
  * PROMOTED in harmonization Phase 5.1 — was dc-planner/js/demo-ui.js,
  * now the single source of truth for the demo player chrome (launcher
- * chip + floating player + transcript panel + highlight overlay) across
+ * chip + floating player + orb-routed narration + highlight overlay) across
  * all 3 sibling consumers. Loaded as `../shared/js/demo-ui.js`.
  *
  * Domain coupling notes for downstream consumers (Phase 5.3):
@@ -18,9 +18,9 @@
  *
  * The visible chrome that wraps the Demo Engine: a launcher chip in
  * the side-nav header, a floating player at the bottom of the viewport,
- * a transcript / speaker-notes panel that doubles as manual mode, and
- * a highlight overlay that pins to whatever element the engine is
- * pointing at. Listens for engine events and forwards user input.
+ * and a highlight overlay that pins to whatever element the engine is
+ * pointing at. Narrated text is routed into the existing agent-orb
+ * chat panel instead of creating a separate transcript modal.
  *
  * URL params: ?demo=<track>      — autoload + autoplay on page ready
  *             ?demo=<track>&autoplay=0 — load but wait for explicit play
@@ -28,7 +28,7 @@
  * Keyboard (only while a demo is active):
  *   Space        play / pause
  *   ←  →         prev / next step
- *   T            toggle transcript panel
+ *   T            open the assistant panel
  *   R            restart current track from (0,0)
  *   M            mute / unmute voice
  *   Esc          exit demo (asks before discarding restore-snapshot)
@@ -156,21 +156,11 @@
       <span class="demo-player__divider"></span>
       <button class="demo-player__btn" data-act="restart" title="Restart track (R)" aria-label="Restart track">\u21BA</button>
       <button class="demo-player__btn" data-act="mute" title="Mute voice (M)" aria-label="Mute voice">\uD83D\uDD0A</button>
-      <button class="demo-player__btn" data-act="transcript" title="Toggle transcript (T)" aria-label="Toggle transcript">T</button>
+      <button class="demo-player__btn" data-act="transcript" title="Open assistant panel (T)" aria-label="Open assistant panel"><span class="material-symbols-outlined">chat</span></button>
       <span class="demo-player__divider"></span>
       <button class="demo-player__btn demo-player__btn--exit" data-act="exit" title="Exit demo (Esc)" aria-label="Exit demo">EXIT</button>
     `;
     document.body.appendChild(player);
-
-    const transcript = el("aside", { class: "demo-transcript", role: "complementary", "aria-label": "Speaker notes" });
-    transcript.innerHTML = `
-      <div class="demo-transcript__header">
-        <span data-role="track-label">Speaker notes</span>
-        <button class="demo-transcript__close" data-act="close-transcript" title="Hide transcript" aria-label="Hide transcript"><span class="material-symbols-outlined">close</span></button>
-      </div>
-      <div class="demo-transcript__body" data-role="transcript-body"></div>
-    `;
-    document.body.appendChild(transcript);
 
     const highlight = el("div", { class: "demo-highlight is-hidden", "aria-hidden": "true" });
     document.body.appendChild(highlight);
@@ -199,23 +189,14 @@
         if (typeof engine.setMuted === "function") engine.setMuted(next);
         api.player.setMuted(next);
       }
-      else if (act === "transcript") api.transcript.toggle();
+      else if (act === "transcript") api.narration.openAssistant();
       else if (act === "exit") api.requestExit();
-    });
-
-    transcript.addEventListener("click", (ev) => {
-      const close = ev.target.closest('[data-act="close-transcript"]');
-      if (close) { api.transcript.hide(); return; }
-      const step = ev.target.closest("[data-scene][data-step]");
-      if (step) {
-        engine.goTo(parseInt(step.dataset.scene, 10), parseInt(step.dataset.step, 10));
-      }
     });
 
     /* ── API for events to update DOM ────────────────────────────── */
 
     const api = {
-      el: { player, transcript, highlight, toast },
+      el: { player, highlight, toast },
 
       player: {
         show() { player.classList.add("is-visible"); },
@@ -258,41 +239,32 @@
         }
       },
 
-      transcript: {
-        show() { transcript.classList.add("is-visible"); },
-        hide() { transcript.classList.remove("is-visible"); },
-        toggle() { transcript.classList.toggle("is-visible"); },
-        render(track) {
-          const body = transcript.querySelector('[data-role="transcript-body"]');
-          const trackLabel = transcript.querySelector('[data-role="track-label"]');
-          if (trackLabel) trackLabel.textContent = (track && track.title) || "Speaker notes";
-          if (!body) return;
-          body.innerHTML = "";
-          if (!track || !Array.isArray(track.scenes)) return;
-          track.scenes.forEach((scene, sIdx) => {
-            const heading = el("div", { class: "demo-transcript__step-label" });
-            heading.textContent = `Scene ${sIdx + 1} — ${scene.title || ""}`;
-            body.appendChild(heading);
-            scene.steps.forEach((step, stIdx) => {
-              const node = el("p", {
-                class: "demo-transcript__step",
-                "data-scene": String(sIdx),
-                "data-step": String(stIdx)
-              });
-              node.textContent = step.narration || "";
-              body.appendChild(node);
-            });
-          });
+      narration: {
+        _lastKey: "",
+        openAssistant() {
+          if (window.ChatOrb && typeof window.ChatOrb.open === "function") {
+            try { window.ChatOrb.open(); return true; } catch (_) {}
+          }
+          if (window.DCChatFeedback && typeof window.DCChatFeedback.open === "function") {
+            try { window.DCChatFeedback.open(); return true; } catch (_) {}
+          }
+          return false;
         },
-        markActive(sceneIdx, stepIdx) {
-          const all = transcript.querySelectorAll(".demo-transcript__step");
-          all.forEach(n => n.classList.remove("demo-transcript__step--active"));
-          const target = transcript.querySelector(
-            `.demo-transcript__step[data-scene='${sceneIdx}'][data-step='${stepIdx}']`
-          );
-          if (target) {
-            target.classList.add("demo-transcript__step--active");
-            target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        post(text, meta) {
+          var safe = String(text || "").trim();
+          if (!safe) return;
+          var key = (meta && meta.sceneIdx != null && meta.stepIdx != null)
+            ? (meta.sceneIdx + ":" + meta.stepIdx + ":" + safe)
+            : safe;
+          if (key === api.narration._lastKey) return;
+          api.narration._lastKey = key;
+          var msg = "<b>Demo Narration:</b> " + escapeHtml(safe);
+          api.narration.openAssistant();
+          if (window.ChatOrb && typeof window.ChatOrb.printAi === "function") {
+            try { window.ChatOrb.printAi(msg, { html: true }); return; } catch (_) {}
+          }
+          if (window.DCChatFeedback && typeof window.DCChatFeedback.addMessage === "function") {
+            try { window.DCChatFeedback.addMessage(msg, "ai", { html: true }); return; } catch (_) {}
           }
         }
       },
@@ -413,19 +385,24 @@
     if (attrs) Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
     return node;
   }
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
 
   /* ── Engine event wiring ────────────────────────────────────────── */
 
   function wireEngineEvents(engine, ui) {
-    engine.on("track:loaded", ({ track }) => {
-      ui.transcript.render(track);
+    engine.on("track:loaded", function () {
+      if (ui && ui.narration) ui.narration._lastKey = "";
     });
 
     engine.on("phase:changed", ({ phase }) => {
       ui.player.setPhase(phase);
       if (phase === "idle") {
         ui.player.hide();
-        ui.transcript.hide();
         ui.highlight.clear();
       } else {
         ui.player.show();
@@ -448,7 +425,10 @@
         total = countSteps(st.track);
       }
       ui.player.setProgress(pos + 1, total);
-      ui.transcript.markActive(sceneIdx, stepIdx);
+    });
+
+    engine.on("narration:start", ({ text, sceneIdx, stepIdx }) => {
+      if (ui && ui.narration) ui.narration.post(text, { sceneIdx, stepIdx });
     });
 
     engine.on("highlight", (target) => {
@@ -521,7 +501,7 @@
       } else if (ev.key && ev.key.toLowerCase() === "t") {
         ev.preventDefault();
         const ui = window.DcDemo && window.DcDemo._ui;
-        if (ui && ui.transcript && ui.transcript.toggle) ui.transcript.toggle();
+        if (ui && ui.narration && ui.narration.openAssistant) ui.narration.openAssistant();
       } else if (ev.key && ev.key.toLowerCase() === "r") {
         // Restart current track from (0,0) — tutor-bar parity.
         ev.preventDefault();
@@ -577,7 +557,7 @@
   function startTrack(engine, ui, name) {
     const safe = REGISTERED_TRACKS.includes(name) ? name : DEFAULT_TRACK;
     return engine.loadTrack(safe).then(() => {
-      ui.transcript.show();
+      if (ui && ui.narration) ui.narration.openAssistant();
       return engine.play();
     }).catch(err => {
       ui.toast.show({
@@ -595,7 +575,7 @@
     if (!want) return;
     const autoplay = params.get("autoplay") !== "0";
     engine.loadTrack(want).then(() => {
-      ui.transcript.show();
+      if (ui && ui.narration) ui.narration.openAssistant();
       if (autoplay) engine.play();
     }).catch(err => console.warn("[demo-ui] URL-param load failed:", err));
   }

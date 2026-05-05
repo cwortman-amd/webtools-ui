@@ -330,3 +330,103 @@ tr:hover .bom-delete-btn { opacity: 0.6; }
   body { background: #fff; color: #000; }
   .page { max-width: 100%; padding: 0; }
 }
+
+/* ── Mobile (≤640px, primary target: iPhone) ─────────────────────────
+ * Phase 9.8d-mobile (2026-05-05): canonical mobile baseline shared
+ * across llm-benchmark, cluster-manager, dc-planner.
+ *
+ * Goals:
+ *   1. Honor iPhone notch / dynamic island via env(safe-area-inset-*).
+ *      Pages must set <meta name="viewport" content="… viewport-fit=cover">
+ *      for these to take effect.
+ *   2. Tap targets ≥44 px per Apple HIG. The 28×28 .hero-icon-btn that
+ *      works fine with a mouse is too small for thumbs.
+ *   3. Form inputs ≥16 px font-size to suppress iOS's auto-zoom-on-focus
+ *      behavior (iOS only zooms inputs whose computed font-size is
+ *      <16px; bumping to 16px keeps the layout stable when the keyboard
+ *      opens).
+ *   4. Tab/nav text legible at thumb distance — slightly larger fonts
+ *      and more vertical padding than the desktop default.
+ *
+ * Per-page mobile rules (charts/tables, kanban columns, etc.) live in
+ * each page's own stylesheet. This block only contains the cross-page
+ * chrome baseline.
+ * ─────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Honor iPhone notch on the top bar. The fixed .hero stays 40 px
+   * tall, but its top padding extends into the safe-area inset so
+   * its content doesn't render under the notch. */
+  .hero {
+    padding-top: env(safe-area-inset-top);
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    height: calc(40px + env(safe-area-inset-top));
+  }
+
+  /* Bump tap targets. .hero-icon-btn is 28×28 by default — thumb-hostile.
+   * 40 px keeps it under the canonical 44 pt for visual density but is
+   * comfortably tappable. The iframe content area is what users
+   * primarily interact with; this is the page-chrome baseline. */
+  .hero-icon-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .hero-icon-btn .material-symbols-outlined {
+    font-size: 22px;
+  }
+
+  /* Tab buttons in the .hero scroll horizontally; bump their height
+   * for thumb tappability and add momentum scrolling on iOS. */
+  .hero-tabs {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .tab-btn,
+  .hero-tabs .tab-btn {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 0.9rem;
+    scroll-snap-align: start;
+  }
+
+  /* Form controls — kill iOS zoom-on-focus by guaranteeing 16 px.
+   * Per-page CSS may set smaller fonts on inputs; this rule wins
+   * because it's inside a media query. */
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 40px;
+  }
+
+  /* Honor home-indicator safe-area for floating chrome that anchors
+   * to the bottom of the viewport (chat orbs, tutor bar, action
+   * buttons). Already partially handled by chat-orb.css. */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Tables that overflow: pages should wrap them in `.table-scroll`
+   * for horizontal scrolling on narrow viewports. This rule provides
+   * the canonical implementation so per-page CSS doesn't need to
+   * redefine it. */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* Stat chip strip: stack as 2-column on mobile instead of 4 so
+   * each stat has room to breathe without text-clipping. */
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
