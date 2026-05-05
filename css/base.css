@@ -323,6 +323,44 @@ tr:hover .bom-delete-btn { opacity: 0.6; }
 .warning { color: var(--ui-warning-text); font-size: 0.86rem; }
 .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
+/* ── User Mode Visibility (Phase 9.8e P1.1, 2026-05-05) ──────────────
+ * Canonical "gate UI by user mode" pattern shared across all three
+ * sibling consumer dashboards. Mark any element that should only
+ * appear at higher tiers with one of:
+ *
+ *   class="… mode-advanced"   → visible in advanced + expert
+ *   class="… mode-expert"     → visible in expert only
+ *
+ * The host page must set `body[data-user-mode]` to one of `standard`,
+ * `advanced`, or `expert`. The mode picker JS in each consumer's
+ * `pages/index.html` keeps this attribute in sync with the user's
+ * selection (and persists it via `localStorage`).
+ *
+ * Default behavior is `display: none !important` — the element
+ * disappears from layout entirely. This matches what llm-benchmark
+ * + dc-planner ship.
+ *
+ * OPT-OUT for "lock + upsell" UX (cluster-manager's primary tab
+ * strip). Set `body[data-mode-gating="lock"]` and the canonical
+ * hide rules become no-ops; the consumer is then responsible for
+ * applying its own lock-state styling (e.g. `.tab-locked` dim +
+ * click-to-open-mode-menu) on the same `.mode-*` elements. The
+ * `.mode-*` class still serves as a declarative marker for tests
+ * + accessibility tooling so the gated elements are discoverable
+ * without reading the JS.
+ * ─────────────────────────────────────────────────────────────────── */
+body[data-user-mode="standard"] .mode-advanced,
+body[data-user-mode="standard"] .mode-expert,
+body[data-user-mode="advanced"] .mode-expert {
+  display: none !important;
+}
+
+body[data-mode-gating="lock"][data-user-mode="standard"] .mode-advanced,
+body[data-mode-gating="lock"][data-user-mode="standard"] .mode-expert,
+body[data-mode-gating="lock"][data-user-mode="advanced"] .mode-expert {
+  display: revert !important;
+}
+
 /* ── Print ────────────────────────────────────── */
 
 @media print {
