@@ -369,6 +369,40 @@ body[data-mode-gating="lock"][data-user-mode="advanced"] .mode-expert {
   .page { max-width: 100%; padding: 0; }
 }
 
+/* ── Mobile drawer chrome (Phase 9.8e P2, 2026-05-05) ─────────────────
+ * Cross-page chrome for the off-canvas hamburger drawer pattern shared
+ * across all three sibling shells. The drawer-CONTAINER selector itself
+ * (`.sidebar` in llm-benchmark / cluster-manager, `.side-nav` in
+ * dc-planner) and the body-shift selector (`.shell-body` vs `.page`)
+ * stay per-repo because the underlying layout primitives differ — but
+ * the hamburger button + backdrop chrome below is identical, so it
+ * lives here.
+ *
+ * The corresponding JS controller is `webtools-ui/js/mobile-drawer.js`
+ * which exposes `MobileDrawer.install({ menuBtn, drawer, backdrop, … })`.
+ *
+ * Default state: hamburger hidden (revealed only inside the mobile
+ * media query below). Backdrop hidden until `body.nav-mobile-open`.
+ * ─────────────────────────────────────────────────────────────────── */
+.hero-mobile-menu {
+  display: none;
+}
+
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+body.nav-mobile-open .nav-backdrop {
+  display: block;
+  opacity: 1;
+}
+
 /* ── Mobile (≤640px, primary target: iPhone) ─────────────────────────
  * Phase 9.8d-mobile (2026-05-05): canonical mobile baseline shared
  * across llm-benchmark, cluster-manager, dc-planner.
@@ -466,5 +500,16 @@ body[data-mode-gating="lock"][data-user-mode="advanced"] .mode-expert {
    * each stat has room to breathe without text-clipping. */
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Mobile drawer chrome: reveal the hamburger. The drawer container
+   * itself (sidebar/side-nav) is positioned by per-repo CSS because
+   * the selector + content-area shift selector differ. */
+  .hero-mobile-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    order: -1;
+    margin-right: 4px;
   }
 }
