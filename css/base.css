@@ -369,6 +369,58 @@ body[data-mode-gating="lock"][data-user-mode="advanced"] .mode-expert {
   .page { max-width: 100%; padding: 0; }
 }
 
+/* ── Hero brand link (Phase 9.8e P2.1, 2026-05-05) ────────────────────
+ * Canonical shape for the dashboard's brand element in the .hero
+ * top-bar. Promoted from cluster-manager's inline <style> after audit
+ * P2 found three different markup shapes across the sibling consumers:
+ *
+ *   - llm-benchmark   <a class="brand-link"   ><h1>...                (inline-styled)
+ *   - cluster-manager <a class="hero-title"   ><span class="hero-title-text">  (this one — winner)
+ *   - dc-planner      <a class="app-title-link"><h1 inline-styled>            (inline-styled)
+ *
+ * The `<a class="hero-title">` shape with a child `<span class="hero-title-text">`
+ * was selected because:
+ *   - The anchor makes the brand a real link to the pitch deck (SEO + a11y)
+ *   - The text span (not <h1>) means the page's primary <h1> can live
+ *     in the sidebar nav-header without competing with the hero brand
+ *   - Hover-underline targets only the text via `:hover .hero-title-text`,
+ *     so the icon doesn't get an accidental underline
+ *   - All visual chrome (gap, color, weight) is in CSS — no inline
+ *     `style` attributes needed
+ *
+ * Required markup:
+ *
+ *   <a class="hero-title" href="pitch.html" title="Open pitch deck">
+ *     <span class="material-symbols-outlined">…icon…</span>
+ *     <span class="hero-title-text">…Brand Name…</span>
+ *   </a>
+ *
+ * Per-repo divergence: only the icon glyph (`hub` / `speed` / `dashboard`)
+ * and the brand name string differ — the markup shape and CSS are
+ * identical across all three consumers.
+ * ─────────────────────────────────────────────────────────────────── */
+.hero-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  color: var(--ui-header);
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.hero-title:hover .hero-title-text {
+  text-decoration: underline;
+}
+
+.hero-title .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--ui-accent);
+  flex-shrink: 0;
+}
+
 /* ── Mobile drawer chrome (Phase 9.8e P2, 2026-05-05) ─────────────────
  * Cross-page chrome for the off-canvas hamburger drawer pattern shared
  * across all three sibling shells. The drawer-CONTAINER selector itself
@@ -511,5 +563,13 @@ body.nav-mobile-open .nav-backdrop {
     justify-content: center;
     order: -1;
     margin-right: 4px;
+  }
+
+  /* Hero brand text shrinks slightly on narrow viewports so the
+   * icon + name + tab strip all fit without clipping. The icon
+   * stays at its desktop size — text-only shrink keeps the visual
+   * weight unchanged. */
+  .hero-title-text {
+    font-size: 0.95rem;
   }
 }

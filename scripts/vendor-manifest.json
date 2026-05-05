@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-05T22:21:26Z",
-  "head": "d3a849c1532324bebb02b1e4955b8881b59a9f8d",
+  "generated_at": "2026-05-05T22:29:05Z",
+  "head": "b548850214d8980e2fe4426c9dd66bdd3387e7af",
   "files": [
     { "path": "README.md", "sha256": "e9777abab18ea26dfa6c31d655384f92ece9bfe39341f013dde391e2d026d630", "size": 4022 },
-    { "path": "css/base.css", "sha256": "9113432173fb9665b30adb12876d377a45ad57046f524d498bd907f5b8e5ba8b", "size": 22871 },
+    { "path": "css/base.css", "sha256": "6f44a5c4a5cdd20d229274d9b6b437cc7346ab6cd96fe97b3d58f2d8b877b57c", "size": 25337 },
     { "path": "css/chat-orb.css", "sha256": "5aa7a30fd7af9ea0fb46e00323b3a4c3b32c7cbaa3ced2fddd75840baae89b42", "size": 25927 },
     { "path": "css/demo-engine.css", "sha256": "7f6ba8e18c2b1b0770b7f1a454dfea989f65fc0ca017b0b6386d2c1289ba5fae", "size": 353 },
     { "path": "css/demo-mode.css", "sha256": "64114f358d2d47e946434aab7e3a2f1b4a7ea6306bd35a6d38c33e749306e528", "size": 12137 },
