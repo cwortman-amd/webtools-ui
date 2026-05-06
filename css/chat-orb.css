@@ -1,10 +1,10 @@
 /*!
- * shared-ui/css/chat-orb.css
+ * webtools-ui/css/chat-orb.css
  *
  * Canonical agent orb + panel + LLM settings card chrome for all three
  * sibling consumer dashboards (`llm-benchmark`, `dc-planner`,
  * `cluster-manager`). Extracted from `dc-planner/js/chat-feedback.js`'s
- * `injectStyles()` (the canonical reference per `shared/docs/PLAN.md`
+ * `injectStyles()` (the canonical reference per `webtools-ui/docs/PLAN.md`
  * Phase 2) into a real, browser-cacheable stylesheet.
  *
  * USAGE: <link rel="stylesheet" href="../shared/css/chat-orb.css">

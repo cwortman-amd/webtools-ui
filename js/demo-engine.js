@@ -1,9 +1,10 @@
 /*!
- * shared-ui canonical asset: demo-engine.js
+ * webtools-ui canonical asset: demo-engine.js
  *
- * PROMOTED in harmonization Phase 5.1 — was gpu-planner/js/demo-engine.js,
- * now the single source of truth for the narrated-demo state machine
- * across all 3 sibling consumers. Loaded as `../shared/js/demo-engine.js`.
+ * PROMOTED in harmonization Phase 5.1 — originally dc-planner/js/demo-engine.js
+ * (then named gpu-planner before the 2026-05-03 rename), now the single
+ * source of truth for the narrated-demo state machine across all 3 sibling
+ * consumers. Loaded as `../shared/js/demo-engine.js`.
  *
  * Domain coupling notes for downstream consumers:
  *   - The engine talks to the dashboard via `window.agentBridge`. Each
@@ -11,15 +12,15 @@
  *     RPC surface (navigate / set_field / click / get_state / set_state)
  *     for the engine's actions to land.
  *   - The `SNAPSHOT_KEYS` array below is dc-planner-specific (rack /
- *     scenarios / pricing-tab keys). The keys use the `dc-planner-*`
- *     prefix that landed with dc-planner's gpu-planner → dc-planner
- *     rebrand (2026-05-03); cluster-manager and llm-benchmark have their
- *     own `js/demo-bridge.js` that mounts this engine and would pass
- *     consumer-specific keys via a future `DemoEngine.create({ snapshotKeys: [...] })`
- *     override hook (not yet implemented — defaults are dc-planner's).
+ *     scenarios / pricing-tab keys, all under the `dc-planner-*` prefix).
+ *     cluster-manager and llm-benchmark each have their own
+ *     `js/demo-bridge.js` that mounts this engine; they would pass
+ *     consumer-specific keys via a future
+ *     `DemoEngine.create({ snapshotKeys: [...] })` override hook (TODO —
+ *     defaults are dc-planner's).
  *   - Track JSON files live in each consumer's own `data/demo-tracks/`
  *     directory (the canonical schema is documented in
- *     `shared-ui/docs/templates/demo-track.schema.json`).
+ *     `webtools-ui/docs/templates/demo-track.schema.json`).
  *
  * --- (original header below) ---
  *

@@ -1,18 +1,17 @@
 /*!
- * shared-ui canonical asset: base.css
+ * webtools-ui canonical asset: base.css
  *
  * Canonical baseline page chrome shared by all three sibling consumer
  * dashboards (`llm-benchmark`, `cluster-manager`, `dc-planner`).
  * Promoted from `llm-benchmark/css/base.css` as the 275-line reference
- * implementation per `shared-ui/docs/PLAN.md` Phase 9.8a — replaces the
+ * implementation per `webtools-ui/docs/PLAN.md` Phase 9.8a — replaces the
  * 10-line "Phase 0 placeholder" that previously sat at this path.
  *
  * USAGE: <link rel="stylesheet" href="../shared/css/base.css">
  *
  * REQUIRES: a skin file (e.g. `shared/css/skins/matte-dark.css`) loaded
  * earlier in the cascade, which defines the `--ui-*` and `--skin-*` CSS
- * variables this stylesheet consumes. See `shared-ui/SKILL.md` for the
- * full variable reference.
+ * variables this stylesheet consumes.
  *
  * SCOPE (what this file defines):
  *   - Box-sizing reset, body typography, scrollbars

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/cwortman-amd/shared-ui/blob/main/docs/templates/demo-track.schema.json",
+  "$id": "https://github.com/cwortman-amd/webtools-ui/blob/main/docs/templates/demo-track.schema.json",
   "title": "Demo Track",
   "description": "Canonical schema for narrated dashboard demo tracks. Promoted in harmonization Phase 5.1 from the dc-planner format. Each consumer ships its own per-domain track JSON files in `data/demo-tracks/<track>.json` (the engine that consumes them is the shared `shared/js/demo-engine.js`).\n\nA TRACK is one end-to-end narrated walkthrough (e.g. \"presales\", \"onboarding\", \"engineering\"). It contains a sequence of SCENES (typically one scene per dashboard tab). Each SCENE contains a sequence of STEPS. Each STEP has narration text and a list of ACTIONS the engine executes against the dashboard via the agent bridge.",
   "type": "object",

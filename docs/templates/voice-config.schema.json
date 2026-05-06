@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/cwortman-amd/shared-ui/blob/main/docs/templates/voice-config.schema.json",
+  "$id": "https://github.com/cwortman-amd/webtools-ui/blob/main/docs/templates/voice-config.schema.json",
   "title": "Voice Bridge Config",
   "description": "Canonical schema for the configuration object passed to `window.voiceBridge.configure(opts)` (Phase 6). Each consumer ships its own per-repo `js/voice-config.js` (or equivalent module) that calls this with its phonetic dictionary, personas, and chat-target preference. The shape is documented here so consumers stay in sync as the voice bridge evolves.\n\nReference: `shared/js/voice.js`.",
   "type": "object",

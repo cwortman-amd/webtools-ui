@@ -1,11 +1,12 @@
 /* ─────────────────────────────────────────────────────────────────────
- * shared-ui canonical asset: demo-mode.css
+ * webtools-ui canonical asset: demo-mode.css
  *
  * The visible chrome for the canonical Demo Mode engine — promoted to
- * shared-ui on 2026-05-04 from dc-planner/css/demo-mode.css, with the
- * floating control bar and EXIT pill ported from
- * llm-benchmark/css/dashboard-tutor.css (.tutor-bar) so all 3 sibling
- * consumers render the same player chrome.
+ * webtools-ui on 2026-05-04 from dc-planner/css/demo-mode.css (the repo
+ * was named `shared-ui` at the time of the promotion; renamed to
+ * `webtools-ui` later that day in Phase 9.8c), with the floating control
+ * bar and EXIT pill ported from llm-benchmark/css/dashboard-tutor.css
+ * (.tutor-bar) so all 3 sibling consumers render the same player chrome.
  *
  * Loaded via:
  *   - explicit  <link rel="stylesheet" href="../shared/css/demo-mode.css">

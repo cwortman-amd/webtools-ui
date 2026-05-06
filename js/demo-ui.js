@@ -1,5 +1,5 @@
 /*!
- * shared-ui canonical asset: demo-ui.js
+ * webtools-ui canonical asset: demo-ui.js
  *
  * PROMOTED in harmonization Phase 5.1 — was dc-planner/js/demo-ui.js,
  * now the single source of truth for the demo player chrome (launcher

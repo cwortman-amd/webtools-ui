@@ -1,5 +1,5 @@
 /*!
- * shared-ui canonical asset: voice.js
+ * webtools-ui canonical asset: voice.js
  *
  * PROMOTED in harmonization Phase 6 — was cluster-manager/js/voice.js
  * (the richest STT + wake-word + TTS implementation across the 3

@@ -1,5 +1,5 @@
 /*!
- * shared-ui canonical asset: demo-voice.js
+ * webtools-ui canonical asset: demo-voice.js
  *
  * PROMOTED in harmonization Phase 5.1 — was dc-planner/js/demo-voice.js,
  * now the single source of truth for narrated-demo voice across all 3

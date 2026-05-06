@@ -1,5 +1,5 @@
 /*!
- * shared-ui/js/slash-router.js
+ * webtools-ui/js/slash-router.js
  *
  * Helper module for batch-registering slash-command handlers from a
  * declarative manifest. The actual dispatch logic lives in chat-orb.js;

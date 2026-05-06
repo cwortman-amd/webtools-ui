@@ -1,11 +1,11 @@
 /*!
- * shared-ui/js/chat-orb.js
+ * webtools-ui/js/chat-orb.js
  *
  * Canonical agent orb + panel + slash-command router for all three sibling
  * consumer dashboards (`llm-benchmark`, `dc-planner`, `cluster-manager`).
  *
  * Extracted (and substantially cleaned up) from `dc-planner/js/chat-feedback.js`'s
- * orb chrome per the harmonization plan (`shared/docs/PLAN.md` Phase 2). The
+ * orb chrome per the harmonization plan (`webtools-ui/docs/PLAN.md` Phase 2). The
  * dc-planner monolith mixes orb chrome with 12+ domain-specific intents
  * (`/explain`, `/solve dc_tco`, `/skills`, `/journal`, etc.); this module ships
  * ONLY the generic, reusable pieces every consumer needs:
@@ -45,6 +45,13 @@
   "use strict";
 
   // ── Module state ─────────────────────────────────────────────────
+  // NOTE: the `shared-ui:` namespace on these localStorage keys predates
+  // the 2026-05-04 directory rename to `webtools-ui` (Phase 9.8c). They
+  // are intentionally NOT renamed — these keys carry per-user orb history
+  // and LLM settings across all 3 sibling consumers, and a rename would
+  // silently lose that state for every existing user with no migration
+  // path. New keys added after this date should use the `webtools-ui:`
+  // prefix; legacy keys keep their original namespace.
   var STORAGE_KEY = "shared-ui:chat-orb:v1";
   var LLM_KEY     = "shared-ui:chat-orb:llm:v1";
   var DEFAULTS = {

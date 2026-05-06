@@ -41,8 +41,9 @@ This doc describes the template + per-consumer values + strict-diff CI guard tha
 > `window.DemoPicker`) now serving all three consumers, the
 > `.demo-picker*` rules in `shared/css/demo-mode.css` are mandatory
 > head-loaded chrome — promoted into the template alongside
-> `chat-orb.css`. See [`DEMO.md` §3.1](../../llm-benchmark/docs/DEMO.md)
-> and PLAN.md Phase 9.8e P5 for the full rollout.
+> `chat-orb.css`. See [`DEMO.skeleton.md` §6.4](templates/DEMO.skeleton.md)
+> and [`PLAN.md`](PLAN.md) Phase 9.8e P5 for the full rollout. Each
+> consumer's own `docs/DEMO.md` mirrors the §3.1 adoption matrix.
 
 ### Placeholder grammar
 

@@ -1,11 +1,12 @@
 /*!
- * shared-ui/css/notes-panel.css
+ * webtools-ui/css/notes-panel.css
  *
  * Canonical right-side speaker-notes panel for all three sibling pitch decks
- * (`llm-benchmark`, `gpu-planner`, `cluster-manager`).
+ * (`llm-benchmark`, `dc-planner`, `cluster-manager`).
  *
- * Originally extracted from `gpu-planner/pages/pitch.html` (the canonical
- * implementation per the harmonization plan, `shared/docs/PLAN.md` Phase 1.2).
+ * Originally extracted from `dc-planner/pages/pitch.html` (the canonical
+ * implementation per the harmonization plan, `webtools-ui/docs/PLAN.md`
+ * Phase 1.2). Mobile orientation-aware layout added in Phase 9.8e P6.
  *
  * USAGE: Each consumer's pitch.html includes this stylesheet via:
  *
