@@ -435,8 +435,19 @@ a.hero-title:hover .hero-title-text {
  *
  * Default state: hamburger hidden (revealed only inside the mobile
  * media query below). Backdrop hidden until `body.nav-mobile-open`.
+ *
+ * Specificity note (Phase 9.8e P9, 2026-05-06): the selector is
+ * scoped under `.hero` so per-repo `.hero-icon-btn { display:
+ * inline-flex }` redeclarations (loaded AFTER this file) can't
+ * accidentally win the cascade and re-show the hamburger on
+ * desktop. The hamburger button carries BOTH `.hero-icon-btn`
+ * and `.hero-mobile-menu`, and a bare `.hero-mobile-menu` selector
+ * has identical specificity to `.hero-icon-btn`, so source-order
+ * decided the winner — fragile across consumers. The descendant-
+ * combinator bump (0,1,1 vs 0,1,0) makes the canonical hide rule
+ * authoritative regardless of per-repo file order.
  * ─────────────────────────────────────────────────────────────────── */
-.hero-mobile-menu {
+.hero .hero-mobile-menu {
   display: none;
 }
 
@@ -571,8 +582,10 @@ body.nav-mobile-open .nav-backdrop {
 
   /* Mobile drawer chrome: reveal the hamburger. The drawer container
    * itself (sidebar/side-nav) is positioned by per-repo CSS because
-   * the selector + content-area shift selector differ. */
-  .hero-mobile-menu {
+   * the selector + content-area shift selector differ. Selector is
+   * scoped under `.hero` to match the specificity of the desktop
+   * hide rule above (Phase 9.8e P9). */
+  .hero .hero-mobile-menu {
     display: inline-flex;
     align-items: center;
     justify-content: center;

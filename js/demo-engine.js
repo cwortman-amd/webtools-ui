@@ -612,7 +612,10 @@
         return;
       }
       bus.emit("step:enter", { sceneIdx, stepIdx });
-      if (phase === "playing") runFromCurrent();
+      if (phase === "playing" || phase === "paused") {
+        if (phase !== "playing") setPhase("playing");
+        runFromCurrent();
+      }
     }
 
     function prev() {
@@ -620,7 +623,10 @@
       cancelCurrentSpeech();
       retreatCursor();
       bus.emit("step:enter", { sceneIdx, stepIdx });
-      if (phase === "playing") runFromCurrent();
+      if (phase === "playing" || phase === "paused") {
+        if (phase !== "playing") setPhase("playing");
+        runFromCurrent();
+      }
     }
 
     function goTo(targetScene, targetStep) {
@@ -629,7 +635,10 @@
       sceneIdx = clampSceneIdx(targetScene);
       stepIdx = clampStepIdx(sceneIdx, targetStep || 0);
       bus.emit("step:enter", { sceneIdx, stepIdx });
-      if (phase === "playing") runFromCurrent();
+      if (phase === "playing" || phase === "paused") {
+        if (phase !== "playing") setPhase("playing");
+        runFromCurrent();
+      }
     }
 
     // restart() rewinds the cursor to (0,0) and resumes the prior phase.
@@ -637,12 +646,15 @@
     // so a presenter can re-run the same track without reloading.
     function restart() {
       if (!track) return;
-      const wasPlaying = phase === "playing";
+      const shouldResume = phase === "playing" || phase === "paused";
       cancelCurrentSpeech();
       sceneIdx = 0;
       stepIdx = 0;
       bus.emit("step:enter", { sceneIdx, stepIdx });
-      if (wasPlaying) runFromCurrent();
+      if (shouldResume) {
+        if (phase !== "playing") setPhase("playing");
+        runFromCurrent();
+      }
     }
 
     // setMuted(bool) — pass-through to the voice provider. The engine's

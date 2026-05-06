@@ -160,14 +160,15 @@
     // (.tutor-bar) in 2026-05-04 to become the canonical chrome across all
     // 3 sibling consumers. Layout:
     //
-    //   [DEMO]  ‹  ⏸  ›   1 / N   |   ↺  🔊  T  |  EXIT
+    //   ‹  ⏸  ›   1 / N   |   ↺  🔊  T  |  ×
     //
     // The class names keep the legacy `demo-player*` namespace (so existing
     // tests and CSS overrides keep working), but the visual structure /
-    // affordances mirror the tutor-bar.
+    // affordances mirror the tutor-bar. The exit affordance is rendered as
+    // a simple "×" glyph (was "EXIT" prior to 2026-05-06) so it matches the
+    // close button on the pitch.html slide-deck nav bar.
     const player = el("div", { class: "demo-player", role: "toolbar", "aria-label": "Demo Mode controls" });
     player.innerHTML = `
-      <span class="demo-player__pill demo-player__pill--demo">DEMO</span>
       <button class="demo-player__btn" data-act="prev" title="Previous step (\u2190)" aria-label="Previous step">\u2039</button>
       <button class="demo-player__btn" data-act="toggle" title="Play / pause (Space)" aria-label="Play or pause">\u23F8</button>
       <button class="demo-player__btn" data-act="next" title="Next step (\u2192)" aria-label="Next step">\u203A</button>
@@ -177,7 +178,7 @@
       <button class="demo-player__btn" data-act="mute" title="Mute voice (M)" aria-label="Mute voice">\uD83D\uDD0A</button>
       <button class="demo-player__btn" data-act="transcript" title="Open assistant panel (T)" aria-label="Open assistant panel"><span class="material-symbols-outlined">chat</span></button>
       <span class="demo-player__divider"></span>
-      <button class="demo-player__btn demo-player__btn--exit" data-act="exit" title="Exit demo (Esc)" aria-label="Exit demo">EXIT</button>
+      <button class="demo-player__btn demo-player__btn--exit" data-act="exit" title="Exit demo (Esc)" aria-label="Exit demo">\u00D7</button>
     `;
     document.body.appendChild(player);
 

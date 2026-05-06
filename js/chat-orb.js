@@ -229,7 +229,7 @@
       '<div class="ai-msgs" id="chatMsgs" role="log" aria-live="polite"></div>',
       '<div class="ai-input-row">',
       '  <div class="ai-input-wrap">',
-      '    <input type="text" id="chatInput" class="ai-input" placeholder="' + escapeAttr(state.cfg.placeholder) + '" maxlength="600" autocomplete="off" />',
+      '    <textarea id="chatInput" class="ai-input" rows="1" placeholder="' + escapeAttr(state.cfg.placeholder) + '" maxlength="600"></textarea>',
       "  </div>",
       '  <button type="button" id="chatSend" class="ai-send" aria-label="Send message"><span class="material-symbols-outlined">arrow_upward</span></button>',
       "</div>"

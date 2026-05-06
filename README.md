@@ -6,7 +6,7 @@ Canonical implementations of UI surfaces shared across three sibling consumer da
 - [`dc-planner`](https://github.com/cwortman-amd/dc-planner)
 - [`cluster-manager`](https://github.com/cwortman-amd/cluster-manager)
 
-Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is a relative symlink to `~/workspace/webtools-ui/`; the original `git subtree` workflow is retained as a fallback for fresh clones / CI). See [`docs/PLAN.md`](docs/PLAN.md) for the full harmonization history (Phase 0 through Phase 9.8e P6) and rationale.
+Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is a relative symlink to `~/workspace/webtools-ui/`; the original `git subtree` workflow is retained as a fallback for fresh clones / CI). See [`docs/PLAN.md`](docs/PLAN.md) for the full harmonization history (Phase 0 through Phase 9.8e P9) and rationale.
 
 > **Note**: this repo was renamed from `shared-ui` to `webtools-ui` on 2026-05-04 (Phase 9.8c). Historical phase narratives in `docs/PLAN.md` retain the original "shared-ui" name for traceability; the canonical path going forward is `~/workspace/webtools-ui/`.
 
@@ -19,9 +19,9 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | Path | Purpose |
 | :--- | :--- |
 | `css/base.css` | Universal shell styles, font stack, `.hero` top bar, panels, tabs, form controls, focus rings, tables, mobile defaults (Phase 9.8a + 9.8d-mobile) |
-| `css/chat-orb.css` | Animated orb chrome + chat panel + LLM settings card |
+| `css/chat-orb.css` | Animated orb chrome + chat panel + LLM settings card (resizable panel + multiline composer updates in Phase 9.8e P9) |
 | `css/notes-panel.css` | Right-drawer / bottom-sheet speaker-notes panel for pitch decks (mobile orientation aware as of Phase 9.8e P6) |
-| `css/demo-mode.css` | Demo Mode tutor-bar + launcher chip + transcript + audience-picker chrome (Phase 9.7 promotion + Phase 9.8e P5 picker rules) |
+| `css/demo-mode.css` | Demo Mode tutor-bar + launcher chip + transcript + audience-picker chrome (Phase 9.7 promotion + Phase 9.8e P5 picker rules + P9 picker theming refresh) |
 | `css/material-symbols.css` | `@font-face` + `.material-symbols-outlined` defaults for the canonical icon font (Phase 9.8d-D.1) |
 | `css/fonts/material-symbols-outlined.woff2` | Self-hosted icon font (3.55 MB) |
 | `css/skins/*.css` | 7 canonical skins: `amd`, `amd-gold`, `amd-teal`, `glass-dark`, `matte-dark` (default), `minimal-monochrome`, `soft-neutral-light` |
@@ -34,8 +34,8 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/slash-router.js` | Pluggable slash-command dispatcher + cross-repo `coverAll()` no-op coverage |
 | `js/slash-catalog.js` | Catalog of every slash command shipped by any sibling consumer (drives `coverAll()`) |
 | `js/voice.js` | TTS + STT + wake-word + persona/phonetic registry; iOS/iPadOS-aware voice routing in `cloudTTS.mode="auto"` (Phase 9.8e P6) |
-| `js/demo-engine.js` | Demo Mode scene loop, action dispatcher, snapshot/restore |
-| `js/demo-ui.js` | Demo Mode tutor-bar player chrome, launcher chip, transcript popup |
+| `js/demo-engine.js` | Demo Mode scene loop, action dispatcher, snapshot/restore (P9 control actions resume cleanly from pause) |
+| `js/demo-ui.js` | Demo Mode tutor-bar player chrome, launcher chip, transcript popup (P9 compact close affordance) |
 | `js/demo-voice.js` | Web Speech TTS narration for Demo Mode |
 | `js/demo-audiences.js` | `window.DemoAudiences` — shared audience catalog (Standard / Advanced / Expert) (Phase 9.8e) |
 | `js/demo-picker.js` | `window.DemoPicker.open(...)` — cross-repo audience-picker modal (Phase 9.8e P5) |
@@ -118,4 +118,4 @@ bash scripts/build-vendor-manifest.sh
 
 ## Status
 
-The harmonization initiative is **complete** — Phases 0 through 9.8e P6 are landed. See [`docs/PLAN.md`](docs/PLAN.md) §"Initiative status" and the chronological status log for the full rollout. Live cross-repo gates: vendor manifest in all 3 consumers, `test_offline.sh §25` in `llm-benchmark`, `scripts/self-check.sh` in `cluster-manager`, `tests/self-check.sh` in `dc-planner`.
+The harmonization initiative is **complete** — Phases 0 through 9.8e P9 are landed. See [`docs/PLAN.md`](docs/PLAN.md) §"Initiative status" and the chronological status log for the full rollout. Live cross-repo gates: vendor manifest in all 3 consumers, `test_offline.sh §25` in `llm-benchmark`, `scripts/self-check.sh` in `cluster-manager`, `tests/self-check.sh` in `dc-planner`.

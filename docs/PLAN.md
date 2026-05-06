@@ -2,9 +2,9 @@
 title: "Cross-Repo Harmonization Plan"
 description: "Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE feature surfaces across `llm-benchmark`, `dc-planner`, and `cluster-manager` via the shared `webtools-ui/` library (mounted as `shared/` in each consumer). Historical phase narratives below preserve the original `shared-ui` and `gpu-planner` names that pre-date the 2026-05-03 (gpu-planner→dc-planner) and 2026-05-04 (shared-ui→webtools-ui) renames."
 date: 2026-05-02
-updated: 2026-05-05
+updated: 2026-05-06
 status: complete
-phase: 9.8e P6
+phase: 9.8e P9
 owner: "Curt Wortman"
 category: architecture
 tags:
@@ -1064,3 +1064,29 @@ across all 4 repos.
   (existing redundant hides like `#layoutToggleTop` are now belt-
   and-suspenders but harmless). **Commit**: webtools-ui `<hash>`
   (single `css/base.css` edit + this PLAN.md entry).
+
+- **Phase 9.8e P9 — demo/picker polish + chat composer ergonomics (2026-05-06)**:
+  follow-up hardening pass focused on interaction quality and visual
+  consistency in the canonical webtools-ui layer:
+  **(a) Mobile-menu specificity guard** — `css/base.css` now scopes
+  `.hero-mobile-menu` visibility under `.hero` in both desktop-hide and
+  mobile-show rules so later-loaded consumer `.hero-icon-btn` rules do
+  not accidentally re-show the hamburger on desktop due to equal
+  specificity + source-order ties.
+  **(b) Chat composer ergonomics** — `js/chat-orb.js` swaps the composer
+  input from single-line `<input>` to `<textarea rows="1">`; matching
+  `css/chat-orb.css` updates add multiline sizing (`max-height`),
+  resize affordances (desktop resizable panel + vertical text-area resize),
+  and remove browser-default focus chrome so the canonical styles remain
+  visually consistent across engines.
+  **(c) Demo control behavior** — `js/demo-engine.js` now treats
+  `next()`/`prev()`/`goTo()`/`restart()` while paused as explicit resume
+  intents: phase flips back to `playing` before re-entering
+  `runFromCurrent()`, eliminating the "step changed but playback stayed
+  paused" trap.
+  **(d) Demo chrome + picker refresh** — `js/demo-ui.js` replaces the
+  text `EXIT` pill with a compact `×` close affordance (aligned with the
+  pitch deck nav bar), while `css/demo-mode.css` + `js/demo-picker.js` +
+  `js/demo-audiences.js` tighten audience copy and apply accent-driven
+  picker tokens so the picker reads as first-class product chrome across
+  dark/light skins.
