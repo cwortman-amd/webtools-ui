@@ -420,3 +420,182 @@ html[data-skin="minimal-monochrome"] {
 /* ── Body class while demo is active ──────────────────────────────── */
 
 body.demo-active .demo-launcher { display: none; }
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Audience-picker modal (Phase 9.8e P5, 2026-05-05)
+ *
+ * Promoted from llm-benchmark/css/dashboard-tutor.css `.tutor-modal*`
+ * + `.tutor-audience-*` rules so all 3 sibling consumers render the
+ * same "Standard Onboarding / Advanced Usage / Expert Training" picker.
+ * Driven by webtools-ui/js/demo-picker.js + the canonical catalog at
+ * webtools-ui/js/demo-audiences.js.
+ *
+ * Tokens deliberately consume the canonical `--ui-*` skin variables
+ * (defined by every shared/css/skins/*.css) instead of llm-benchmark's
+ * private `--tutor-*` namespace, so the picker follows the active skin
+ * in any consumer without per-repo CSS variable shimming.
+ *
+ * z-index 110 sits ABOVE the chat orb panel (100) and the side-nav
+ * mobile drawer (110 ourselves — same band; the modal arrives second
+ * during a slash-orb flow, so it stacks on top), but BELOW the demo
+ * player chrome (3500) which only appears AFTER the picker is closed.
+ * ───────────────────────────────────────────────────────────────── */
+
+.demo-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.demo-picker-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.demo-picker {
+  background: var(--ui-panel, var(--ui-bg, #14181d));
+  color: var(--ui-text, #e4e8ed);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.22));
+  border-radius: 14px;
+  padding: 28px 32px;
+  width: min(520px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--ui-shadow-lg, 0 24px 64px rgba(0, 0, 0, 0.55));
+  transform: translateY(8px);
+  transition: transform 0.18s ease;
+  box-sizing: border-box;
+}
+.demo-picker-backdrop.is-open .demo-picker { transform: translateY(0); }
+
+.demo-picker-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ui-accent, #5c9cf5);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.demo-picker-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--ui-header, var(--ui-text, #e4e8ed));
+}
+.demo-picker-sub {
+  font-size: 0.85rem;
+  color: var(--ui-muted, #8b95a2);
+  margin: 0 0 20px;
+}
+
+.demo-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.demo-picker-option {
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.12));
+  color: var(--ui-text, #e4e8ed);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+html[data-theme="light"] .demo-picker-option {
+  background: rgba(0, 0, 0, 0.03);
+}
+.demo-picker-option:hover,
+.demo-picker-option:focus-visible {
+  border-color: var(--ui-accent, #5c9cf5);
+  background: var(--ui-accent-soft, rgba(92, 156, 245, 0.10));
+  outline: none;
+}
+.demo-picker-option[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.demo-picker-option[disabled]:hover {
+  border-color: var(--ui-line, rgba(255, 255, 255, 0.12));
+  background: rgba(255, 255, 255, 0.04);
+}
+.demo-picker-option-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.demo-picker-option-name {
+  font-weight: 700;
+  font-size: 0.96rem;
+}
+.demo-picker-option-time {
+  font-size: 0.75rem;
+  color: var(--ui-muted, #8b95a2);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.demo-picker-option-desc {
+  font-size: 0.82rem;
+  color: var(--ui-muted, #cfcfcf);
+  margin: 0;
+  line-height: 1.4;
+}
+.demo-picker-option-tag {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ui-muted, #8b95a2);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
+.demo-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+.demo-picker-btn-cancel {
+  background: transparent;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.22));
+  color: var(--ui-muted, #8b95a2);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+.demo-picker-btn-cancel:hover,
+.demo-picker-btn-cancel:focus-visible {
+  border-color: var(--ui-accent, #5c9cf5);
+  color: var(--ui-text, #e4e8ed);
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .demo-picker {
+    padding: 22px 20px;
+    border-radius: 12px;
+  }
+  .demo-picker-title { font-size: 1.05rem; }
+  .demo-picker-sub { font-size: 0.78rem; }
+  .demo-picker-option { padding: 12px 14px; }
+}

@@ -955,3 +955,61 @@ across all 4 repos.
   (head alignment + Stage 1b wire-in + values.json), dc-planner
   `<hash>` (head alignment + 2x wire-in + values.json).
 
+- **Phase 9.8e P5 — canonical audience-picker modal (2026-05-05)**:
+  followed up Phase 9.8e (the canonical audience *catalog*) by also
+  promoting the *picker modal DOM* itself into webtools-ui so all
+  three consumers render the identical "DEMO MODE / Pick your
+  audience" picker — same copy, same option cards (Standard
+  Onboarding ~5min / Advanced Usage ~10min / Expert Training ~15min),
+  same skin-aware styling, same Esc/backdrop/keyboard behavior.
+  Before P5 only `llm-benchmark` rendered the picker (its
+  `js/dashboard-tutor.js mountModal()` injected a private
+  `.tutor-modal*` DOM tree); cluster-manager's `/demo` (no-token)
+  showed a welcome banner with no audience choice, and dc-planner's
+  `DcDemo.openLauncher` was a stub that fell through to a default
+  track. Work shipped in 4 repos: **webtools-ui** added
+  `js/demo-picker.js` (UMD-ish module exposing
+  `window.DemoPicker.{open,close,isOpen}` with lazy-mounted
+  single-instance modal, reads catalog from `window.DemoAudiences`
+  with hard-coded fallback) and `.demo-picker*` rules in
+  `css/demo-mode.css` (uses canonical `--ui-*` tokens so it follows
+  the active skin); also promoted `shared/css/demo-mode.css` to the
+  canonical `pages/index.html` skeleton template (was per-repo
+  before — `dc-planner` had it in `PER_REPO_STYLESHEETS`,
+  `llm-benchmark`+`cluster-manager` didn't load it at all). **llm-
+  benchmark** retired its private `.tutor-modal*`/`.tutor-audience-*`
+  CSS (~3 KB) plus the inline `mountModal()` builder, dropped the
+  local `AUDIENCE_OPTIONS` constant, rewired
+  `openLauncher`/`closeLauncher` to delegate to `DemoPicker`, added
+  `<script src=demo-picker.js>` before `dashboard-tutor.js`.
+  **cluster-manager** wired the existing `/demo` (no-token) chat-orb
+  handler to call `DemoPicker.open()`; the `onSelect` callback maps
+  audience id → engine mode (`onboarding→manual`, `advanced→auto`,
+  `expert→training`) and forwards to `cmDemo.start({mode})`. **dc-
+  planner** added `DcDemo.openLauncher()` to the canonical
+  `shared/js/demo-ui.js` returned object — invoking
+  `DemoPicker.open({onSelect: id => startTrack(engine, ui, id)})` —
+  and loaded `demo-audiences.js` + `demo-picker.js` (deferred,
+  before `demo-ui.js`) so the orb's existing `chat-orb-mount.js
+  openDemo()` branch (which already called `DcDemo.openLauncher`
+  defensively) finally has a real implementation behind it.
+  Verified end-to-end across all three repos in a real browser
+  (clicked the Demo entry point, captured screenshots; canonical
+  picker rendered with the same 3 cards, same eyebrow/title,
+  same Cancel button; Esc closes cleanly, backdrop click closes,
+  selecting an option fires the consumer's `onSelect` and triggers
+  the right engine code path). The visible chrome harmonization is
+  now end-to-end (catalog → picker modal → audience-aware controller),
+  closing the "Phase 9.8e-2" item that was promised on commit. See
+  [`docs/DEMO.md` §3.1 adoption matrix](DEMO.md) for the per-repo
+  status. **Commits**: webtools-ui `<hash>` (`js/demo-picker.js` +
+  `css/demo-mode.css` `.demo-picker*` rules + skeleton template
+  promotion of `demo-mode.css` + `shared/js/demo-ui.js`
+  `DcDemo.openLauncher` + vendor-manifest regen + PLAN/DEMO updates),
+  llm-benchmark `<hash>` (drop inline modal/CSS, wire DemoPicker,
+  index.html script tag + demo-mode.css link, DEMO.md update),
+  cluster-manager `<hash>` (chat-orb-mount.js wiring + index.html
+  script tags + demo-mode.css link), dc-planner `<hash>` (index.html
+  script tags + values.json move demo-mode.css from PER_REPO to
+  canonical slot).
+

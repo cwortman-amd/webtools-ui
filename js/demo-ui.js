@@ -123,6 +123,25 @@
     window.DcDemo = {
       start(track) { return startTrack(engine, ui, track || DEFAULT_TRACK); },
       stop() { engine.exit({ restore: true }); },
+      /* Phase 9.8e P5 (2026-05-05): cross-repo audience-picker entry
+       * point. Calls window.DemoPicker.open() with onSelect wired to
+       * DcDemo.start(). Falls back to starting the default track if
+       * the canonical picker module didn't load (graceful degradation
+       * — same shape llm-benchmark and cluster-manager use). */
+      openLauncher() {
+        if (window.DemoPicker && typeof window.DemoPicker.open === "function") {
+          window.DemoPicker.open({
+            onSelect(audienceId) {
+              startTrack(engine, ui, audienceId);
+            }
+          });
+          return;
+        }
+        if (window.console && console.warn) {
+          console.warn("[demo-ui] DemoPicker unavailable; starting default track.");
+        }
+        startTrack(engine, ui, DEFAULT_TRACK);
+      },
       engine,
       voice,
       tracks: REGISTERED_TRACKS.slice(),
