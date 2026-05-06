@@ -4,7 +4,7 @@ description: "Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE 
 date: 2026-05-02
 updated: 2026-05-05
 status: complete
-phase: 9.8e P4
+phase: 9.8e P6
 owner: "Curt Wortman"
 category: architecture
 tags:
@@ -1012,4 +1012,26 @@ across all 4 repos.
   script tags + demo-mode.css link), dc-planner `<hash>` (index.html
   script tags + values.json move demo-mode.css from PER_REPO to
   canonical slot).
+
+- **Phase 9.8e P6 — mobile notes + voice routing + slash cleanup (2026-05-05)**:
+  follow-up stabilization after P5 focused on three cross-cutting
+  quality items in the canonical webtools-ui layer:
+  **(a) Mobile notes ergonomics** — `css/notes-panel.css` adds
+  orientation-aware mobile layouts under `max-width: 900px`: landscape
+  uses a narrower right drawer reserve, portrait switches the notes UI
+  to a bottom-sheet style panel so the slide viewport keeps horizontal
+  room and the panel remains reachable above mobile browser chrome.
+  **(b) iOS/iPadOS voice quality in auto mode** — `js/voice.js` now
+  detects iOS-like devices (including iPadOS user agents that present
+  as Macintosh with touch points), prioritizes Siri/Samantha voices in
+  local TTS voice resolution, and routes `cloudTTS.mode="auto"` to try
+  local-first on iOS before cloud fallback (reduces perceived latency
+  and keeps high-quality on-device synthesis as the preferred path).
+  **(c) Slash catalog pruning** — `js/slash-catalog.js` removes
+  `/demo-shared` and `/docs` from the canonical list so only currently
+  supported cross-repo commands are advertised; this avoids help/menu
+  drift from stale migration-era entries. Docs updated alongside:
+  `docs/INDEX_SKELETON.md` records `demo-mode.css` canonical promotion,
+  and `docs/templates/DEMO.skeleton.md` now documents the canonical
+  `DemoPicker` contract and cross-repo adoption matrix.
 

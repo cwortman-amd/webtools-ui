@@ -115,7 +115,11 @@ function.
 ### 7.1) Voice selection · [CANONICAL]
 
 Preferred-voice fallback chain (e.g. Microsoft Aria → Google US
-English → Samantha → first available).
+English → Samantha → first available). Include platform nuance:
+on iOS/iPadOS, local synthesis should prioritize Siri-class system
+voices first, and `cloudTTS.mode="auto"` should attempt local TTS
+before cloud fallback so mobile narration stays low-latency when a
+high-quality on-device voice is available.
 
 ### 7.2) Phonetic overrides · [CONSUMER-SPECIFIC]
 

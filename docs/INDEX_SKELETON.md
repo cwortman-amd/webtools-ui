@@ -28,10 +28,21 @@ This doc describes the template + per-consumer values + strict-diff CI guard tha
 {{?PER_REPO_STYLESHEETS}}
   <link rel="stylesheet" id="skinStylesheet" href="../shared/css/skins/matte-dark.css" />
   <link rel="stylesheet" href="../shared/css/chat-orb.css" />
+  <link rel="stylesheet" href="../shared/css/demo-mode.css" />
 {{?MANIFEST_LINK}}
 {{?THEME_COLOR_META}}
   <!-- end:skeleton -->
 ```
+
+> **Phase 9.8e P5 (2026-05-05) — `demo-mode.css` promoted to canonical.**
+> Originally per-repo: `dc-planner` carried it in `PER_REPO_STYLESHEETS`,
+> `llm-benchmark` + `cluster-manager` didn't load it at all. With the
+> canonical audience-picker (`shared/js/demo-picker.js` exposing
+> `window.DemoPicker`) now serving all three consumers, the
+> `.demo-picker*` rules in `shared/css/demo-mode.css` are mandatory
+> head-loaded chrome — promoted into the template alongside
+> `chat-orb.css`. See [`DEMO.md` §3.1](../../llm-benchmark/docs/DEMO.md)
+> and PLAN.md Phase 9.8e P5 for the full rollout.
 
 ### Placeholder grammar
 
@@ -70,16 +81,21 @@ Each consumer ships `pages/index.skeleton.values.json`:
 }
 ```
 
-### Adoption matrix (Phase 9.8e P4)
+### Adoption matrix (Phase 9.8e P4 + P5)
 
 | placeholder | `llm-benchmark` | `cluster-manager` | `dc-planner` |
 | --- | --- | --- | --- |
 | `TITLE` | "LLM Benchmark" | "Cluster Manager" | "DC Planner" |
 | `ICON_LINK` | `/favicon.svg` (file) | inline SVG data-URI (cluster icon) | inline SVG data-URI (DC monogram) |
 | `STRUCTURED_DATA` | — | `application/ld+json` schema.org `WebPage` | — |
-| `PER_REPO_STYLESHEETS` | `dashboard-tutor.css` | `cm-overrides.css` + `demo.css` | `dc-planner.css` + `demo-mode.css` |
+| `PER_REPO_STYLESHEETS` | `dashboard-tutor.css` | `cm-overrides.css` + `demo.css` | `dc-planner.css` |
 | `MANIFEST_LINK` | — | — | `../data/manifest.json` |
 | `THEME_COLOR_META` | — | — | `#111315` |
+
+> **P5 changelog**: `dc-planner`'s `PER_REPO_STYLESHEETS` value lost
+> `shared/css/demo-mode.css` — that asset now ships from the canonical
+> template, so all three consumers load it from the same head position
+> (right after `chat-orb.css`).
 
 ## 3. The check
 

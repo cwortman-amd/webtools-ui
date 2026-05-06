@@ -51,12 +51,7 @@
                     native: ["llm-benchmark", "gpu-planner", "cluster-manager"] },
     "/demo":      { description: "Start the narrated dashboard walkthrough",
                     native: ["llm-benchmark", "gpu-planner", "cluster-manager"] },
-    "/demo-shared": { description: "Run a canonical demo track via shared/js/demo-engine.js (e.g. `/demo-shared presales`)",
-                      native: ["llm-benchmark", "dc-planner", "cluster-manager"],
-                      placeholder: "Canonical demo engine is wired in this app via `js/demo-bridge.js` (harmonization Phase 5.3g). If `/demo-shared` is missing, the bridge module didn't load — check the script order in pages/index.html." },
     "/dashboard": { description: "Return to the main dashboard",
-                    native: ["llm-benchmark", "gpu-planner", "cluster-manager"] },
-    "/docs":      { description: "Open a doc by name (e.g. `/docs SWEEP`)",
                     native: ["llm-benchmark", "gpu-planner", "cluster-manager"] },
 
     // ── Cross-repo agent operations (gpu-planner + cluster-manager) ─

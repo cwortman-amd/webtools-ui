@@ -165,6 +165,13 @@
   function _userAgent() {
     return (global.navigator && global.navigator.userAgent || "").toLowerCase();
   }
+  function _isIOSLike() {
+    var ua = _userAgent();
+    if (/iphone|ipad|ipod/.test(ua)) return true;
+    // iPadOS can present as Macintosh while still exposing touch points.
+    var nav = global.navigator || {};
+    return /macintosh/.test(ua) && !!nav.maxTouchPoints && nav.maxTouchPoints > 1;
+  }
   function _isWindows() { return /windows/.test(_userAgent()); }
   function _isLinux() { return /linux/.test(_userAgent()) && !/android/.test(_userAgent()); }
   function _safeGetVoices() {
@@ -334,7 +341,7 @@
 
   function _platformVoiceHints() {
     var ua = _userAgent();
-    var iOS = /iphone|ipad|ipod/.test(ua);
+    var iOS = _isIOSLike();
     var android = /android/.test(ua);
     if (iOS) {
       return ["Siri", "Samantha", "Ava", "Karen", "Moira", "Daniel", "Alex"];
@@ -396,6 +403,14 @@
   // return the first SpeechSynthesisVoice matched on the user's
   // machine, or null.
   function _pickPreferredVoice(persona) {
+    // On iOS/iPadOS, prioritize Siri-class system voices for the
+    // highest quality on-device synthesis experience.
+    if (_isIOSLike()) {
+      var siri = _resolveVoice("Siri");
+      if (siri) return siri;
+      var samantha = _resolveVoice("Samantha");
+      if (samantha) return samantha;
+    }
     var preferred = [];
     if (persona && Array.isArray(persona.preferred_voices)) {
       preferred = preferred.concat(persona.preferred_voices);
@@ -679,6 +694,11 @@
     var persona = getPersona();
     var mode = (_config.cloudTTS && _config.cloudTTS.mode) || "local";
     if (mode === "cloud" || mode === "auto") {
+      if (mode === "auto" && _isIOSLike()) {
+        return _sayLocal(spoken, opts, persona).then(function (r0) {
+          return (r0 && r0.ok) ? r0 : _speakCloud(spoken, persona, opts);
+        });
+      }
       return _speakCloud(spoken, persona, opts).then(function (r) {
         return (r && r.ok) ? r : _sayLocal(spoken, opts, persona);
       });

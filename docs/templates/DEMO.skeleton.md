@@ -131,8 +131,46 @@ truth for styling: `shared/css/notes-panel.css` (Phase 1.2).
 
 ### 6.4) Audience picker / launcher modal · [CANONICAL]
 
-Modal that lists the consumer's tracks (one per audience) with
-estimated minutes and a single launch button.
+Cross-repo audience-picker modal — `shared/js/demo-picker.js`
+(Phase 9.8e P5, 2026-05-05) exposes `window.DemoPicker.{open,close,
+isOpen}`. The modal lists the canonical audiences from
+`window.DemoAudiences` (the catalog at `shared/js/demo-audiences.js`,
+Phase 9.8e) with estimated minutes and a single launch button per
+audience. CSS selectors are `.demo-picker*` rules in
+`shared/css/demo-mode.css` (canonical head-loaded asset since P5);
+all colors/borders consume `--ui-*` skin tokens so the picker
+follows the active skin in any consumer without per-repo CSS shims.
+
+Wiring contract — each consumer imports the picker module before
+its own demo controller, then invokes:
+
+```js
+window.DemoPicker.open({
+  // Optional overrides; omitted args fall back to window.DemoAudiences.
+  audiences: window.DemoAudiences,
+  onSelect: function (audienceId) {
+    // Consumer-specific: start the right tour for this audience.
+    // llm-benchmark:    start(audienceId)
+    // cluster-manager:  cmDemo.start({ mode: { onboarding:"manual",
+    //                                  advanced:"auto",
+    //                                  expert:"training" }[audienceId] })
+    // dc-planner:       startTrack(engine, ui, audienceId)
+  },
+  onCancel: function () { /* optional cleanup */ }
+});
+```
+
+Closes on Esc, backdrop click, the cancel button, or after
+`onSelect` fires (close runs *before* `onSelect` so the consumer can
+reveal new chrome without the picker on top). Focuses the first
+non-disabled option on open and restores focus on close. Adoption
+matrix for consumer DEMO.md §3.1 (each consumer mirrors this):
+
+| repo | catalog wired | picker rendered | onSelect wires to |
+| --- | :---: | :---: | --- |
+| `llm-benchmark` | ✓ | ✓ | DashboardTutor `start(audienceId)` |
+| `cluster-manager` | ✓ | ✓ | `cmDemo.start({mode})` (audience→mode map) |
+| `dc-planner` | ✓ | ✓ | `DcDemo.start(audienceId)` → `data/demo-tracks/{id}.json` |
 
 ### 6.5) Page scroll during narration · [CANONICAL]
 

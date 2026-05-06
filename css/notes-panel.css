@@ -198,3 +198,46 @@ body.notes-open {
 @media print {
   .notes-panel { display: none !important; }
 }
+
+/* ── Mobile notes layout ──────────────────────────────────────────────
+ * Portrait: bottom sheet under the slide viewport.
+ * Landscape: right-side drawer (narrower than desktop).
+ */
+@media (max-width: 900px) and (orientation: landscape) {
+  body.notes-open {
+    --notes-reserve: 320px;
+    padding-right: var(--notes-reserve);
+  }
+
+  .notes-panel {
+    top: 8px;
+    right: 8px;
+    bottom: 64px;
+    width: 304px;
+    max-width: calc(100vw - 16px);
+  }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  body.notes-open {
+    --notes-reserve: 0px;
+    padding-right: 0;
+    padding-bottom: calc(42vh + 20px);
+  }
+
+  .notes-panel {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: 64px;
+    width: auto;
+    max-width: none;
+    height: 42vh;
+    min-height: 180px;
+    transform: translateY(110%);
+  }
+
+  .notes-panel.open {
+    transform: translateY(0);
+  }
+}
