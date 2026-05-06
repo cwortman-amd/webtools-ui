@@ -166,7 +166,7 @@
     // Replay the planner state into live DOM so the user sees their
     // own work, not the demo's residue.
     try {
-      const raw = snap.keys["gpu-planner-state"];
+      const raw = snap.keys["dc-planner-state"];
       if (raw && typeof window.__dcPlannerSetState === "function") {
         window.__dcPlannerSetState(JSON.parse(raw));
       }

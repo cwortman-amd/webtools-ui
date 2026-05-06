@@ -29,7 +29,8 @@ GENERATED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Files that belong in the manifest. Pattern matches shared-ui's
 # subtree-mounted layout in each consumer (under their `shared/` dir).
 PATHS=$(find . -type f \
-   \( -name '*.js' -o -name '*.css' -o -name '*.json' -o -name '*.md' \) \
+   \( -name '*.js' -o -name '*.css' -o -name '*.json' -o -name '*.md' \
+      -o -name '*.woff2' -o -name '*.html' \) \
    -not -path './.git/*' \
    -not -path './node_modules/*' \
    -not -path "./$OUT" \
