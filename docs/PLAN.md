@@ -1035,3 +1035,32 @@ across all 4 repos.
   and `docs/templates/DEMO.skeleton.md` now documents the canonical
   `DemoPicker` contract and cross-repo adoption matrix.
 
+- **Phase 9.8e P8 — minimal mobile top bar (2026-05-06)**: at viewport
+  ≤ 640 px the `.hero` top bar now renders only two elements — the
+  hamburger (`.hero-mobile-menu`, canonical from P2) and the brand
+  (`.hero-title` icon + name, canonical from P2.1). The `.hero-tabs`
+  strip and the `.hero-toolbar` (theme/skin/layout/demo toggles + the
+  user-mode picker) are hidden on mobile because:
+  - The hamburger opens the side-nav drawer, which already mirrors
+    every entry in `.hero-tabs` 1-for-1 across all three consumers
+    (llm-benchmark `.sidebar-nav`, cluster-manager `.sidebar-nav`,
+    dc-planner `.side-nav-tabs`). Showing both was a pure
+    duplication and forced a horizontal scroll strip on phones.
+  - The toolbar utilities all have side-nav equivalents (theme/skin
+    inside `sidebar-bottom` settings, layout toggle is hidden on
+    mobile anyway since the drawer IS the layout, the demo launcher
+    is present in BOTH the chat-orb header AND in `sidebar-bottom`).
+    Nothing becomes unreachable.
+  Implementation is a single rule inside `webtools-ui/css/base.css`'s
+  existing `@media (max-width: 640px)` block:
+  `.hero-tabs, .hero-toolbar { display: none !important; }`. The
+  generic `.tab-btn` thumb-size rule (40 px min-height, 0.9 rem font)
+  is preserved separately so in-page tab strips outside the hero
+  (e.g. `pages/profile.html` sub-tabs, `pages/view.html` toggle
+  pills) still get mobile-friendly sizing. **Result**: the same
+  minimal "hamburger + tool icon + tool name" mobile top bar across
+  llm-benchmark, cluster-manager, and dc-planner — one rule, three
+  consumers. Per-repo HTML / inline `<style>` blocks unchanged
+  (existing redundant hides like `#layoutToggleTop` are now belt-
+  and-suspenders but harmless). **Commit**: webtools-ui `<hash>`
+  (single `css/base.css` edit + this PLAN.md entry).

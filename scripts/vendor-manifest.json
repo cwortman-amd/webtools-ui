@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-06T00:42:10Z",
-  "head": "fe94be614700b06e9e5f51c361e89d1f62699a05",
+  "generated_at": "2026-05-06T09:05:58Z",
+  "head": "fe2900a5a38c819ad3b96ba774649aeac2ebccc4",
   "files": [
     { "path": "README.md", "sha256": "ecdd5000574125af0a6ea1380c37babd61346bf756ab21ad7f18662083d8416b", "size": 7107 },
-    { "path": "css/base.css", "sha256": "507cb64d27846d63894923d6ce2eb5639b916e5c2af928e4ee4a53e2c766cf5b", "size": 25280 },
+    { "path": "css/base.css", "sha256": "cfc87a13c785d95cef47bb6a8bf5fb032a62ed9431f7d07f2b05c636b3f9d198", "size": 26255 },
     { "path": "css/chat-orb.css", "sha256": "e4ea274cc90c4d58ccb2aa23f1113cc96f56dd95e1f8a591ba17a27178695001", "size": 25934 },
     { "path": "css/demo-mode.css", "sha256": "0e6a7e3dfc2b5c23f80981df8d12ced16f0e5f817d24fa93c086e6b7ea7cd942", "size": 17441 },
     { "path": "css/fonts/material-symbols-outlined.woff2", "sha256": "b9a28e5c5328940ee287c3d7f6b626e32a9afa92f86b055295cdf6fd5d1c004b", "size": 3555400 },
@@ -18,7 +18,7 @@
     { "path": "css/skins/soft-neutral-light.css", "sha256": "be71316c4aca950a57fd32c98c0ea4c2d458b2867e6759f8f139267dcb272d06", "size": 4828 },
     { "path": "docs/CSS_HARMONIZATION.md", "sha256": "3e0ca1ae56687693d4a7302a0f48e72169a31e3628e562e1c548e825c9271efb", "size": 22072 },
     { "path": "docs/INDEX_SKELETON.md", "sha256": "18a7f11efde553a91253958d77a9efc99d9a9f78a84b080ea68b6c377fbaa8af", "size": 10226 },
-    { "path": "docs/PLAN.md", "sha256": "154cba3970a8f6e74ebf1e4e4d45794374d1097e67761949ab715d7f70960fb2", "size": 62800 },
+    { "path": "docs/PLAN.md", "sha256": "7946d9315db9e5a6c1ffecc703f054654aacafb1ee5523aeb6c05965d0feebd1", "size": 64654 },
     { "path": "docs/templates/AGENT.skeleton.md", "sha256": "d55a66563b8cf263a1ea4f9417e15ed698dd2e7808f56ba4c40b1e1966cdfe94", "size": 5599 },
     { "path": "docs/templates/CHAT.skeleton.md", "sha256": "3983de8fa69c01f14a90c99ae7d1a1cbdc99b36b15f266bd9f844e24c5bd1ba7", "size": 5844 },
     { "path": "docs/templates/DEMO.skeleton.md", "sha256": "19c9021a91e79d10e27a26dde43283c892dcb392b05b0c954735b1c8201ec22b", "size": 9223 },
