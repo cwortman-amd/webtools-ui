@@ -15,7 +15,7 @@
 
   /* ── Skin / Theme ── */
   function setSkin(skin) {
-    if (!SKIN_LABELS[skin]) skin = "matte-dark";
+    if (!SKIN_LABELS[skin]) skin = "amd-gold";
     document.documentElement.setAttribute("data-skin", skin);
     document.body.setAttribute("data-skin", skin);
     var link = document.getElementById("skinStylesheet");
@@ -160,7 +160,7 @@
 
     setLayout(savedLayout);
     setCollapsed(savedCollapsed);
-    setSkin(localStorage.getItem(PREFIX + "-skin") || "matte-dark");
+    setSkin(localStorage.getItem(PREFIX + "-skin") || "amd-gold");
     setTheme(localStorage.getItem(PREFIX + "-theme") || "dark");
     setUserMode(localStorage.getItem(PREFIX + "-user-mode") || "standard");
 

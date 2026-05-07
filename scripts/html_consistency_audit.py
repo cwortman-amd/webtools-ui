@@ -6,7 +6,7 @@ webtools-ui dashboard ecosystem (cluster-manager, dc-planner, llm-benchmark).
 Checks performed:
   1. Skeleton guard       — runs check_index_skeleton.py for each repo
   2. Body class           — verifies `class="nav-side"` is set on <body>
-  3. Skin default         — verifies `data-skin="matte-dark"` on <body>/<html>
+  3. Skin default         — verifies `data-skin="amd-gold"` on <body>/<html>
   4. Theme default        — verifies `data-theme="dark"` on <body>/<html>
   5. Viewport meta        — verifies viewport-fit=cover is present
   6. Font preload         — verifies material-symbols-outlined.woff2 preload
@@ -129,10 +129,10 @@ def check_body_attrs(repo_name: str, index_html: str) -> None:
     else:
         emit("ERROR", repo_name, '<body> is missing class="nav-side" — sidebar will not be the default on first paint')
 
-    if 'data-skin="matte-dark"' in body_attrs:
-        ok(repo_name, '<body> has data-skin="matte-dark"')
+    if 'data-skin="amd-gold"' in body_attrs:
+        ok(repo_name, '<body> has data-skin="amd-gold"')
     else:
-        emit("WARN", repo_name, '<body> is missing data-skin="matte-dark"')
+        emit("WARN", repo_name, '<body> is missing data-skin="amd-gold"')
 
     if 'data-theme="dark"' in body_attrs:
         ok(repo_name, '<body> has data-theme="dark"')
@@ -276,10 +276,10 @@ def check_present_html(repo_name: str, repo_path: Path) -> None:
 
     check_skin_id(repo_name, html, "present.html")
 
-    if "matte-dark.css" not in html:
-        emit("WARN", repo_name, "present.html: default skin matte-dark.css not linked")
+    if "amd-gold.css" not in html:
+        emit("WARN", repo_name, "present.html: default skin amd-gold.css not linked")
     else:
-        ok(repo_name, "present.html: matte-dark skin linked")
+        ok(repo_name, "present.html: amd-gold skin linked")
 
     # Check for viewport-fit=cover
     check_viewport(repo_name, html, "present.html")
