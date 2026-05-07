@@ -1,0 +1,383 @@
+/* Canonical in-body shell bootstrap prelude (cross-repo aligned):
+   root nav-width vars + html/body viewport sizing. Repo-specific
+   shell/layout rules continue below this block. */
+:root {
+  --side-nav-width: 180px;
+  --side-nav-collapsed-width: 46px;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* ── Top-bar mode (default) ── */
+.shell-body {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.2s ease, padding-top 0.2s ease;
+}
+
+.tab-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tab-panel.hidden {
+  display: none;
+}
+
+.tab-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  min-height: 0;
+}
+
+/* ── Sidebar (hidden in top-bar mode) ── */
+.sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--side-nav-width);
+  background: var(--skin-hero-bg, var(--ui-bg));
+  border-right: 1px solid var(--ui-line);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 101;
+  flex-direction: column;
+  transition: width 0.2s ease;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  height: 40px;
+  border-bottom: 1px solid var(--ui-line);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-brand h1 {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  color: var(--ui-header);
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 6px;
+  gap: 1px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ui-muted);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ui-text);
+}
+
+body[data-theme="light"] .nav-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn.active {
+  background: var(--skin-tab-active-bg, rgba(255, 255, 255, 0.1));
+  color: var(--skin-tab-active-color, var(--ui-header));
+  font-weight: 600;
+}
+
+.nav-btn .material-symbols-outlined {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.util-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ui-muted);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.util-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ui-text);
+}
+
+body[data-theme="light"] .util-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.util-btn .material-symbols-outlined {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.util-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Inline skin list in sidebar (expanded mode only) */
+.side-nav-skin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 0 2px 28px;
+  margin-top: 2px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.side-nav-skin-list[hidden] {
+  display: none;
+}
+
+.side-nav-skin-option {
+  all: unset;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  color: var(--ui-muted);
+  cursor: pointer;
+  transition: color 0.12s;
+  white-space: nowrap;
+}
+
+.side-nav-skin-option:hover {
+  color: var(--ui-text);
+}
+
+.side-nav-skin-option.active {
+  color: var(--ui-accent);
+  font-weight: 600;
+}
+
+body.nav-collapsed .side-nav-skin-list,
+body.nav-collapsed .side-nav-mode-list {
+  display: none !important;
+}
+
+.side-nav-mode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 0 2px 28px;
+  margin-top: 2px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.side-nav-mode-list[hidden] {
+  display: none;
+}
+
+.side-nav-mode-option {
+  all: unset;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  color: var(--ui-muted);
+  cursor: pointer;
+  transition: color 0.12s;
+  white-space: nowrap;
+}
+
+.side-nav-mode-option:hover {
+  color: var(--ui-text);
+}
+
+.side-nav-mode-option.active {
+  color: var(--ui-accent);
+  font-weight: 600;
+}
+
+.hero-skin-menu .hero-skin-menu-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+  padding: 4px 10px 2px;
+  letter-spacing: 0.05em;
+}
+
+/* ── Side-bar mode ── */
+body.nav-side .hero {
+  display: none;
+}
+
+body.nav-side .sidebar {
+  display: flex;
+}
+
+body.nav-side .shell-body {
+  padding-top: 0;
+  left: var(--side-nav-width);
+}
+
+/* ── Collapsed side-bar ── */
+body.nav-side.nav-collapsed .sidebar {
+  width: var(--side-nav-collapsed-width);
+}
+
+body.nav-side.nav-collapsed .shell-body {
+  left: var(--side-nav-collapsed-width);
+}
+
+body.nav-side.nav-collapsed .sidebar-brand h1,
+body.nav-side.nav-collapsed .nav-label,
+body.nav-side.nav-collapsed .util-label {
+  display: none;
+}
+
+body.nav-side.nav-collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 12px 4px;
+}
+
+body.nav-side.nav-collapsed .nav-btn,
+body.nav-side.nav-collapsed .util-btn {
+  justify-content: center;
+  padding: 8px 0;
+}
+
+body.nav-side.nav-collapsed .nav-btn {
+  gap: 0;
+}
+
+body.nav-side.nav-collapsed .util-btn {
+  gap: 0;
+}
+
+body.nav-side.nav-collapsed .sidebar-nav {
+  padding: 8px 4px;
+}
+
+body.nav-side.nav-collapsed .sidebar-bottom {
+  padding: 6px 4px;
+}
+
+/* ── User mode visibility ── */
+body[data-user-mode="standard"] .mode-advanced,
+body[data-user-mode="standard"] .mode-expert {
+  display: none !important;
+}
+
+body[data-user-mode="advanced"] .mode-expert {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  /* Keep the top-bar header visible regardless of layout mode. */
+  body.nav-side .hero {
+    display: flex;
+  }
+
+  /* Hide the desktop sidebar by default; the drawer will slide it
+   * back in with the .nav-mobile-open class below. The shell-body
+   * area always uses full viewport width on mobile. */
+  body.nav-side .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(78vw, 280px);
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    z-index: 110;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.35);
+  }
+
+  /* All layouts on mobile: the iframe area starts BELOW the .hero
+   * AND below the iPhone notch (the .hero now extends into the
+   * safe-area top inset, so shell-body needs to match). */
+  .shell-body {
+    padding-top: calc(40px + env(safe-area-inset-top)) !important;
+  }
+
+  body.nav-side .shell-body {
+    left: 0 !important;
+  }
+
+  body.nav-mobile-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* Sidebar nav items on mobile: bump padding for thumb tappability. */
+  body.nav-side .nav-btn,
+  body.nav-side .util-btn {
+    padding: 12px 14px;
+    font-size: 0.92rem;
+  }
+
+  body.nav-side .nav-btn .material-symbols-outlined,
+  body.nav-side .util-btn .material-symbols-outlined {
+    font-size: 22px;
+  }
+
+  /* The sidebar-collapse toggle and layout toggle don't make sense
+   * on mobile (the drawer is the layout). Hide them. */
+  #sidebarCollapseBtn,
+  #layoutToggleTop,
+  #layoutToggleSide {
+    display: none !important;
+  }
+}

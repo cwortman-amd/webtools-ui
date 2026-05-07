@@ -1090,3 +1090,18 @@ across all 4 repos.
   `js/demo-audiences.js` tighten audience copy and apply accent-driven
   picker tokens so the picker reads as first-class product chrome across
   dark/light skins.
+
+- **Phase 9.8f — Mobile and Modal UI Harmonization (2026-05-06)**:
+  Standardized the layout and visual consistency of modals and mobile UI
+  elements across all three consumer repositories.
+  **(a) Mobile Layout Harmonization** — Replaced `dc-planner`'s custom
+  `.side-nav` classes with the canonical `.sidebar` and `.shell-body`
+  primitives. Added `env(safe-area-inset)` rules to `shared/css/base.css`
+  and enforced a 44x44px minimum touch target for iPhone compatibility.
+  **(b) Modal Standardization** — Consolidated fragmented inline `.modal`
+  styles from `llm-benchmark/pages/plan.html`, `llm-benchmark/pages/view.html`,
+  and `cluster-manager/pages/status.html`. Extracted a single canonical
+  modal structure (`.modal-overlay`, `.modal`, `.modal-header`, `.modal-body`,
+  `.modal-footer`) into `shared/css/base.css` with consistent widths, shadows,
+  fonts, and backdrop filters. Button fills inside modals now reliably
+  inherit from the global button definitions.

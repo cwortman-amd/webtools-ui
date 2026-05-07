@@ -601,3 +601,98 @@ body.nav-mobile-open .nav-backdrop {
     font-size: 0.95rem;
   }
 }
+
+/* ── Modals ───────────────────────────────────── */
+
+.modal-overlay, .modal-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.modal-overlay.open, .modal-overlay.show, .modal-backdrop:not([hidden]) {
+  display: flex !important;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal, .modal-content {
+  background: var(--skin-panel-bg, var(--ui-panel));
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  width: min(540px, 95vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header, .modal-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--ui-line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2, .modal-head h2, .modal-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ui-header);
+}
+
+.modal-close {
+  all: unset;
+  cursor: pointer;
+  color: var(--ui-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ui-text);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-footer, .modal-actions {
+  padding: 14px 20px;
+  border-top: 1px solid var(--ui-line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: color-mix(in srgb, var(--ui-panel) 80%, transparent);
+}
+
+.modal-footer button, .modal-actions button {
+  min-width: 80px;
+}
