@@ -34,6 +34,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab-panel.hidden {
@@ -73,6 +75,15 @@ body {
   border-bottom: 1px solid var(--ui-line);
   overflow: hidden;
   white-space: nowrap;
+  text-decoration: none;
+}
+
+a.sidebar-brand:hover h1 {
+  text-decoration: underline;
+}
+
+.sidebar-brand .material-symbols-outlined {
+  color: var(--ui-accent);
 }
 
 .sidebar-brand h1 {
@@ -91,6 +102,7 @@ body {
   gap: 1px;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav-btn {
