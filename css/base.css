@@ -77,9 +77,10 @@ body {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
   gap: 10px; padding: 0 10px; height: 40px;
-  background: var(--skin-hero-bg, var(--ui-bg));
+  background: color-mix(in srgb, var(--skin-hero-bg, var(--ui-bg)) 82%, transparent);
   border-bottom: 1px solid var(--ui-line);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.15);
 }
 
 .hero-main {
@@ -106,16 +107,37 @@ h1 { margin: 0; font-size: 0.95rem; line-height: 1; letter-spacing: 0.3px; color
 .icon-bold   { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
 
 .hero-icon-btn {
-  all: unset;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 0; cursor: pointer;
-  color: var(--ui-muted); transition: opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  position: relative;
+}
+
+.hero-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.hero-icon-btn:active {
+  transform: translateY(0);
 }
 .hero-toolbar .hero-icon-btn {
   background: transparent !important; border: none !important; box-shadow: none !important;
 }
 .hero-icon-btn .material-symbols-outlined { font-size: 18px; }
-.hero-icon-btn:hover { opacity: 0.85; }
 .hero-icon-btn:disabled { opacity: 0.3; cursor: default; }
 .hero-icon-btn:disabled:hover { opacity: 0.3; }
 
@@ -198,17 +220,34 @@ tbody tr:hover td { background: color-mix(in srgb, var(--ui-accent) 8%, transpar
 
 .tabs { display: flex; gap: 8px; margin: 0 0 14px 0; }
 .tab-btn {
-  background: var(--skin-tab-bg, #193157); border: var(--skin-tab-border, 1px solid #365b91);
-  color: var(--skin-tab-color, #d8e8ff); border-radius: 999px;
-  padding: 8px 14px; font-weight: 700; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--ui-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.tab-btn:hover:not(.active) { color: var(--ui-text); border-color: var(--ui-muted); }
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--ui-text);
+  transform: translateY(-1px);
+}
+
 .tab-btn.active {
-  background: var(--skin-tab-active-bg, linear-gradient(180deg, #2f7de1 0%, #2667bc 100%));
-  border-color: var(--skin-tab-active-border, #4b8fe6);
-  color: var(--skin-tab-active-color, #ffffff);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--ui-accent);
+  color: var(--ui-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .tab-icon { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
 
@@ -219,22 +258,65 @@ tbody tr:hover td { background: color-mix(in srgb, var(--ui-accent) 8%, transpar
 /* ── Buttons ──────────────────────────────────── */
 
 button {
-  background: var(--skin-btn-bg, linear-gradient(180deg, #2f7de1 0%, #2667bc 100%));
-  color: var(--skin-btn-color, white); border: var(--skin-btn-border, none);
-  border-radius: 8px; padding: 9px 12px; font-weight: 700;
-  cursor: pointer; transition: opacity 0.15s;
+  background: var(--skin-btn-bg, rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  color: var(--skin-btn-color, white);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
-button:hover { opacity: 0.88; }
+
+button:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  opacity: 1 !important;
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 button.secondary {
-  background: var(--skin-btn2-bg, #1f3559);
-  border: var(--skin-btn2-border, 1px solid #365b91);
-  color: var(--skin-btn2-color, #d9e8ff);
+  background: var(--skin-btn2-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--skin-btn2-color, var(--ui-muted));
 }
-button.secondary:hover { border-color: var(--ui-accent); color: var(--ui-text); }
+
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--ui-accent);
+  color: var(--ui-text);
+}
 
 .pill {
-  display: inline-block; padding: 2px 8px; border-radius: 999px;
-  border: 1px solid var(--ui-line); font-size: 0.74rem; color: var(--ui-muted);
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
+}
+.pill.accent {
+  background: rgba(92, 156, 245, 0.15);
+  color: var(--ui-accent);
+  border-color: rgba(92, 156, 245, 0.2);
 }
 
 /* ── Form Controls ────────────────────────────── */
@@ -662,20 +744,25 @@ body.nav-mobile-open .nav-backdrop {
 }
 
 .modal-close {
-  all: unset;
   cursor: pointer;
   color: var(--ui-muted);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   color: var(--ui-text);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: rotate(90deg);
 }
 
 .modal-body {

@@ -18,9 +18,9 @@
   --ui-warning-bg: rgba(90, 64, 20, 0.52);
   --ui-warning-text: #ffd88a;
 
-  --skin-btn-bg: linear-gradient(180deg, rgba(110, 200, 245, 0.28) 0%, rgba(100, 130, 240, 0.18) 100%);
+  --skin-btn-bg: rgba(110, 200, 245, 0.22);
   --skin-btn-color: #f0f8ff;
-  --skin-btn-border: 1px solid rgba(120, 200, 255, 0.22);
+  --skin-btn-border: 1px solid rgba(110, 200, 245, 0.28);
   --skin-btn2-bg: rgba(255, 255, 255, 0.03);
   --skin-btn2-border: 1px solid rgba(140, 175, 255, 0.16);
   --skin-btn2-color: #b8c8e8;

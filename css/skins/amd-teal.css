@@ -58,16 +58,16 @@
   --ui-warning-bg: #2B1A0A;
   --ui-warning-text: #FFB000;
 
-  --skin-btn-bg: linear-gradient(180deg, #00C2DE 0%, #007F92 100%);
-  --skin-btn-color: #001A1F;
-  --skin-btn-border: none;
-  --skin-btn2-bg: rgba(255, 255, 255, 0.04);
-  --skin-btn2-border: 1px solid rgba(255, 255, 255, 0.18);
+  --skin-btn-bg: rgba(0, 128, 128, 0.22);
+  --skin-btn-color: #FFFFFF;
+  --skin-btn-border: 1px solid rgba(0, 128, 128, 0.3);
+  --skin-btn2-bg: rgba(255, 255, 255, 0.05);
+  --skin-btn2-border: 1px solid rgba(255, 255, 255, 0.12);
   --skin-btn2-color: rgba(255, 255, 255, 0.85);
-  --skin-tab-bg: rgba(255, 255, 255, 0.03);
-  --skin-tab-border: 1px solid rgba(255, 255, 255, 0.10);
+  --skin-tab-bg: rgba(255, 255, 255, 0.04);
+  --skin-tab-border: 1px solid rgba(255, 255, 255, 0.08);
   --skin-tab-color: rgba(255, 255, 255, 0.65);
-  --skin-tab-active-bg: linear-gradient(180deg, rgba(0, 194, 222, 0.20) 0%, rgba(0, 127, 146, 0.10) 100%);
+  --skin-tab-active-bg: rgba(0, 128, 128, 0.15);
   --skin-tab-active-border: var(--amd-teal);
   --skin-tab-active-color: #FFFFFF;
   --skin-panel-bg: linear-gradient(180deg, #2C2C2C 0%, #262626 100%);

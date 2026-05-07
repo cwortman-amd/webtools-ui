@@ -18,11 +18,11 @@
   --ui-warning-bg: #2b2415;
   --ui-warning-text: #f0c36b;
 
-  --skin-btn-bg: linear-gradient(180deg, #4a8ae8 0%, #3a72c4 100%);
+  --skin-btn-bg: rgba(92, 156, 245, 0.2);
   --skin-btn-color: #ffffff;
-  --skin-btn-border: none;
-  --skin-btn2-bg: rgba(255, 255, 255, 0.03);
-  --skin-btn2-border: 1px solid #323a45;
+  --skin-btn-border: 1px solid rgba(255, 255, 255, 0.1);
+  --skin-btn2-bg: rgba(255, 255, 255, 0.04);
+  --skin-btn2-border: 1px solid rgba(255, 255, 255, 0.08);
   --skin-btn2-color: #a0a9b5;
   --skin-tab-bg: rgba(255, 255, 255, 0.02);
   --skin-tab-border: 1px solid #2a3340;
@@ -58,11 +58,11 @@
   --ui-warning-bg: #fef3cd;
   --ui-warning-text: #856404;
 
-  --skin-btn-bg: linear-gradient(180deg, #4a8ae8 0%, #3a72c4 100%);
-  --skin-btn-color: #ffffff;
-  --skin-btn-border: none;
-  --skin-btn2-bg: transparent;
-  --skin-btn2-border: 1px solid #d4dae2;
+  --skin-btn-bg: rgba(56, 114, 196, 0.1);
+  --skin-btn-color: #3872c4;
+  --skin-btn-border: 1px solid rgba(56, 114, 196, 0.15);
+  --skin-btn2-bg: rgba(0, 0, 0, 0.04);
+  --skin-btn2-border: 1px solid rgba(0, 0, 0, 0.08);
   --skin-btn2-color: #5c6878;
   --skin-tab-bg: transparent;
   --skin-tab-border: 1px solid #d4dae2;
