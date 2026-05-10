@@ -34,19 +34,19 @@
       id: "onboarding",
       name: "Standard Onboarding",
       time: "~5 min",
-      desc: "Standard-view walkthrough. Why each section exists, the typical day-one workflow, and a closing preview of the user-mode picker so first-time users know where to go next."
+      desc: "Standard-view walkthrough of each section's purpose and day-one usage."
     },
     {
       id: "advanced",
       name: "Advanced Usage",
       time: "~10 min",
-      desc: "Advanced-mode workflow tour. Power-user features, multi-step comparisons and side-by-side analysis, providing a deeper level of understanding."
+      desc: "Power-user tour of advanced features and options for deeper understanding."
     },
     {
       id: "expert",
       name: "Expert Training",
       time: "~15 min",
-      desc: "Full engineering training. End-to-end deep-dive: trade-off reasoning, root-cause workflows, advanced configuration, and the expert-only deliverables."
+      desc: "Technical deep-dive into advanced configuration options for expert analysis."
     }
   ];
 

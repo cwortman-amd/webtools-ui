@@ -427,6 +427,14 @@
       } else {
         ui.player.show();
       }
+      // Mirror the active phase onto <body> so cross-cutting CSS rules
+      // (e.g. notes-panel.css hiding the speaker-notes drawer in favor
+      // of the agent chat orb) can toggle off the dashboard chrome that
+      // would otherwise compete with the demo's narration surface.
+      // Same body class llm-benchmark/js/dashboard-tutor.js sets — kept
+      // in lockstep so behavior is identical across all 3 consumers.
+      const active = phase === "playing" || phase === "paused";
+      document.body.classList.toggle("demo-active", active);
     });
 
     engine.on("step:enter", ({ sceneIdx, stepIdx }) => {

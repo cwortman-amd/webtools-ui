@@ -1,12 +1,15 @@
 /*!
  * webtools-ui/css/notes-panel.css
  *
- * Canonical right-side speaker-notes panel for all three sibling pitch decks
- * (`llm-benchmark`, `dc-planner`, `cluster-manager`).
+ * Canonical orientation-aware speaker-notes panel for all three sibling
+ * pitch decks (`llm-benchmark`, `dc-planner`, `cluster-manager`).
  *
- * Originally extracted from `dc-planner/pages/pitch.html` (the canonical
- * implementation per the harmonization plan, `webtools-ui/docs/PLAN.md`
- * Phase 1.2). Mobile orientation-aware layout added in Phase 9.8e P6.
+ * Originally extracted from `dc-planner/pages/pitch.html` per the
+ * harmonization plan (`webtools-ui/docs/PLAN.md` Phase 1.2). Mobile
+ * orientation-aware layout added in Phase 9.8e P6, and Phase 9.8e P9
+ * (2026-05-10) consolidated the placement to RIGHT-in-landscape /
+ * BOTTOM-in-portrait at every breakpoint so the deck behaves the same
+ * on desktop, iPad, and iPhone in either orientation.
  *
  * USAGE: Each consumer's pitch.html includes this stylesheet via:
  *
@@ -26,29 +29,32 @@
  *   </aside>
  *
  * Toggle visibility by adding/removing the `.open` class on `.notes-panel`.
- * Each consumer's own pitch.html JS still owns the toggle behavior, slide-aware
- * rendering, and entity decoding — those vary slightly per deck and are
- * deferred to a later harmonization phase.
+ * Each consumer's own pitch.html JS still owns the toggle behavior, slide-
+ * aware rendering, and entity decoding — those vary per deck.
  *
  * STYLE GOALS (the contract this file enforces):
- *   - Right-side fixed drawer; slides in from translateX(110%) to
- *     translateX(0) on `.open`.
- *   - 360px width; max width capped to leave 32px gutter on small screens.
- *   - z-index 55 — above the deck (z 1) and progress bar (z 60 sits above
- *     this intentionally so global progress is always visible).
- *   - Hidden in print so PDF export stays slide-only (presenter handouts
- *     are rendered on dedicated notes pages by the deck's own print rules).
- *   - AMD-red accent on left border + slide pill; falls back to a generic
- *     accent when consumer doesn't define `--notes-accent`.
+ *   - Landscape (default): right-side fixed drawer; slides in from
+ *     translateX(110%) → translateX(0) on `.open`. 360px wide.
+ *   - Portrait (any width): bottom sheet; slides up from
+ *     translateY(110%) → translateY(0) on `.open`. 42vh tall.
+ *   - z-index 55 — above the deck (z 1) and below the global progress
+ *     bar (z 60) so progress is always visible.
+ *   - Hidden in print so PDF export stays slide-only.
+ *   - Hidden during demo mode (`body.demo-active`) — the demo engine
+ *     posts each step's narration into the agent chat orb (see
+ *     webtools-ui/js/demo-ui.js `narration.post`), which becomes the
+ *     "speaker notes" surface while a demo is running.
+ *   - AMD-red accent on the inward border + slide pill; falls back to
+ *     a generic accent when the consumer doesn't define `--notes-accent`.
  *
  * LAYOUT SHIFT (`body.notes-open`):
  *   When the notes panel is open, the consumer's `setNotesOpen()`
- *   toggles `body.notes-open` in addition to `.notes-panel.open`.
- *   That body class adds `padding-right: var(--notes-reserve)`
- *   (376px = 360px panel + 16px gutter) which, combined with the
- *   consumer's existing `body { display: flex; justify-content: center }`,
- *   re-centers the deck in the leftover viewport WITHOUT it slipping
- *   under the panel.
+ *   toggles `body.notes-open` in addition to `.notes-panel.open`. That
+ *   body class consumes `--notes-reserve` (376 / 320 / 0 px depending
+ *   on breakpoint + orientation) and applies it as `padding-right` in
+ *   landscape (so the centered deck shifts left and re-centers in the
+ *   leftover viewport) or as `padding-bottom` in portrait (so the deck
+ *   shifts up and the bottom sheet doesn't cover it).
  *
  *   The consumer's `fitDeck()` (or equivalent scale-to-fit routine)
  *   should ALSO read `--notes-reserve` and subtract it from the
@@ -65,41 +71,55 @@
  *   class so the re-fit animates alongside the panel slide-in.
  */
 
-/* ── Layout shift: deck recenters left of the panel when open ───────
- * Consumers' body has `display: flex; justify-content: center`. Adding
- * padding-right shifts the flex content area left, so the centered
- * deck visually re-centers in the leftover viewport. The transition
- * matches the .notes-panel slide-in (0.22s ease) so the deck shift
- * animates in lockstep with the panel sliding in.
- *
- * The `--notes-reserve` token is also consumed by the consumer's
- * `fitDeck()` JS so the scale-to-fit math accounts for the panel.
- * Default is 0 (panel closed); 376px = 360px panel + 16px gutter.
+/* ── Layout shift token ─────────────────────────────────────────────
+ * `--notes-reserve` is the horizontal real-estate the panel claims when
+ * open. JS reads it for fitDeck() math; CSS applies it as either
+ * padding-right (landscape) or padding-bottom (portrait, with a literal
+ * bottom-sheet height value).
  */
 :root {
   --notes-reserve: 0px;
 }
 
 body {
-  transition: padding-right 0.22s ease;
+  transition:
+    padding-right 0.22s ease,
+    padding-bottom 0.22s ease;
 }
 
+/* Landscape (default): body shifts left so the deck recenters to the
+ * left of the panel. */
 body.notes-open {
   --notes-reserve: 376px;
   padding-right: var(--notes-reserve);
+}
+
+/* Portrait: body shifts up so the deck recenters above the bottom sheet.
+ * --notes-reserve stays 0 so fitDeck()'s horizontal math is unaffected. */
+@media (orientation: portrait) {
+  body.notes-open {
+    --notes-reserve: 0px;
+    padding-right: 0;
+    padding-bottom: calc(42vh + 20px);
+  }
 }
 
 @media print {
   body.notes-open {
     --notes-reserve: 0px;
     padding-right: 0;
+    padding-bottom: 0;
   }
 }
 
+/* ── Drawer (landscape default) ─────────────────────────────────────
+ * Right-side fixed drawer. Slides in from translateX(110%) → 0 on `.open`.
+ * The accent border is on the LEFT edge (the side facing the deck).
+ */
 .notes-panel {
   position: fixed;
   top: 16px;
-  right: 16px;
+  right: max(16px, env(safe-area-inset-right));
   bottom: 78px;
   width: 360px;
   max-width: calc(100vw - 32px);
@@ -196,14 +216,9 @@ body.notes-open {
   font-style: italic;
 }
 
-@media print {
-  .notes-panel { display: none !important; }
-}
-
-/* ── Mobile notes layout ──────────────────────────────────────────────
- * Portrait: bottom sheet under the slide viewport.
- * Landscape: right-side drawer (narrower than desktop).
- */
+/* ── Mobile-landscape sizing tweaks ─────────────────────────────────
+ * Same right-side placement as desktop landscape, but slimmer so a
+ * narrow phone screen still has room for the deck. */
 @media (max-width: 900px) and (orientation: landscape) {
   body.notes-open {
     --notes-reserve: 320px;
@@ -212,33 +227,52 @@ body.notes-open {
 
   .notes-panel {
     top: 8px;
-    right: 8px;
+    right: max(8px, env(safe-area-inset-right));
     bottom: 64px;
     width: 304px;
     max-width: calc(100vw - 16px);
   }
 }
 
-@media (max-width: 900px) and (orientation: portrait) {
-  body.notes-open {
-    --notes-reserve: 0px;
-    padding-right: 0;
-    padding-bottom: calc(42vh + 20px);
-  }
-
+/* ── Portrait (any width): bottom sheet ─────────────────────────────
+ * Slides up from below the deck. Accent border moves to the TOP edge
+ * (the side facing the deck). Used on phones held in portrait, tablets
+ * in portrait, and tall desktop monitors. */
+@media (orientation: portrait) {
   .notes-panel {
     top: auto;
-    left: 8px;
-    right: 8px;
-    bottom: 64px;
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(64px, env(safe-area-inset-bottom));
     width: auto;
     max-width: none;
     height: 42vh;
     min-height: 180px;
+    border-left: none;
+    border-top: 3px solid var(--notes-accent, #ED1C24);
     transform: translateY(110%);
   }
 
   .notes-panel.open {
     transform: translateY(0);
   }
+}
+
+/* ── Demo mode owns the narration UX ────────────────────────────────
+ * The demo engine pushes each step's narration into the agent chat orb
+ * (webtools-ui/js/demo-ui.js `narration.post` → ChatOrb.printAi). While
+ * a demo is running, the orb IS the speaker-notes surface; suppress
+ * this drawer so the two don't compete for attention. */
+body.demo-active .notes-panel {
+  display: none !important;
+}
+
+body.demo-active.notes-open {
+  --notes-reserve: 0px;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
+@media print {
+  .notes-panel { display: none !important; }
 }

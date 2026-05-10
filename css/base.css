@@ -61,6 +61,18 @@
 
 * { box-sizing: border-box; }
 
+/* ── Mobile / iPhone safe-area shell ──────────────
+   Pages using <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+   must size their root with the dynamic viewport unit so iOS Safari's collapsing
+   chrome can't clip content at the bottom, and pad with env(safe-area-inset-*)
+   so portrait home-indicator + landscape notch/curved-edge regions stay clear.
+   100vh is kept as the fallback for browsers without dvh support. */
+html {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -68,6 +80,9 @@ body {
   background: var(--ui-bg);
   color: var(--ui-text);
   min-height: 100vh;
+  min-height: 100dvh;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -76,7 +91,10 @@ body {
 .hero {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
-  gap: 10px; padding: 0 10px; height: 40px;
+  gap: 10px;
+  padding-left: max(10px, env(safe-area-inset-left));
+  padding-right: max(10px, env(safe-area-inset-right));
+  height: 40px;
   background: color-mix(in srgb, var(--skin-hero-bg, var(--ui-bg)) 82%, transparent);
   border-bottom: 1px solid var(--ui-line);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -179,7 +197,11 @@ body[data-theme="light"] .hero-skin-option.active { background: rgba(0,0,0,0.07)
 
 /* ── Page Layout ──────────────────────────────── */
 
-.page { max-width: 1340px; margin: 0 auto; padding: 40px 10px 10px; }
+.page {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 40px 10px max(10px, env(safe-area-inset-bottom));
+}
 
 .panel {
   background: var(--skin-panel-bg, var(--ui-panel));

@@ -2,9 +2,9 @@
 title: "Cross-Repo Harmonization Plan"
 description: "Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE feature surfaces across `llm-benchmark`, `dc-planner`, and `cluster-manager` via the shared `webtools-ui/` library (mounted as `shared/` in each consumer). Historical phase narratives below preserve the original `shared-ui` and `gpu-planner` names that pre-date the 2026-05-03 (gpu-planner→dc-planner) and 2026-05-04 (shared-ui→webtools-ui) renames."
 date: 2026-05-02
-updated: 2026-05-06
+updated: 2026-05-10
 status: complete
-phase: 9.8e P9
+phase: 9.8g
 owner: "Curt Wortman"
 category: architecture
 tags:
@@ -1105,3 +1105,46 @@ across all 4 repos.
   `.modal-footer`) into `shared/css/base.css` with consistent widths, shadows,
   fonts, and backdrop filters. Button fills inside modals now reliably
   inherit from the global button definitions.
+
+- **Phase 9.8g — In-orb demo selector + orientation-aware notes (2026-05-10)**:
+  Collapsed the demo audience picker and the speaker-notes drawer into
+  surfaces the user already understands — the agent orb and the deck
+  itself — and made the iPhone full-screen treatment uniform across
+  every page in all three consumer repos.
+  **(a) Canonical iPhone safe-area shell** — `css/base.css` switched the
+  body root from `min-height: 100vh` to a paired `100vh` + `100dvh`
+  declaration so iOS Safari's collapsing chrome no longer clips the
+  bottom of the page. Added `env(safe-area-inset-*)` padding to body /
+  hero / page so the notch (landscape) and home indicator (portrait)
+  zones stay clear without shrinking the desktop layout. Audited every
+  `index.html` (root + `pages/`) across cluster-manager, dc-planner,
+  llm-benchmark, vixci-utils, and scaleout-utils to ensure
+  `viewport-fit=cover` is on the meta viewport.
+  **(b) In-orb demo audience picker** — `js/chat-orb.js` gained a
+  slide-down `.ai-demo-card` (mirroring `.ai-llm-card` chrome and the
+  same mutex behavior) populated from `js/demo-audiences.js`. Selecting
+  an audience fires the consumer's new `onDemoSelect(audienceId)`
+  callback, with a default fallback to `SlashRouter.run('/demo ' + id)`
+  so consumers don't even need to wire it explicitly. New public API:
+  `ChatOrb.openDemoCard()` / `ChatOrb.toggleDemoCard()`. All three
+  per-repo `chat-orb-mount.js` files dropped their bespoke
+  `onDemoClick` paths (which opened a page-level `DemoPicker` modal,
+  invoked `window.prompt()`, or called `DashboardTutor.openLauncher()`)
+  in favor of the canonical in-orb card. The deep-link / sessionStorage
+  reentry paths now also open the orb's demo card on next page load.
+  Audience copy was tightened to one sentence each: standard-view
+  walkthrough · power-user tour · technical deep-dive.
+  **(c) Orientation-aware speaker notes** — `css/notes-panel.css` was
+  rewritten so the placement is driven by orientation, not width:
+  landscape (any device) = right-side fixed drawer; portrait (any
+  device) = bottom sheet. Added `env(safe-area-inset-*)` so the panel
+  never sits under an iPhone notch or home indicator regardless of
+  orientation. While a demo is running, the drawer is suppressed via
+  `body.demo-active .notes-panel { display: none }` so the orb's chat
+  panel — which `webtools-ui/js/demo-ui.js#narration.post` already
+  populates with `<b>Demo Narration:</b> …` for each step — becomes
+  the single speaker-notes surface. The `body.demo-active` toggle was
+  promoted from llm-benchmark's `dashboard-tutor.js` into the canonical
+  `demo-ui.js` `phase:changed` handler so it fires identically across
+  `SharedDemo` (cluster-manager), `DcDemo` (dc-planner), and
+  `DashboardTutor` (llm-benchmark).

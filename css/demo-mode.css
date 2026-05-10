@@ -223,17 +223,22 @@ html[data-skin="minimal-monochrome"] {
   margin: 0 2px;
 }
 
-/* ── Transcript / Speaker-notes panel (right side) ────────────────── */
+/* ── Transcript / Speaker-notes panel ─────────────────────────────
+ * Orientation-aware: landscape default = full-height column on the
+ * LEFT, portrait = full-width bar pinned at the BOTTOM (above the
+ * floating .demo-player chrome and clear of the iPhone home indicator
+ * via env(safe-area-inset-bottom)). On iPhone landscape with a notch,
+ * env(safe-area-inset-left) keeps the panel clear of the notch /
+ * curved-edge zone. The exact orientation logic also drives the
+ * orb's chat panel during demo mode (`body.demo-active .ai-panel`,
+ * below) since the canonical engine routes narration into the orb.
+ * ───────────────────────────────────────────────────────────────── */
 
 .demo-transcript {
   position: fixed;
-  right: 24px;
-  bottom: 76px;
   z-index: var(--demo-z-overlay);
   display: none;
   flex-direction: column;
-  width: min(360px, calc(100vw - 48px));
-  max-height: min(60vh, 480px);
   font: 13px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--demo-fg);
   background: var(--demo-bg);
@@ -241,6 +246,28 @@ html[data-skin="minimal-monochrome"] {
   border-radius: var(--demo-radius);
   box-shadow: var(--demo-shadow);
   overflow: hidden;
+
+  /* Landscape default: anchor to the LEFT, fill the available height
+     between the .hero (40 px) and the floating .demo-player (~50 px
+     tall, sitting at bottom: 18 px). */
+  left:   max(16px, env(safe-area-inset-left));
+  top:    calc(40px + 16px + env(safe-area-inset-top));
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  right:  auto;
+  width:  min(360px, 38vw);
+  max-height: none;
+}
+
+@media (orientation: portrait) {
+  .demo-transcript {
+    /* Portrait: anchor to the BOTTOM, span the viewport width. */
+    left:   max(12px, env(safe-area-inset-left));
+    right:  max(12px, env(safe-area-inset-right));
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    top:    auto;
+    width:  auto;
+    max-height: min(38vh, 360px);
+  }
 }
 
 .demo-transcript.is-visible {
@@ -414,10 +441,45 @@ html[data-skin="minimal-monochrome"] {
   .demo-player [data-act="mute"] {
     display: none;
   }
+}
 
-  .demo-transcript {
-    right: 12px;
-    bottom: 64px;
+/* ── In-demo orb chat panel = the live speaker-notes surface ──────
+ * The canonical engine (webtools-ui/js/demo-engine.js + demo-ui.js)
+ * routes per-step narration into the agent orb's chat panel via
+ * ChatOrb.printAi(...), so `.ai-panel` is what the user actually
+ * reads during a demo. While `body.demo-active` is set, override
+ * the orb panel's default bottom-right docking so it lives where
+ * presenters expect speaker notes:
+ *   - Landscape (desktop or iPhone landscape) → full-height column
+ *     pinned to the LEFT side, clear of the .hero and the floating
+ *     .demo-player chrome.
+ *   - Portrait (mobile or narrow desktop) → full-width bar pinned
+ *     to the BOTTOM, above the floating .demo-player and clear of
+ *     the iPhone home indicator (env(safe-area-inset-bottom)).
+ * Outside demo mode the orb keeps its normal bottom-right docking.
+ * ───────────────────────────────────────────────────────────────── */
+
+body.demo-active .ai-panel {
+  /* Landscape default: pin to the LEFT edge. */
+  left:   max(16px, env(safe-area-inset-left));
+  right:  auto;
+  top:    calc(40px + 16px + env(safe-area-inset-top));
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  width:  min(360px, 38vw);
+  max-height: none;
+  transform-origin: bottom left;
+}
+
+@media (orientation: portrait) {
+  body.demo-active .ai-panel {
+    /* Portrait: pin to the BOTTOM, span the viewport width. */
+    left:   max(12px, env(safe-area-inset-left));
+    right:  max(12px, env(safe-area-inset-right));
+    top:    auto;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    width:  auto;
+    max-height: min(42vh, 380px);
+    transform-origin: bottom center;
   }
 }
 

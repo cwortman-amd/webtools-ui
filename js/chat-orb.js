@@ -64,11 +64,21 @@
     onHelpExtra: null,    // optional fn returning string to append to /help output
     // Optional extra header action: when truthy, a play_circle "Demo" button
     // is rendered to the LEFT of the gear (LLM settings) icon in the panel
-    // header. onDemoClick is invoked on click; if not provided, the click
-    // falls through to SlashRouter.run('/demo') so consumers that already
-    // register the /demo intent get it for free.
+    // header.
+    //
+    // Default behavior (recommended): clicking the button toggles an in-orb
+    // slide-down audience picker (`.ai-demo-card`) — same UX shape as the
+    // gear opens the LLM settings card. When the user picks an audience the
+    // orb fires `onDemoSelect(audienceId)` if defined, else falls back to
+    // `SlashRouter.run('/demo ' + id)` (every consumer registers a `/demo`
+    // handler that knows how to start its own runtime).
+    //
+    // Legacy escape hatch: if `onDemoClick` is set, it fully overrides the
+    // default and the in-orb card is never shown — the consumer is in
+    // charge of opening whatever picker/modal it wants.
     showDemoBtn: false,
     onDemoClick: null,
+    onDemoSelect: null,
     // Optional feedback button: when truthy, a `feedback` icon button is
     // rendered to the LEFT of the Demo button (or gear if demo is off) and
     // typing `/feedback` in the chat input opens the same composer. The
@@ -102,7 +112,7 @@
 
   var ui = { orb: null, panel: null, msgs: null, input: null, send: null,
              close: null, llmBtn: null, llmCard: null, demoBtn: null,
-             feedbackBtn: null, feedbackCard: null };
+             demoCard: null, feedbackBtn: null, feedbackCard: null };
 
   function resolveVoiceModeLabel() {
     try {
@@ -212,6 +222,16 @@
       '    <button type="button" class="primary" id="chatFeedbackSubmit">Open GitHub draft</button>',
       "  </div>",
       "</div>",
+      (state.cfg.showDemoBtn
+        ? '<div class="ai-demo-card" id="chatDemoCard" role="region" aria-label="Demo Mode audience picker">'
+          + '  <div class="ai-demo-hdr">Demo Mode</div>'
+          + '  <div class="ai-demo-sub">Pick an audience to start the walkthrough.</div>'
+          + '  <div class="ai-demo-list" id="chatDemoList"></div>'
+          + '  <div class="ai-demo-actions">'
+          + '    <button type="button" id="chatDemoCancel">Cancel</button>'
+          + '  </div>'
+          + '</div>'
+        : ""),
       '<div class="ai-llm-card" id="chatLlmCard" role="region" aria-label="LLM agent settings">',
       '  <div class="ai-llm-row"><label for="chatLlmHost">Host</label><input type="text" id="chatLlmHost" placeholder="10.0.0.5:11434" autocomplete="off" /></div>',
       '  <div class="ai-llm-row"><label for="chatLlmModel">Model</label><input type="text" id="chatLlmModel" placeholder="llama3.1:8b-instruct" autocomplete="off" /></div>',
@@ -243,20 +263,26 @@
     ui.close.addEventListener("click", function () { setOpen(false); });
     ui.llmBtn.addEventListener("click", toggleLlmCard);
 
-    // Optional demo-launch button (showDemoBtn config flag). Prefers the
-    // consumer-supplied onDemoClick callback; falls back to dispatching
-    // /demo through SlashRouter so consumers that already register the
-    // intent get this header shortcut for free.
+    // Demo-launch button (showDemoBtn config flag). Default behavior is to
+    // toggle the in-orb `.ai-demo-card` slide-down picker (parallel to how
+    // the gear opens `.ai-llm-card`). The legacy `onDemoClick` config takes
+    // precedence when set and fully overrides the in-orb path.
     if (ui.demoBtn) {
       ui.demoBtn.addEventListener("click", function () {
         if (typeof state.cfg.onDemoClick === "function") {
           try { state.cfg.onDemoClick(); } catch (e) { console.warn("[chat-orb] onDemoClick threw:", e); }
           return;
         }
-        if (window.SlashRouter && typeof window.SlashRouter.run === "function") {
-          window.SlashRouter.run("/demo");
-        }
+        toggleDemoCard();
       });
+    }
+    if (ui.demoCard) {
+      var cancelBtn = document.getElementById("chatDemoCancel");
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", function () {
+          ui.demoCard.classList.remove("show");
+        });
+      }
     }
 
     // Optional feedback button (showFeedbackBtn config flag). Prefers the
@@ -331,6 +357,7 @@
     } else {
       ui.llmCard.classList.remove("show");
       if (ui.feedbackCard) ui.feedbackCard.classList.remove("show");
+      if (ui.demoCard) ui.demoCard.classList.remove("show");
     }
   }
 
@@ -340,6 +367,7 @@
     var showing = ui.llmCard.classList.toggle("show");
     if (showing) {
       if (ui.feedbackCard) ui.feedbackCard.classList.remove("show");
+      if (ui.demoCard) ui.demoCard.classList.remove("show");
       hydrateLlmInputs();
       setLlmStatus("");
     }
@@ -354,6 +382,7 @@
     if (!ui.feedbackCard) return;
     if (!state.open) setOpen(true);
     if (ui.llmCard) ui.llmCard.classList.remove("show");
+    if (ui.demoCard) ui.demoCard.classList.remove("show");
     var showing = ui.feedbackCard.classList.toggle("show");
     if (showing) {
       setFeedbackStatus("");
@@ -361,6 +390,106 @@
         var ta = document.getElementById("chatFeedbackText");
         if (ta) ta.focus();
       }, 100);
+    }
+  }
+
+  // ── Demo audience picker (in-orb) ────────────────────────────────
+  // Slide-down card that lets the user pick an audience track without
+  // opening a separate page-level modal. Audience catalog comes from
+  // window.DemoAudiences (canonical webtools-ui/js/demo-audiences.js)
+  // when present, with a static fallback so the card renders even if
+  // the catalog hasn't loaded yet.
+  function resolveDemoAudiences() {
+    if (typeof global.getDemoAudiences === "function") {
+      try {
+        var live = global.getDemoAudiences();
+        if (Array.isArray(live) && live.length) return live;
+      } catch (_) {}
+    }
+    if (Array.isArray(global.DemoAudiences) && global.DemoAudiences.length) {
+      return global.DemoAudiences.slice();
+    }
+    return [
+      { id: "onboarding", name: "Standard Onboarding", time: "~5 min",  desc: "Standard-view walkthrough of each section's purpose and day-one usage." },
+      { id: "advanced",   name: "Advanced Usage",      time: "~10 min", desc: "Power-user tour of advanced features and options for deeper understanding." },
+      { id: "expert",     name: "Expert Training",     time: "~15 min", desc: "Technical deep-dive into advanced configuration options for expert analysis." }
+    ];
+  }
+
+  function hydrateDemoCard() {
+    if (!ui.demoCard) return;
+    var listEl = document.getElementById("chatDemoList");
+    if (!listEl) return;
+    while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+    resolveDemoAudiences().forEach(function (aud) {
+      if (!aud || !aud.id) return;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "ai-demo-option";
+      btn.setAttribute("data-audience", aud.id);
+      if (aud.tag) {
+        btn.disabled = true;
+        btn.title = String(aud.tag);
+      }
+
+      var head = document.createElement("div");
+      head.className = "ai-demo-option-row";
+      var nameEl = document.createElement("span");
+      nameEl.className = "ai-demo-option-name";
+      nameEl.textContent = aud.name || aud.id;
+      head.appendChild(nameEl);
+      if (aud.time) {
+        var t = document.createElement("span");
+        t.className = "ai-demo-option-time";
+        t.textContent = aud.time;
+        head.appendChild(t);
+      }
+      btn.appendChild(head);
+
+      if (aud.desc) {
+        var d = document.createElement("p");
+        d.className = "ai-demo-option-desc";
+        d.textContent = aud.desc;
+        btn.appendChild(d);
+      }
+
+      btn.addEventListener("click", function () {
+        if (btn.disabled) return;
+        var id = btn.getAttribute("data-audience");
+        ui.demoCard.classList.remove("show");
+        handleDemoSelect(id);
+      });
+      listEl.appendChild(btn);
+    });
+  }
+
+  function toggleDemoCard() {
+    if (!ui.demoCard) return;
+    if (!state.open) setOpen(true);
+    if (ui.llmCard) ui.llmCard.classList.remove("show");
+    if (ui.feedbackCard) ui.feedbackCard.classList.remove("show");
+    var showing = ui.demoCard.classList.toggle("show");
+    if (showing) hydrateDemoCard();
+  }
+
+  function openDemoCard() {
+    if (!ui.demoCard) return;
+    if (!state.open) setOpen(true);
+    if (ui.llmCard) ui.llmCard.classList.remove("show");
+    if (ui.feedbackCard) ui.feedbackCard.classList.remove("show");
+    ui.demoCard.classList.add("show");
+    hydrateDemoCard();
+  }
+
+  function handleDemoSelect(audienceId) {
+    if (!audienceId) return;
+    if (typeof state.cfg.onDemoSelect === "function") {
+      try { state.cfg.onDemoSelect(audienceId); }
+      catch (e) { console.warn("[chat-orb] onDemoSelect threw:", e); }
+      return;
+    }
+    if (global.SlashRouter && typeof global.SlashRouter.run === "function") {
+      global.SlashRouter.run("/demo " + audienceId);
     }
   }
 
@@ -670,7 +799,8 @@
     ui.close   = document.getElementById("chatClose");
     ui.llmBtn  = document.getElementById("chatLlmBtn");
     ui.llmCard = document.getElementById("chatLlmCard");
-    ui.demoBtn = document.getElementById("chatDemoBtn"); // null when showDemoBtn=false
+    ui.demoBtn  = document.getElementById("chatDemoBtn");  // null when showDemoBtn=false
+    ui.demoCard = document.getElementById("chatDemoCard"); // null when showDemoBtn=false
     ui.feedbackBtn  = document.getElementById("chatFeedbackBtn");   // null when showFeedbackBtn=false
     ui.feedbackCard = document.getElementById("chatFeedbackCard");  // null when showFeedbackBtn=false
 
@@ -723,7 +853,9 @@
     setTyping:   setTyping,
     clear:       clearLog,
     getLLM:      function () { return Object.assign({}, state.llm); },
-    setLLM:      function (cfg) { state.llm = Object.assign({}, state.llm, cfg); saveLLM(); }
+    setLLM:      function (cfg) { state.llm = Object.assign({}, state.llm, cfg); saveLLM(); },
+    openDemoCard:   openDemoCard,
+    toggleDemoCard: toggleDemoCard
   };
 
   global.ChatOrb = api;

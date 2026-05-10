@@ -923,6 +923,126 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
+ * In-orb demo audience picker (.ai-demo-card)
+ *
+ * Slide-down sibling of .ai-llm-card / .ai-feedback-card. Same chrome
+ * (border, gradient, slide-in animation), but contains a vertical
+ * list of audience options (.ai-demo-option) rendered from
+ * window.DemoAudiences. Mutex with the other two cards is enforced
+ * in chat-orb.js (toggleDemoCard / toggleLlmCard / toggleFeedbackCard).
+ * ───────────────────────────────────────────────────────────────── */
+
+.ai-demo-card {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 12px 4px;
+  padding: 12px;
+  border-radius: var(--ai-radius-md);
+  background: linear-gradient(160deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+  border: 1px solid color-mix(in srgb, var(--ai-accent) 35%, rgba(255, 255, 255, .12));
+}
+
+.ai-demo-card.show {
+  display: flex;
+  animation: ai-bubble-in .18s ease-out;
+}
+
+.ai-demo-card .ai-demo-hdr {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--ai-text);
+}
+
+.ai-demo-card .ai-demo-sub {
+  font-size: 11.5px;
+  color: var(--ai-text-dim);
+  line-height: 1.4;
+}
+
+.ai-demo-card .ai-demo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-demo-card .ai-demo-option {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(0, 0, 0, .25);
+  color: var(--ai-text);
+  transition: background .14s ease, border-color .14s ease;
+}
+
+.ai-demo-card .ai-demo-option:hover:not(:disabled),
+.ai-demo-card .ai-demo-option:focus-visible {
+  background: color-mix(in srgb, var(--ai-accent) 22%, rgba(255, 255, 255, .05));
+  border-color: color-mix(in srgb, var(--ai-accent) 55%, transparent);
+}
+
+.ai-demo-card .ai-demo-option:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.ai-demo-card .ai-demo-option-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ai-demo-card .ai-demo-option-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ai-text);
+}
+
+.ai-demo-card .ai-demo-option-time {
+  font-size: 11px;
+  color: var(--ai-text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ai-demo-card .ai-demo-option-desc {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ai-text-dim);
+  line-height: 1.4;
+}
+
+.ai-demo-card .ai-demo-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.ai-demo-card .ai-demo-actions button {
+  all: unset;
+  cursor: pointer;
+  font-size: 11.5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: var(--ai-text);
+  background: rgba(255, 255, 255, .04);
+}
+
+.ai-demo-card .ai-demo-actions button:hover {
+  background: color-mix(in srgb, var(--ai-accent) 22%, rgba(255, 255, 255, .05));
+  border-color: color-mix(in srgb, var(--ai-accent) 55%, transparent);
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────────
  * Animations
  * ───────────────────────────────────────────────────────────────── */
 
