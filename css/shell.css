@@ -69,7 +69,13 @@ body {
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  /* Gap mirrors `padding-left: 14px` (from `padding: 12px 14px`)
+     so the brand icon has equal breathing room on its left
+     (between the sidebar edge and the icon) and on its right
+     (between the icon and the wordmark). Was `8px` previously,
+     which made the wordmark visually crowd the icon while the
+     left side stayed roomy. (Phase 9.8e P10.2, 2026-05-12) */
+  gap: 14px;
   padding: 12px 14px;
   height: 40px;
   border-bottom: 1px solid var(--ui-line);
