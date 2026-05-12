@@ -300,9 +300,16 @@ body.nav-side.nav-collapsed .util-label {
   display: none;
 }
 
+/* Keep the sidebar brand icon anchored at the same x position when
+   the sidebar collapses. We deliberately KEEP `padding-left: 14px`
+   (matches the expanded `.sidebar-brand` padding above) and we do
+   NOT set `justify-content: center` — both would shift the icon
+   ~10px to the left at the 46px collapsed width and expose the
+   wordmark's first letter as the brand wipes out from under it.
+   `padding-right: 4px` is fine because the wordmark `<h1>` is
+   `display: none` in this state. (Phase 9.8e P10.1, 2026-05-12) */
 body.nav-side.nav-collapsed .sidebar-brand {
-  justify-content: center;
-  padding: 12px 4px;
+  padding: 12px 4px 12px 14px;
 }
 
 body.nav-side.nav-collapsed .nav-btn,
