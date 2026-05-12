@@ -1148,3 +1148,38 @@ across all 4 repos.
   `demo-ui.js` `phase:changed` handler so it fires identically across
   `SharedDemo` (cluster-manager), `DcDemo` (dc-planner), and
   `DashboardTutor` (llm-benchmark).
+
+- **Phase 9.8e P12 — retire page-level audience-picker modal (2026-05-12)**:
+  finishes the migration begun in Phase 9.8g(b). The canonical chat orb
+  (`webtools-ui/js/chat-orb.js`, mounted with `showDemoBtn:true`) now
+  renders an in-orb slide-down audience picker (`.ai-demo-card`) and is
+  the SOLE entry point for Demo Mode on the main screen across all
+  three consumers. The page-level `webtools-ui/js/demo-picker.js`
+  modal — promoted in Phase 9.8e P5 — is no longer loaded by any
+  consumer's `pages/index.html`, and the three legacy call sites that
+  still invoked `window.DemoPicker.open()` were each rewired to
+  delegate to `window.ChatOrb.openDemoCard()`:
+    - `llm-benchmark/js/dashboard-tutor.js openLauncher()` — now opens
+      the orb's in-orb card. The `mountLaunchButton()` helper also
+      stopped double-wiring `#chatDemoBtn` (the orb's own
+      `toggleDemoCard` handler was being shadowed by an
+      `openLauncher` click handler, stacking the retired modal on top
+      of the in-orb card on every click) and stopped synthesizing the
+      legacy floating bottom-right `demoLaunchBtn` pill (the orb is
+      always reachable).
+    - `cluster-manager/pages/index.html openDemoBanner()` — same
+      delegate; the sidebar `#demoLaunchBtnSide` pill now opens the
+      in-orb card instead of the modal.
+    - `webtools-ui/js/demo-ui.js DcDemo.openLauncher` — same delegate;
+      programmatic dc-planner callers (slash commands, URL handlers,
+      test fixtures) keep working without surfacing the retired modal.
+  `demo-audiences.js` is still loaded by all three consumers because
+  the orb's `resolveDemoAudiences()` reads `window.DemoAudiences` to
+  hydrate the in-orb card with the canonical Standard / Advanced /
+  Expert copy. `demo-picker.js` itself remains on disk in
+  `webtools-ui/js/` for any out-of-tree consumer that still imports
+  it, but it is functionally retired from the harmonized 3-repo
+  surface. Validated by reloading all three `pages/index.html` and
+  clicking each Demo entry point: only the in-orb
+  `Demo Mode audience picker` region opens (no `.demo-picker__overlay`
+  / `dialog.demo-picker` is ever inserted), console clean.

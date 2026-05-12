@@ -66,15 +66,22 @@
     document.dispatchEvent(new CustomEvent("shell:modeChanged", { detail: { mode: mode } }));
   }
 
-  /* ── Layout: top-bar vs side-bar ── */
-  function setLayout(layout) {
-    if (layout === "side") {
-      document.body.classList.add("nav-side");
-    } else {
-      document.body.classList.remove("nav-side");
-      document.body.classList.remove("nav-collapsed");
-    }
-    try { localStorage.setItem(PREFIX + "-nav-layout", layout); } catch (_) { }
+  /* ── Layout: sidebar-only (Phase 9.8e P10, 2026-05-12) ──
+   *
+   * The dual-layout (top-bar tabs / sidebar nav) shell was retired —
+   * the sidebar is now the only supported navigation layout. setLayout
+   * survives as a no-op-ish helper so external callers (chat-orb-mount,
+   * MobileDrawer.install onOpen, agent-bridge, slash commands, URL
+   * handlers, test fixtures, cross-page sessionStorage reentry) still
+   * have a stable entry point that lands us in nav-side mode every
+   * time. We also overwrite any stale `<prefix>-nav-layout=top` value
+   * in localStorage so old caches from before the cleanup don't try
+   * to remove `nav-side` on next page load. Mirrors cluster-manager's
+   * inline `setLayout` (retired 2026-05-11) and dc-planner Phase 9.8e
+   * P10. */
+  function setLayout(_layout) {
+    document.body.classList.add("nav-side");
+    try { localStorage.setItem(PREFIX + "-nav-layout", "side"); } catch (_) { }
     syncSideSkinList();
   }
 
@@ -100,7 +107,11 @@
     syncSideSkinList();
   }
 
-  /* ── Tab switching (shared between both nav modes) ── */
+  /* ── Tab switching (sidebar-only after Phase 9.8e P10, 2026-05-12) ──
+   * Selector kept inclusive of `.hero-tabs .tab-btn` so any pre-P10
+   * markup (or other consumers that still ship the strip) stays in
+   * sync if they reuse this helper. In llm-benchmark the strip is
+   * gone and only `.sidebar-nav .nav-btn` matches. */
   function switchTab(tabId) {
     document.querySelectorAll(".hero-tabs .tab-btn, .sidebar-nav .nav-btn").forEach(function (t) {
       var isTarget = t.getAttribute("data-tab") === tabId;
@@ -153,12 +164,14 @@
 
   function init() {
     /* ── Rehydrate from localStorage ── */
-    var savedLayout = "side";
+    /* Phase 9.8e P10 (2026-05-12): the savedLayout localStorage read
+     * was retired — sidebar is the only supported layout, so we
+     * always force "side". setLayout() also overwrites any stale
+     * `<prefix>-nav-layout=top` value on first run. */
     var savedCollapsed = false;
-    try { savedLayout = localStorage.getItem(PREFIX + "-nav-layout") || "side"; } catch (_) { }
     try { savedCollapsed = localStorage.getItem(PREFIX + "-nav-collapsed") === "1"; } catch (_) { }
 
-    setLayout(savedLayout);
+    setLayout("side");
     setCollapsed(savedCollapsed);
     setSkin(localStorage.getItem(PREFIX + "-skin") || "amd-gold");
     setTheme(localStorage.getItem(PREFIX + "-theme") || "dark");
@@ -171,27 +184,26 @@
     var tSide = document.getElementById("themeToggleSide");
     if (tSide) tSide.addEventListener("click", toggleTheme);
 
-    var lTop = document.getElementById("layoutToggleTop");
-    if (lTop) lTop.addEventListener("click", function () { setLayout("side"); });
-    var lSide = document.getElementById("layoutToggleSide");
-    if (lSide) lSide.addEventListener("click", function () { setLayout("top"); });
+    /* Phase 9.8e P10 (2026-05-12): #layoutToggleTop and #layoutToggleSide
+     * were removed from llm-benchmark/pages/index.html when the
+     * sidebar became the only supported layout, so the click handlers
+     * that flipped between "side" and "top" via setLayout() were
+     * retired. Defensive `getElementById(...)` lookups would resolve
+     * to null and the listener add was a no-op anyway, but dropping
+     * the dead block keeps the init function readable. */
 
     if (window.MobileDrawer && typeof window.MobileDrawer.install === "function") {
       window.MobileDrawer.install({
         menuBtn:    "navMobileMenuBtn",
         backdrop:   "navBackdrop",
         drawer:     "sideNavDrawer",
-        closeOnTap: [".nav-btn", ".util-btn"],
-        onOpen: function () {
-          if (!document.body.classList.contains("nav-side")) {
-            document.body.classList.add("nav-side", "nav-mobile-temp");
-          }
-        },
-        onClose: function () {
-          if (document.body.classList.contains("nav-mobile-temp")) {
-            document.body.classList.remove("nav-side", "nav-mobile-temp");
-          }
-        }
+        closeOnTap: [".nav-btn", ".util-btn"]
+        /* Phase 9.8e P10 (2026-05-12): the onOpen/onClose handlers
+         * that flipped a temporary `nav-mobile-temp` class to force
+         * the sidebar drawer open from a top-bar layout were dropped
+         * — body always carries `nav-side`, so the drawer opens
+         * unconditionally on hamburger tap and there's nothing to
+         * temporarily restore on close. */
       });
     }
 
@@ -259,11 +271,11 @@
       });
     });
 
-    document.querySelectorAll(".hero-tabs .tab-btn").forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        if (!this.disabled) switchTab(this.getAttribute("data-tab"));
-      });
-    });
+    /* Phase 9.8e P10 (2026-05-12): the per-`.hero-tabs .tab-btn` click
+     * binding was removed — the strip is gone from
+     * llm-benchmark/pages/index.html and `querySelectorAll` returned
+     * an empty NodeList. Sidebar-nav handler below is the sole tab
+     * switcher. */
 
     document.querySelectorAll(".sidebar-nav .nav-btn").forEach(function (tab) {
       tab.addEventListener("click", function () {

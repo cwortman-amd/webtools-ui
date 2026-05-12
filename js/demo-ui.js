@@ -123,22 +123,29 @@
     window.DcDemo = {
       start(track) { return startTrack(engine, ui, track || DEFAULT_TRACK); },
       stop() { engine.exit({ restore: true }); },
-      /* Phase 9.8e P5 (2026-05-05): cross-repo audience-picker entry
-       * point. Calls window.DemoPicker.open() with onSelect wired to
-       * DcDemo.start(). Falls back to starting the default track if
-       * the canonical picker module didn't load (graceful degradation
-       * — same shape llm-benchmark and cluster-manager use). */
+      /* Phase 9.8e P12 (2026-05-12): the page-level audience-picker
+       * MODAL has been retired. The canonical chat orb
+       * (`shared/js/chat-orb.js`, mounted with `showDemoBtn:true`)
+       * renders an in-orb slide-down audience picker (`.ai-demo-card`)
+       * and is the SOLE entry point for Demo Mode on the main screen.
+       * Picking an audience fires the orb's `onDemoSelect` callback —
+       * each consumer's `js/chat-orb-mount.js` wires that to its
+       * `start` function (DcDemo.start / DashboardTutor.start /
+       * SharedDemo.start) — so the launch path is end-to-end with no
+       * page-level pop-up.
+       *
+       * We keep `openLauncher` as a thin shim so existing programmatic
+       * callers (slash commands, URL handlers, test fixtures) keep
+       * working without surfacing the retired modal. Falls back to the
+       * default track if the orb is unavailable (e.g. on a
+       * stripped-down embed page). */
       openLauncher() {
-        if (window.DemoPicker && typeof window.DemoPicker.open === "function") {
-          window.DemoPicker.open({
-            onSelect(audienceId) {
-              startTrack(engine, ui, audienceId);
-            }
-          });
+        if (window.ChatOrb && typeof window.ChatOrb.openDemoCard === "function") {
+          window.ChatOrb.openDemoCard();
           return;
         }
         if (window.console && console.warn) {
-          console.warn("[demo-ui] DemoPicker unavailable; starting default track.");
+          console.warn("[demo-ui] ChatOrb unavailable; starting default track.");
         }
         startTrack(engine, ui, DEFAULT_TRACK);
       },
