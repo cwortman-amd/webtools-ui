@@ -155,6 +155,33 @@ h1 { margin: 0; font-size: 0.95rem; line-height: 1; letter-spacing: 0.3px; color
 .hero-toolbar .hero-icon-btn {
   background: transparent !important; border: none !important; box-shadow: none !important;
 }
+/* ── Hamburger plate strip (Phase 9.8e P13, 2026-05-12) ────────────────
+ * The mobile-only hamburger button (`.hero .hero-mobile-menu`) is the
+ * sole `.hero-icon-btn` that survived the top-bar retirement — the
+ * `.hero-toolbar` strip is gone, so the existing
+ * `.hero-toolbar .hero-icon-btn { background: transparent !important }`
+ * rule no longer reaches the hamburger and it picked up the default
+ * translucent plate + 1 px border + 8 px backdrop blur. Visually that
+ * gave it a "chip" look on the mobile hero bar that diverged from the
+ * brand link beside it (which has no plate) and from dc-planner's
+ * sibling hamburger (which strips the plate via its `all: unset`
+ * `.hero-icon-btn` override). This rule re-aligns cluster-manager and
+ * llm-benchmark with that flat-icon look in the canonical baseline so
+ * all three sibling consumer dashboards render the hamburger the same
+ * way. The hover state stays transparent too so we don't reintroduce
+ * the plate on tap-and-hold. Specificity is `.hero .hero-mobile-menu`
+ * (0,1,1) so it beats the bare `.hero-icon-btn` (0,1,0) above without
+ * needing `!important`. */
+.hero .hero-mobile-menu,
+.hero .hero-mobile-menu:hover,
+.hero .hero-mobile-menu:active {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+}
 .hero-icon-btn .material-symbols-outlined { font-size: 18px; }
 .hero-icon-btn:disabled { opacity: 0.3; cursor: default; }
 .hero-icon-btn:disabled:hover { opacity: 0.3; }
