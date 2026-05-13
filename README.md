@@ -116,6 +116,74 @@ bash scripts/build-vendor-manifest.sh
 
 ---
 
+## Sibling Repositories
+
+This toolkit is designed to work in concert with the following consumer repositories. Each repo provides a specific dashboard or service that consumes the canonical assets in this repository.
+
+- **[LLM Benchmarking Toolkit (llm-benchmark)](../llm-benchmark/README.md)**: Local benchmarking, sweep optimization, and queue orchestration for AMD Instinct GPUs.
+- **[Cluster Manager (cluster-manager)](../cluster-manager/README.md)**: Automation toolkit for installing, configuring, and validating AMD ROCm and AI-NIC (Pollara) clusters.
+- **[DC Planner (dc-planner)](../dc-planner/README.md)**: Browser-based planning tool for GPU infrastructure scenarios (BOM, TCO, Rack, Power).
+
+---
+
+## Installation & Setup
+
+### Local Installation (Laptop/Dev Environment)
+
+For local development, it is recommended to clone all repositories into a common workspace directory (e.g., `~/workspace`) so the relative symlinks can resolve correctly.
+
+1. **Create a workspace and clone repositories**:
+   ```bash
+   mkdir -p ~/workspace && cd ~/workspace
+   git clone https://github.com/cwortman-amd/webtools-ui.git
+   git clone https://github.com/cwortman-amd/llm-benchmark.git
+   git clone https://github.com/cwortman-amd/cluster-manager.git
+   git clone https://github.com/cwortman-amd/dc-planner.git
+   ```
+
+2. **Initialize shared symlinks**:
+   In each consumer repo, the `shared/` directory should point back to `webtools-ui`. Most repositories include a `Makefile` to handle this.
+   ```bash
+   cd ~/workspace/llm-benchmark
+   make shared-restore
+   ```
+
+3. **Launch a local server**:
+   Since these are static web applications, any static file server will work. Python's built-in server is a quick option:
+   ```bash
+   cd ~/workspace/llm-benchmark
+   python3 -m http.server 8080
+   ```
+   Then open `http://localhost:8080/pages/index.html` in your browser.
+
+### Server Deployment
+
+When deploying to a production server (e.g., Nginx or Apache), ensure that the relative paths between the consumer repo and the `webtools-ui` repo are preserved.
+
+**Example Nginx Configuration**:
+```nginx
+server {
+    listen 80;
+    server_name dashboards.example.com;
+    root /var/www/html/workspace;
+
+    location / {
+        autoindex on;
+    }
+}
+```
+
+In this setup, your directory structure on the server would mirror your local workspace:
+```text
+/var/www/html/workspace/
+├── webtools-ui/
+├── llm-benchmark/
+├── cluster-manager/
+└── dc-planner/
+```
+
+---
+
 ## Status
 
 The harmonization initiative is **complete** — Phases 0 through 9.8e P9 are landed. See [`docs/PLAN.md`](docs/PLAN.md) §"Initiative status" and the chronological status log for the full rollout. Live cross-repo gates: vendor manifest in all 3 consumers, `test_offline.sh §25` in `llm-benchmark`, `scripts/self-check.sh` in `cluster-manager`, `tests/self-check.sh` in `dc-planner`.
