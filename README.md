@@ -37,9 +37,12 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/demo-engine.js` | Demo Mode scene loop, action dispatcher, snapshot/restore (P9 control actions resume cleanly from pause) |
 | `js/demo-ui.js` | Demo Mode tutor-bar player chrome, launcher chip, transcript popup (P9 compact close affordance) |
 | `js/demo-voice.js` | Web Speech TTS narration for Demo Mode |
+| `js/voice-local.js` | `window.LocalVoice` — on-device (CPU) TTS/STT client for the same-origin `/api/voice/*` contract (Piper + whisper.cpp); degrades to Web Speech when a consumer backend doesn't implement it |
+| `js/demo-interactive.js` | `window.InteractiveNarration` — push-to-talk controller for interactive narrated walkthroughs (pause demo → capture question → context-grounded `chatLLM` answer → speak → auto-resume); backend-agnostic |
 | `js/demo-audiences.js` | `window.DemoAudiences` — shared audience catalog (Standard / Advanced / Expert) (Phase 9.8e) |
 | `js/demo-picker.js` | `window.DemoPicker.open(...)` — cross-repo audience-picker modal (Phase 9.8e P5) |
 | `js/mobile-drawer.js` | Off-canvas drawer wiring for mobile (`MobileDrawer.install({...})`) (Phase 9.8e P2) |
+| `js/error-popup.js` | Dependency-free persistent error modal + global `onerror`/rejection/`alert()` handlers. `window.ErrorPopup`/`showError` (neutral) with `CMErrorPopup`/`showErrorPopup` back-compat aliases. Uses `--ui-*` theme tokens (Phase 10.1) |
 
 ### Docs + tooling
 
@@ -54,7 +57,8 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `scripts/check_index_skeleton.py` | Strict-diff CI guard for the head template |
 | `scripts/build-vendor-manifest.sh` + `verify-vendor-manifest.sh` | Cross-repo vendor manifest tooling (Phase 8 CI gate) |
 | `scripts/vendor-manifest.json` | SHA256 + size manifest used to detect drift between consumer `shared/` mounts and canonical |
-| `scripts/export-pitch-pdf.mjs` | Playwright-based pitch-deck PDF export (1440×810, US Letter landscape) |
+| `scripts/export-pitch-pdf.mjs` | **Canonical** Playwright pitch-deck PDF exporter (1440×810, US Letter landscape). Consumers run `node shared/scripts/export-pitch-pdf.mjs` from their repo root (`--repo`/`--deck`/`--out` optional); Playwright is resolved from the consumer's `node_modules`. Replaces the three former per-repo copies |
+| `scripts/voice_service.py` | Generic on-device (CPU) **TTS (Piper) + STT (whisper.cpp)** engine + framework-agnostic `http_dispatch()` implementing the same-origin `/api/voice/*` contract. Zero-egress / air-gap friendly; degrades to Web Speech when unconfigured. Paired with `js/voice-local.js`. Consumer backends import it and forward requests — no per-project engine code |
 
 ---
 
