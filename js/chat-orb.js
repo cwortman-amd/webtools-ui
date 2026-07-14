@@ -25,7 +25,7 @@
  *   <script src="../shared/js/chat-orb.js"></script>
  *   <script>
  *     ChatOrb.mount({
- *       title:       "LLM Benchmark Copilot",
+ *       title:       "LLM Benchmark Agent",
  *       initials:    "LB",
  *       greeting:    "Ask me about a sweep, or type /help to see commands.",
  *       placeholder: "Ask, navigate, or /command…"

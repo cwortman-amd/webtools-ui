@@ -83,7 +83,7 @@
                    native: ["dc-planner"] },
 
     // ── cluster-manager specific (cluster ops domain) ───────────────
-    "/copilot":      { description: "Open the cluster-manager copilot pane",
+    "/agent":      { description: "Open the cluster-manager agent pane",
                        native: ["cluster-manager"] },
     "/remediate":    { description: "Run a remediation playbook",
                        native: ["cluster-manager"] },

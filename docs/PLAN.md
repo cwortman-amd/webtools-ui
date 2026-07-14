@@ -177,7 +177,7 @@ appended to as phases complete.
   sibling consumer that owns it. `llm-benchmark` and `cluster-manager`
   load the catalog and call `coverAll()` from `chat-orb-mount.js`;
   `dc-planner` ships a thin `js/slash-coverage.js` bridge with a
-  4-line preIntent hook in `chat-feedback.js` (so `/copilot`,
+  4-line preIntent hook in `chat-feedback.js` (so `/agent`,
   `/remediate`, `/tools`, etc. now show a friendly hint, and `/pitch`
   `/demo` `/dashboard` `/docs` work natively for the first time).
   `llm-benchmark` test_offline.sh §14b extended with 5 catalog
@@ -691,6 +691,30 @@ appended to as phases complete.
   carries 3 lines of `.hero-toolbar` border tweaks and a
   `var(--ui-header)` color override that'll move into a per-repo
   override stylesheet when 9.8b lands).
+- **2026-07-13 — Phase 10.1 — Voice service + pitch exporter promoted** —
+  On-device voice landed as canonical shared surfaces: `scripts/voice_service.py`
+  (framework-agnostic Piper TTS + whisper.cpp STT with `http_dispatch()` for the
+  `/api/voice/*` contract), `js/voice-local.js` (`window.LocalVoice`), and
+  `js/demo-interactive.js` (`window.InteractiveNarration` push-to-talk Q&A).
+  cluster-manager wired the endpoints via `_voice_service()` +
+  `http_dispatch()` in `cluster_manager_api.py` and imports the module by
+  `sys.path` from `shared/scripts/` — establishing the precedent that shared
+  Python backend code lives in `shared/scripts/` and is consumed by import,
+  not pip. Separately, the triplicated `scripts/export-pitch-pdf.mjs` (which
+  differed only in comment prose across the 3 consumers) was promoted to the
+  canonical `scripts/export-pitch-pdf.mjs`; it now takes `--repo`/`--deck`/`--out`
+  args (defaulting to cwd + `pages/pitch.html` + `pages/pitch.pdf`) and resolves
+  Playwright from the consumer's `node_modules` via `createRequire`, since the
+  symlinked `shared/` realpath (webtools-ui) has no `node_modules`. cluster-manager
+  now invokes `node shared/scripts/export-pitch-pdf.mjs` from its Makefile +
+  self-check and deleted its local copy. Also promoted `js/error-popup.js`
+  (dependency-free persistent error modal + global handlers) to canonical with
+  neutral `window.ErrorPopup`/`showError` globals plus `CMErrorPopup`/
+  `showErrorPopup` back-compat aliases; cluster-manager's 10 pages now load
+  `../shared/js/error-popup.js` and the local copy was deleted. **dc-planner +
+  llm-benchmark still ship their own `scripts/export-pitch-pdf.mjs` (and
+  llm-benchmark an older `js/error-popup.js`), and have not yet wired the voice
+  endpoints — deferred as a follow-up.**
 
 ## Initiative status: complete
 
