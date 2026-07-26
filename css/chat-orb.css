@@ -1149,6 +1149,29 @@
  * Mobile + reduced-motion
  * ───────────────────────────────────────────────────────────────── */
 
+/* Release the desktop min-height on short viewports.
+ *
+ * `.ai-panel` is a resizable desktop surface, so it carries both
+ * `min-height: 360px` and `max-height: min(640px, calc(100dvh - 130px))`.
+ * When the viewport is shorter than 490px those two fight, and CSS resolves
+ * the conflict in favour of min-height — the panel renders 360px tall inside
+ * a viewport that cannot hold it and overflows off the TOP edge, taking the
+ * header and its close button out of reach.
+ *
+ * The mobile block below already resets min-height, but it is keyed to
+ * `max-width: 720px`, and every current iPhone in landscape is wider than
+ * that (iPhone 15 Pro landscape is 734x343). The constraint that matters
+ * here is height, so this is keyed to height and catches the landscape
+ * phones the width breakpoint steps over.
+ *
+ * 490px is where the conflict begins: max-height only drops below the 360px
+ * minimum once 100dvh - 130px does, i.e. below 490px of viewport. */
+@media (max-height: 490px) {
+  .ai-panel {
+    min-height: 0;
+  }
+}
+
 @media (max-width: 720px) {
   .ai-orb {
     --ai-orb-size: 39px;

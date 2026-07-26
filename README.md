@@ -60,7 +60,8 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/templates/{demo-track,voice-config}.schema.json` | JSON Schemas for `data/demo-tracks/*.json` and `voiceBridge.configure({...})` |
 | `templates/index.skeleton.html` | The canonical `pages/index.html` head template (rendered with per-consumer `pages/index.skeleton.values.json`) |
 | `scripts/check_index_skeleton.py` | Strict-diff CI guard for the head template |
-| `scripts/html_consistency_audit.py` | Cross-repo HTML consistency audit over all three consumers (skeleton, body attrs, critical CSS/JS links, nav structure, duplicate IDs). Exits non-zero on ERRORs; `--strict` also gates on WARNs. Supports `--json`, `--summary-only`, `--repo`, `--workspace` |
+| `scripts/html_consistency_audit.py` | Cross-repo HTML consistency audit over all three consumers (skeleton, body attrs, critical CSS/JS links, nav structure, duplicate IDs, iOS safe-area + viewport units). Exits non-zero on ERRORs; `--strict` also gates on WARNs. Supports `--json`, `--summary-only`, `--repo`, `--workspace` |
+| `tests/iphone-ui.mjs` | Live iPhone UI validation across four device profiles × all three consumers. See [iPhone validation](#iphone-validation) |
 | `scripts/build-vendor-manifest.sh` + `verify-vendor-manifest.sh` | Cross-repo vendor manifest tooling (Phase 8 CI gate) |
 | `scripts/vendor-manifest.json` | SHA256 + size manifest used to detect drift between consumer `shared/` mounts and canonical |
 | `scripts/export-pitch-pdf.mjs` | **Canonical** Playwright pitch-deck PDF exporter (1440×810, US Letter landscape). Consumers run `node shared/scripts/export-pitch-pdf.mjs` from their repo root (`--repo`/`--deck`/`--out` optional); Playwright is resolved from the consumer's `node_modules`. Replaces the three former per-repo copies |
@@ -111,6 +112,57 @@ voids every declaration that references them, including the shared focus
 ring. The canonical template sets it on both.
 
 The first ~18 lines of every consumer's `pages/index.html` head are locked down by [`docs/INDEX_SKELETON.md`](docs/INDEX_SKELETON.md)'s strict-diff guard. Per-repo customization (data, personas, repo-specific stylesheets) lives alongside `shared/` in each consumer's own `data/` and `css/` directories.
+
+---
+
+## iPhone validation
+
+Phones are the case a desktop browser never shows you, so it is checked in two
+halves that deliberately do not overlap.
+
+**Live** — `node tests/iphone-ui.mjs` loads each consumer's real `pages/index.html`
+under Playwright iPhone device profiles and asserts what only a running page can
+answer: no horizontal overflow, tap targets at or above the shared 40px touch
+floor, the viewport meta opting into `viewport-fit=cover` without disabling
+pinch-zoom, `text-size-adjust` pinned so iOS does not inflate text on rotation,
+`--ai-kb-inset` publishing a parseable length, and the chat orb panel fitting
+inside the viewport. The device set is a spread rather than a catalogue —
+iPhone SE for the narrowest viewport, iPhone 13 for the common notched case,
+iPhone 15 Pro Max for the widest, and one landscape profile, which is where the
+notch moves to the side and vertical space is tightest.
+
+```bash
+node tests/iphone-ui.mjs                      # full matrix
+node tests/iphone-ui.mjs --repo dc-planner    # one consumer
+node tests/iphone-ui.mjs --device "iPhone SE" # one profile
+node tests/iphone-ui.mjs --json               # machine-readable
+```
+
+Exit codes: `0` all passed, `1` at least one failure, `2` could not run (for
+example Playwright is not installed in any sibling consumer). Playwright is not
+vendored here — it is resolved from whichever consumer has it.
+
+**Static** — checks 24 and 25 of `scripts/html_consistency_audit.py` cover what
+the live half physically cannot. Headless Chromium resolves every
+`env(safe-area-inset-*)` to `0` regardless of the device profile, so the notch
+and home-indicator cutouts are invisible to a browser test. The audit instead
+reads the stylesheets and reports edge-pinned fixed overlays that never receive
+an inset from any sheet the page loads, plus `dvh` lengths declared with no `vh`
+fallback. Both report at WARN, so they surface in the default run without
+failing it; `--strict` gates on them.
+
+Two failure modes worth knowing about, because each was a real bug caught here:
+
+- **Width breakpoints do not catch landscape phones.** Every current iPhone in
+  landscape is wider than 720px, so a `max-width: 720px` block steps straight
+  over them. `.ai-panel` carried both `min-height: 360px` and a `max-height`
+  derived from `100dvh`; on a 343px-tall landscape viewport those conflict, CSS
+  resolves in favour of `min-height`, and the panel overflowed off the top with
+  its close button out of reach. Gate ergonomics on `pointer`/`height`, not width.
+- **`all: unset` silently erases shared floors.** It resets `min-height` and
+  `min-width` to their initial values, so any later sheet using it defeats the
+  shared touch-ergonomics rule at equal specificity. This is why that rule now
+  carries `!important`.
 
 ---
 

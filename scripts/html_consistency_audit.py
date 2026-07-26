@@ -29,6 +29,15 @@ Checks performed:
   22. Agent-bridge.js     — verifies agent-bridge.js is loaded
   23. Duplicate IDs       — scans index.html markup for duplicate element IDs
                             (comments and script/style bodies are excluded)
+  24. Safe-area insets    — edge-pinned fixed overlays that never receive an
+                            env(safe-area-inset-*), counting handling supplied
+                            by any sheet the page loads
+  25. Viewport units      — dvh lengths with no vh fallback declared above them
+
+Checks 24 and 25 are the static half of the iPhone validation. The live half
+is tests/iphone-ui.mjs, which drives real iPhone device profiles; the two do
+not overlap, because headless Chromium resolves every safe-area inset to 0
+and so cannot see the notch at all.
 
 Exit codes:
   0  no ERRORs found (WARNs may still be present)
@@ -308,6 +317,134 @@ def check_duplicate_ids(repo_name: str, html: str) -> None:
             emit("WARN", repo_name, f"index.html: duplicate id=\"{id_val}\" appears {count} times")
 
 
+def check_ios_safe_area(repo_name: str, repo_path: Path) -> None:
+    """Flag viewport-edge overlays in this repo's own CSS that ignore the notch.
+
+    This is the static half of the iPhone checks. Headless Chromium resolves
+    every env(safe-area-inset-*) to 0 no matter which device profile is in
+    use, so tests/iphone-ui.mjs physically cannot observe whether the notch
+    and home-indicator cutouts are respected. What can be observed is whether
+    the rules ask for them at all, which is what this does.
+
+    Scope is the repo's own stylesheets. The shared sheets are covered by
+    their own review and are symlinked in identically everywhere, so auditing
+    them once per consumer would report the same finding three times.
+
+    An element pinned to a viewport edge is the case that matters: on a
+    notched iPhone that edge is exactly where the cutout, the status bar or
+    the home indicator sits, so content placed there is clipped or
+    unreachable unless the inset is added back.
+    """
+    css_dir = repo_path / "css"
+    if not css_dir.is_dir():
+        skip(repo_name, "safe-area insets: no css/ directory in this repo")
+        return
+
+    def rules_in(path: Path):
+        text = re.sub(r"/\*.*?\*/", "", path.read_text(encoding="utf-8", errors="replace"), flags=re.DOTALL)
+        for match in re.finditer(r"([^{}]+)\{([^{}]*)\}", text):
+            yield text, match
+
+    def leaf_selectors(selector_text: str) -> set[str]:
+        """The individual simple selectors a rule head targets."""
+        out = set()
+        for part in selector_text.split(","):
+            part = " ".join(part.split())
+            if part and not part.startswith("@"):
+                out.add(part.split()[-1])   # the subject of the compound
+        return out
+
+    # Safe-area handling frequently lives in a different rule from the one
+    # that pins the element — most often in a responsive block, and for the
+    # shared components in shared/css/base.css rather than the consumer's own
+    # sheet. dc-planner pins `.hero` to the top in dc-planner.css while
+    # base.css supplies its notch padding, so judging a rule in isolation
+    # reports a defect that is not there. Collect every selector that is
+    # given inset handling anywhere the page will load, then flag only the
+    # pinned selectors that appear nowhere in that set.
+    covered: set[str] = set()
+    search_dirs = [css_dir]
+    shared_css = Path(__file__).resolve().parent.parent / "css"
+    if shared_css.is_dir():
+        search_dirs.append(shared_css)
+
+    for directory in search_dirs:
+        for path in sorted(directory.rglob("*.css")):
+            for _text, match in rules_in(path):
+                if "safe-area-inset" in match.group(2):
+                    covered |= leaf_selectors(match.group(1))
+
+    # A rule is interesting when it is fixed-position AND pinned to an edge.
+    # `inset: 0` and the individual edge properties both count.
+    edge = re.compile(r"(^|;|\{)\s*(top|bottom|left|right|inset)\s*:\s*0(px|%)?\s*(;|\})", re.M)
+    offenders = []
+
+    for path in sorted(css_dir.rglob("*.css")):
+        for text, match in rules_in(path):
+            body = match.group(2)
+            if not re.search(r"position\s*:\s*fixed", body):
+                continue
+            if not edge.search(body):
+                continue
+            if "safe-area-inset" in body:
+                continue
+            if leaf_selectors(match.group(1)) & covered:
+                continue
+            selector = " ".join(match.group(1).split())[-60:]
+            line = text[: match.start()].count("\n") + 1
+            offenders.append(f"{path.relative_to(repo_path)}:{line} {selector}")
+
+    if not offenders:
+        pass_msg = "safe-area insets: no edge-pinned fixed overlays ignore env(safe-area-inset-*)"
+        ok(repo_name, pass_msg)
+        return
+
+    for item in offenders[:6]:
+        emit("WARN", repo_name, f"safe-area insets: edge-pinned fixed overlay without env(safe-area-inset-*) — {item}")
+    if len(offenders) > 6:
+        emit("WARN", repo_name, f"safe-area insets: {len(offenders) - 6} further overlay(s) not listed")
+
+
+def check_ios_viewport_units(repo_name: str, repo_path: Path) -> None:
+    """Flag dvh lengths with no vh fallback in this repo's own CSS.
+
+    base.css states the convention directly — "100vh is kept as the fallback
+    for browsers without dvh support" — and pairs each dvh length with a vh
+    declaration immediately above it. A bare dvh leaves anything without dvh
+    support with no value for that property at all, which for a max-height on
+    a fixed overlay means no height constraint rather than a slightly wrong
+    one.
+    """
+    css_dir = repo_path / "css"
+    if not css_dir.is_dir():
+        skip(repo_name, "viewport units: no css/ directory in this repo")
+        return
+
+    unpaired = []
+    for path in sorted(css_dir.rglob("*.css")):
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        for i, line in enumerate(lines):
+            if "dvh" not in line or line.lstrip().startswith(("*", "/*", "//")):
+                continue
+            prop = re.match(r"\s*([a-z-]+)\s*:", line)
+            if not prop:
+                continue
+            # The fallback convention is the same property declared with vh
+            # on one of the preceding lines of the same rule.
+            window = "\n".join(lines[max(0, i - 3):i])
+            if re.search(rf"{re.escape(prop.group(1))}\s*:[^;]*\bvh\b", window):
+                continue
+            unpaired.append(f"{path.relative_to(repo_path)}:{i + 1} {line.strip()[:56]}")
+
+    if not unpaired:
+        ok(repo_name, "viewport units: every dvh length has a vh fallback")
+        return
+    for item in unpaired[:6]:
+        emit("WARN", repo_name, f"viewport units: dvh without a vh fallback — {item}")
+    if len(unpaired) > 6:
+        emit("WARN", repo_name, f"viewport units: {len(unpaired) - 6} further dvh length(s) not listed")
+
+
 def check_present_html(repo_name: str, repo_path: Path) -> None:
     """Check present.html for cross-repo consistency, where the page exists.
 
@@ -452,6 +589,10 @@ def main(argv: list[str]) -> int:
 
         section("7. Duplicate IDs")
         check_duplicate_ids(repo_name, html)
+
+        section("7b. iPhone / iOS static checks")
+        check_ios_safe_area(repo_name, repo_path)
+        check_ios_viewport_units(repo_name, repo_path)
 
         section("8. present.html")
         check_present_html(repo_name, repo_path)

@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-07-26T12:57:38Z",
-  "head": "b4f57926262645edd602cc17fa21924601416580",
+  "generated_at": "2026-07-26T13:40:25Z",
+  "head": "5a53aeb64361b46bba43829bbe0b3ba7229a4fb2",
   "files": [
-    { "path": "README.md", "sha256": "29c3d536a70cdc7064526e509188b9f2ea0c70b94c8ac84ff281add20e0d0c24", "size": 12358 },
-    { "path": "css/base.css", "sha256": "dbb1e5b1fb071c368d33639a33d46a14dcafc41581fd65dd58069a3a4c066056", "size": 39420 },
-    { "path": "css/chat-orb.css", "sha256": "0e9e288b8700593de2beab9fecb2e0641362d7b427ed0d2aa0317d60e1201db3", "size": 31998 },
+    { "path": "README.md", "sha256": "de5961fcc81b848983e4a1e2f5584bc91e9bf259a4942c948521f7cc7b5003ab", "size": 15336 },
+    { "path": "css/base.css", "sha256": "ccf318740afbff87fd6ee484d4fcc30b1d328c54b5aea981e5a252b7d5177d78", "size": 41298 },
+    { "path": "css/chat-orb.css", "sha256": "a4de2a2dd105eb6a1a6b76b9051d376f44659d9170bcc3b5d06d662da7efb154", "size": 33033 },
     { "path": "css/chrome.css", "sha256": "a7a08be694195d4b0483113d9b4cd933b7162418c287cbbaf87ef3e2a5c4c793", "size": 10764 },
     { "path": "css/components.css", "sha256": "b402d6b5dbbcfd60d60f75c99a55cb31d9f87fbc6e35c484285cc0cc724b2479", "size": 6275 },
     { "path": "css/demo-mode.css", "sha256": "418478165dfbbb06c752700db137d9b2ef7cda59c54403edcd9850b82cfba6ed", "size": 22077 },

@@ -477,6 +477,40 @@ tr:hover .bom-delete-btn { opacity: 0.6; }
 .warning { color: var(--ui-warning-text); font-size: 0.86rem; }
 .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
+/* ── Skip link ────────────────────────────────────────────────────────
+ * cluster-manager/pages/index.html ships `<a class="skip-link">` and its
+ * comment states the style lives here, but it never did: with no rule to
+ * match, the anchor rendered as ordinary static text in the top-left
+ * corner of every page load, overlapping the hero.
+ *
+ * Off-screen rather than `display: none` or `visibility: hidden`, because
+ * both of those remove the link from the tab order and defeat the entire
+ * purpose. On focus it returns to the corner as a normal, hit-testable
+ * control sized to the touch floor used elsewhere in this file. */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  padding: 10px 16px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-accent);
+  border-radius: 0 0 8px 0;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 /* ── User Mode Visibility (Phase 9.8e P1.1, 2026-05-05) ──────────────
  * Canonical "gate UI by user mode" pattern shared across all three
  * sibling consumer dashboards. Mark any element that should only
@@ -816,18 +850,29 @@ body.nav-mobile-open .nav-backdrop {
 
   /* Apple HIG puts the minimum comfortable target at 44pt. 40px is the
      compromise the ≤640px block already settled on for visual density;
-     matching it here keeps the two blocks from disagreeing. */
+     matching it here keeps the two blocks from disagreeing.
+ 
+     `!important` for the same reason the font-size above carries it: these
+     are floors, not preferences. Several of these controls are restyled in
+     later sheets with `all: unset` — `.nav-btn` in shell.css, and
+     `.hero-icon-btn` in dc-planner.css — which resets min-height and
+     min-width back to their initial values. Those sheets load after this
+     one at equal specificity, so without `!important` the floor was simply
+     erased and the sidebar buttons measured 32-34px on a phone while the
+     rule that was supposed to prevent exactly that appeared to be present
+     and correct. */
   .hero-icon-btn,
   .tab-btn,
   .nav-btn,
   .util-btn,
   .side-nav-tab,
+  .hero-title,
   .modal-close {
-    min-height: 40px;
+    min-height: 40px !important;
   }
 
   .hero-icon-btn {
-    min-width: 40px;
+    min-width: 40px !important;
   }
 
   /* Landscape iPhone still has a home indicator. */
