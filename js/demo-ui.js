@@ -494,10 +494,23 @@
     // Track the ring to its element while the page glides into place,
     // but DO NOT call showFor() (which would start another eased scroll
     // and feed back into this listener). aimAt() is pure position math.
+    //
+    // Coalesced into one rAF callback per frame. aimAt() reads the target's
+    // bounding rect and then writes four inline positions, so running it once
+    // per scroll event interleaves reads with writes many times a frame and
+    // forces a layout recalculation on each read. Scrolling can emit events
+    // considerably faster than the compositor paints, and the ring can only
+    // land in one place per frame regardless, so the extra passes are wasted
+    // work during precisely the eased scroll a tour spends most of its time in.
+    let aimFrame = 0;
     function reAimHighlight() {
-      if (lastTargetEl && document.contains(lastTargetEl)) {
-        ui.highlight.aimAt(lastTargetEl);
-      }
+      if (aimFrame) return;
+      aimFrame = requestAnimationFrame(() => {
+        aimFrame = 0;
+        if (lastTargetEl && document.contains(lastTargetEl)) {
+          ui.highlight.aimAt(lastTargetEl);
+        }
+      });
     }
     window.addEventListener("scroll", reAimHighlight, { passive: true });
     window.addEventListener("resize", reAimHighlight, { passive: true });

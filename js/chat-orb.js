@@ -268,21 +268,41 @@
   //
   // `visualViewport` is absent on older browsers and on desktop the
   // computed inset is always 0, so this is inert everywhere but mobile.
+  //
+  // `visualViewport` scroll fires for ordinary page scrolling too, not just
+  // for the keyboard, so this runs constantly on mobile. Two guards keep it
+  // cheap: the work is coalesced into one rAF callback per frame, and an
+  // unchanged inset writes nothing. Setting a custom property on the root
+  // element invalidates style for the whole document, and the inset is 0 and
+  // unchanging through every scroll that does not involve the keyboard — by
+  // far the common case — so the write is almost always a document-wide
+  // invalidation in exchange for no visual change at all.
   function trackKeyboardInset() {
     var vv = global.visualViewport;
     if (!vv) return;
 
-    function sync() {
+    var lastInset = null;
+    var frame = 0;
+
+    function measure() {
+      frame = 0;
       // offsetTop covers the case where the page itself is scrolled
       // within the visual viewport (pinch-zoom / scrolled-into-view).
       var overlap = global.innerHeight - vv.height - vv.offsetTop;
       var inset = overlap > 0 ? Math.round(overlap) : 0;
+      if (inset === lastInset) return;
+      lastInset = inset;
       document.documentElement.style.setProperty("--ai-kb-inset", inset + "px");
+    }
+
+    function sync() {
+      if (frame) return;
+      frame = global.requestAnimationFrame(measure);
     }
 
     vv.addEventListener("resize", sync);
     vv.addEventListener("scroll", sync);
-    sync();
+    measure();
   }
 
   // Coarse pointer == touch. Used to suppress desktop-only affordances
