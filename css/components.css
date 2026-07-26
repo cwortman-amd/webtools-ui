@@ -1,0 +1,237 @@
+/*!
+ * webtools-ui canonical asset: components.css
+ *
+ * Small reusable UI primitives shared by sibling web tools. These styles are
+ * token-driven and intentionally domain-neutral.
+ */
+
+:root {
+  --component-accent: var(--portal-accent, var(--ui-accent));
+  --component-accent-soft: var(--portal-accent-soft, var(--ui-accent-soft, color-mix(in srgb, var(--component-accent) 16%, transparent)));
+  --component-link-hover: var(--portal-link-hover, var(--ui-link-hover, var(--component-accent)));
+  --component-radius-sm: var(--portal-radius-sm, 6px);
+  --component-radius-md: var(--portal-radius-md, 10px);
+}
+
+/* Stat cards
+ *
+ * Deliberately NOT named `.stats` / `.stat`: base.css already owns those two
+ * class names for the older summary-chip strip (a 4-column grid with
+ * `.stat .label` / `.stat .value` children), and base.css is loaded by every
+ * page. Reusing the block names here would silently restyle every existing
+ * stat block in all three consumers the moment this sheet is linked, because
+ * components.css loads after base.css.
+ *
+ * The two components can coexist under distinct names, so adopting this one
+ * is an opt-in per element rather than a repo-wide visual change.
+ */
+.statcard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(108px, 1fr));
+  gap: 10px;
+}
+
+.statcard {
+  min-width: 108px;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--component-radius-md);
+  background: var(--skin-panel-bg, var(--ui-panel));
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.statcard--accent { border-color: color-mix(in srgb, var(--component-accent) 40%, var(--ui-line)); }
+
+.statcard__label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ui-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.statcard__num {
+  display: block;
+  color: var(--ui-header);
+  font-size: 1.34rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.statcard--accent .statcard__num { color: var(--component-accent); }
+
+/* Chips */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.chip {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 5px 9px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--component-radius-sm);
+  color: var(--ui-muted);
+  background: color-mix(in srgb, var(--ui-text) 3%, transparent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chip:hover {
+  color: var(--ui-text);
+  background: color-mix(in srgb, var(--ui-text) 7%, transparent);
+  transform: translateY(-1px);
+}
+
+.chip[aria-checked="true"],
+.chip.is-active {
+  color: var(--ui-header);
+  border-color: var(--component-accent);
+  background: var(--component-accent-soft);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--component-accent) 18%, transparent);
+}
+
+.active-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.active-chip {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--component-accent) 34%, var(--ui-line));
+  border-radius: var(--component-radius-sm);
+  color: var(--component-link-hover);
+  background: var(--component-accent-soft);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.active-chip:hover { color: var(--ui-header); }
+.active-chip .material-symbols-outlined { font-size: 13px; }
+
+/* Code and copy affordances */
+.code-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.code-block {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 14px 44px 14px 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--component-radius-md);
+  background: var(--skin-input-bg, var(--ui-bg-soft));
+  color: var(--ui-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: pre;
+  overflow-x: auto;
+  /* Contain the horizontal flick: on iOS an over-scroll here otherwise
+     chains to the page and can trigger the edge back-swipe gesture. */
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+pre.code-block code {
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  white-space: pre;
+}
+
+.code-block .tok-comment { color: color-mix(in srgb, var(--ui-muted) 92%, transparent); font-style: italic; }
+.code-block .tok-str { color: #9ece6a; }
+.code-block .tok-var { color: #e0af68; }
+.code-block .tok-flag { color: #7dcfff; }
+.code-block .tok-cmd { color: var(--component-accent); font-weight: 700; }
+.code-block .tok-op { color: color-mix(in srgb, var(--ui-text) 70%, transparent); }
+
+.copy-btn {
+  all: unset;
+  box-sizing: border-box;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: var(--ui-muted);
+  background: color-mix(in srgb, var(--ui-panel) 84%, transparent);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--component-radius-sm);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.copy-btn:hover {
+  color: var(--component-link-hover);
+  border-color: color-mix(in srgb, var(--component-accent) 50%, var(--ui-line));
+  background: var(--component-accent-soft);
+  transform: scale(1.06);
+}
+
+.copy-btn.is-copied { color: var(--rd-live-ready, #22c55e); border-color: var(--rd-live-ready, #22c55e); }
+
+.copy-btn .material-symbols-outlined { font-size: 17px; }
+
+@media (max-width: 640px) {
+  .statcard-grid { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .statcard-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .statcard {
+    min-width: 0;
+    padding: 8px 7px;
+  }
+
+  .statcard__label {
+    min-height: 2.4em;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+  }
+
+  .statcard__num { font-size: 1.12rem; }
+
+  .chip,
+  .active-chip {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .chip { padding: 7px 10px; }
+
+  .code-block {
+    max-width: 100%;
+    padding: 12px 40px 12px 12px;
+    font-size: 0.74rem;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .chip:hover,
+  .copy-btn:hover {
+    transform: none;
+  }
+}
