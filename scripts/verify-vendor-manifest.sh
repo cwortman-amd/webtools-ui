@@ -54,18 +54,52 @@ if [ -z "$SHARED_DIR" ] || [ ! -d "$SHARED_DIR" ]; then
 fi
 
 # Parse the manifest. Prefer python3 (always available); fall back to jq.
-ENTRIES=""
+#
+# The manifest path is passed as argv, never interpolated into the program
+# text. Interpolating it made any path containing a quote execute as Python.
+#
+# Records are NUL-separated, not newline-separated, so a path containing a
+# newline stays one record instead of splitting into a bogus entry pair.
+# They go to a temp file because bash command substitution silently drops
+# NUL bytes.
+#
+# The parse status is checked explicitly because this script deliberately
+# does not `set -e`: without the check a failed parse left the entry list
+# empty, the compare loop never ran, all counters stayed 0, and the gate
+# exited 0. A corrupt or truncated manifest therefore reported success —
+# the exact failure mode a manifest gate exists to prevent.
+ENTRY_FILE=$(mktemp)
+trap 'rm -f "$ENTRY_FILE"' EXIT
+PARSE_OK=0
 if command -v python3 >/dev/null 2>&1; then
-  ENTRIES=$(python3 -c "
+  python3 -c '
 import json, sys
-m = json.load(open('$MANIFEST'))
-for f in m.get('files', []):
-    print(f\"{f['sha256']} {f['size']} {f['path']}\")
-")
+with open(sys.argv[1]) as fh:
+    m = json.load(fh)
+if not isinstance(m, dict) or not isinstance(m.get("files"), list):
+    sys.stderr.write("manifest has no top-level \"files\" array\n")
+    raise SystemExit(1)
+out = sys.stdout
+for f in m["files"]:
+    out.write("{} {} {}\0".format(f["sha256"], f["size"], f["path"]))
+' "$MANIFEST" > "$ENTRY_FILE" && PARSE_OK=1
 elif command -v jq >/dev/null 2>&1; then
-  ENTRIES=$(jq -r '.files[] | "\(.sha256) \(.size) \(.path)"' "$MANIFEST")
+  jq -ej '.files[] | "\(.sha256) \(.size) \(.path)\u0000"' \
+     "$MANIFEST" > "$ENTRY_FILE" && PARSE_OK=1
 else
   echo "FAIL  need python3 or jq to parse $MANIFEST"
+  exit 2
+fi
+
+if [ "$PARSE_OK" -ne 1 ]; then
+  echo "FAIL  could not parse $MANIFEST (corrupt, truncated, or wrong schema)"
+  exit 2
+fi
+
+# An empty manifest is indistinguishable from "everything matched" once the
+# loop finishes, so reject it up front rather than reporting a vacuous pass.
+if [ ! -s "$ENTRY_FILE" ]; then
+  echo "FAIL  $MANIFEST lists no files — refusing to report a vacuous pass"
   exit 2
 fi
 
@@ -74,7 +108,7 @@ matched=0
 mismatched=0
 missing=0
 
-while IFS=' ' read -r expected_sha expected_size rel_path; do
+while IFS=' ' read -r -d '' expected_sha expected_size rel_path; do
   [ -z "$rel_path" ] && continue
   total=$((total + 1))
   full_path="$SHARED_DIR/$rel_path"
@@ -85,7 +119,10 @@ while IFS=' ' read -r expected_sha expected_size rel_path; do
     continue
   fi
 
-  actual_sha=$(sha256sum "$full_path" | cut -d' ' -f1)
+  # Hash via stdin: given a path argument, GNU sha256sum prefixes its output
+  # with a backslash and escapes the name whenever the path contains a
+  # backslash or newline, which corrupted the parsed hash.
+  actual_sha=$(sha256sum < "$full_path" | cut -d' ' -f1)
   if [ "$actual_sha" = "$expected_sha" ]; then
     matched=$((matched + 1))
   else
@@ -95,7 +132,7 @@ while IFS=' ' read -r expected_sha expected_size rel_path; do
     echo "        actual   sha=${actual_sha:0:12}… size=$actual_size"
     mismatched=$((mismatched + 1))
   fi
-done <<< "$ENTRIES"
+done < "$ENTRY_FILE"
 
 echo ""
 echo "$REPO_NAME · vendor manifest: matched=$matched / $total · drift=$mismatched · missing=$missing"

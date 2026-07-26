@@ -140,10 +140,28 @@
     }
   }
 
+  /**
+   * Run a slash command programmatically, exactly as if the user had typed
+   * it: the input is echoed into the log and the handler's reply rendered.
+   *
+   *   SlashRouter.run("/demo executive");
+   *
+   * Documented in PLAN.md and relied on by chat-orb's demo audience picker,
+   * but never actually implemented here — callers silently no-op'd.
+   */
+  function run(text, opts) {
+    ensureChatOrb();
+    if (typeof global.ChatOrb.run !== "function") {
+      throw new Error("SlashRouter.run: this build of chat-orb.js is too old (no ChatOrb.run)");
+    }
+    return global.ChatOrb.run(text, opts);
+  }
+
   global.SlashRouter = {
     registerAll: registerAll,
     noop:        noop,
     redirect:    redirect,
-    coverAll:    coverAll
+    coverAll:    coverAll,
+    run:         run
   };
 })(typeof window !== "undefined" ? window : this);

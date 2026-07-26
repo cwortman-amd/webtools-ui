@@ -30,6 +30,7 @@
   var _state = STATE.IDLE;
   var _btn = null;
   var _inited = false;
+  var _syncTimer = null;
   var _engine = null;        // DemoEngine instance (DcDemo.engine), once present
   var _captureMode = null;   // "local" | "bridge"
   var _bridgeResolve = null; // pending onTranscript resolver for voiceBridge
@@ -306,11 +307,41 @@
     if (lv && typeof lv.capabilities === "function") { lv.capabilities().catch(function () {}); }
     // Poll for the demo engine + phase to show/hide the control. Cheap and
     // resilient to the engine being created lazily when a demo starts.
-    setInterval(_syncVisibility, 700);
+    _syncTimer = setInterval(_syncVisibility, 700);
+    // Stop polling while the tab is in the background; the visibility state
+    // cannot change under the user there, and this otherwise kept waking the
+    // page every 700ms for the life of the session.
+    _doc().addEventListener("visibilitychange", _onVisibilityChange);
     _syncVisibility();
   }
 
-  global.InteractiveNarration = { init: init, ask: ask, isBusy: isBusy };
+  function _onVisibilityChange() {
+    if (!_inited) return;
+    if (_doc().hidden) {
+      if (_syncTimer !== null) { clearInterval(_syncTimer); _syncTimer = null; }
+    } else if (_syncTimer === null) {
+      _syncTimer = setInterval(_syncVisibility, 700);
+      _syncVisibility();
+    }
+  }
+
+  // Tear down everything init() created. Without this the 700ms interval and
+  // the button's click listener lived for the whole page session with no way
+  // to release them — a problem for SPAs and for repeated demo mounts.
+  function destroy() {
+    if (!_inited) return;
+    _inited = false;
+    if (_syncTimer !== null) { clearInterval(_syncTimer); _syncTimer = null; }
+    if (_doc()) _doc().removeEventListener("visibilitychange", _onVisibilityChange);
+    if (_btn) {
+      _btn.removeEventListener("click", _onClick);
+      if (_btn.parentNode) _btn.parentNode.removeChild(_btn);
+      _btn = null;
+    }
+    _state = STATE.IDLE;
+  }
+
+  global.InteractiveNarration = { init: init, ask: ask, isBusy: isBusy, destroy: destroy };
 
   if (_doc()) {
     if (_doc().readyState === "loading") {

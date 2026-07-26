@@ -3,6 +3,20 @@
   
   var PREFIX = window.SHELL_PREFIX || "app";
 
+  /* Reading localStorage THROWS (not returns null) on iOS Safari when
+   * "Block All Cookies" is on, and in some Lockdown/private contexts.
+   * Every setItem in this file was already wrapped; the reads in init()
+   * were not, so a blocked-storage iPhone threw before any event was
+   * bound and left the whole shell inert — hamburger included. */
+  function readPref(key, fallback) {
+    try {
+      var v = localStorage.getItem(PREFIX + "-" + key);
+      return v === null || v === undefined ? fallback : v;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
   var SKIN_LABELS = {
     amd: "AMD Red",
     "amd-gold": "AMD Gold",
@@ -168,14 +182,13 @@
      * was retired — sidebar is the only supported layout, so we
      * always force "side". setLayout() also overwrites any stale
      * `<prefix>-nav-layout=top` value on first run. */
-    var savedCollapsed = false;
-    try { savedCollapsed = localStorage.getItem(PREFIX + "-nav-collapsed") === "1"; } catch (_) { }
+    var savedCollapsed = readPref("nav-collapsed", "0") === "1";
 
     setLayout("side");
     setCollapsed(savedCollapsed);
-    setSkin(localStorage.getItem(PREFIX + "-skin") || "amd-gold");
-    setTheme(localStorage.getItem(PREFIX + "-theme") || "dark");
-    setUserMode(localStorage.getItem(PREFIX + "-user-mode") || "standard");
+    setSkin(readPref("skin", "amd-gold"));
+    setTheme(readPref("theme", "dark"));
+    setUserMode(readPref("user-mode", "standard"));
 
     /* ── Event bindings ── */
 

@@ -2,7 +2,7 @@
  * webtools-ui/js/slash-catalog.js
  *
  * Canonical catalog of every slash command shipped by any sibling consumer
- * (`llm-benchmark`, `dc-planner`, `cluster-manager`). Used by the cross-repo
+ * (`llm-benchmark`, `dc-planner`, `cluster-manager`, `demo-portal`). Used by the cross-repo
  * "every command everywhere" coverage system (harmonization Phase 4):
  *
  *   - Each consumer's chat-orb-mount.js registers its NATIVE commands first.
@@ -32,7 +32,7 @@
    *   description: human-readable summary, shown in /help
    *   native:      array of consumer ids that natively implement this
    *                command. Allowed values: "llm-benchmark", "dc-planner",
-   *                "cluster-manager".
+   *                "cluster-manager", "demo-portal".
    *   redirect:    optional URL — if present, the no-op variant becomes a
    *                redirect that points the user at the consumer that owns it.
    *   placeholder: optional string — overrides the default no-op reply.
@@ -40,19 +40,29 @@
   var CATALOG = {
     // ── Built-in (registered automatically by chat-orb.js) ──────────
     "/help":  { description: "Show all available commands",
-                native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
+                native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
     "/clear": { description: "Clear the chat history",
-                native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
+                native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
     "/llm":   { description: "Configure or toggle the LLM agent",
-                native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
+                native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
 
     // ── Cross-repo navigation (every consumer should implement) ─────
     "/pitch":     { description: "Open the executive pitch deck (pitch.html)",
                     native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
-    "/demo":      { description: "Start the narrated dashboard walkthrough",
-                    native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
+    "/demo":      { description: "Open or start a demo experience",
+                    native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
     "/dashboard": { description: "Return to the main dashboard",
                     native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
+
+    // ── demo-portal specific (manifest-driven catalog) ─────────────
+    "/search":    { description: "Search the demo catalog",
+                    native: ["demo-portal"] },
+    "/runbook":   { description: "Show a demo runbook or source URL",
+                    native: ["demo-portal"] },
+    "/favorites": { description: "List locally saved demo favorites",
+                    native: ["demo-portal"] },
+    "/newdemo":   { description: "Create a draft demo manifest entry",
+                    native: ["demo-portal"] },
 
     // ── Cross-repo agent operations (dc-planner + cluster-manager) ──
     "/journal":  { description: "Show or manage the agent journal",
@@ -71,8 +81,8 @@
                    native: ["dc-planner", "cluster-manager"] },
     "/workshop": { description: "Open the workshop / scratchpad mode",
                    native: ["dc-planner", "cluster-manager"] },
-    "/voice":    { description: "Toggle voice output / speak last reply",
-                   native: ["cluster-manager"] },
+    "/voice":    { description: "Toggle voice input/output or speak text",
+                   native: ["cluster-manager", "demo-portal"] },
 
     // ── dc-planner specific (planner / TCO domain) ──────────────────
     "/skills":   { description: "List skills in the agent registry",
@@ -104,7 +114,8 @@
   var CONSUMER_URLS = {
     "llm-benchmark":   "(see https://github.com/cwortman-amd/llm-benchmark)",
     "dc-planner":      "(see https://github.com/cwortman-amd/dc-planner)",
-    "cluster-manager": "(see https://github.com/cwortman-amd/cluster-manager)"
+    "cluster-manager": "(see https://github.com/cwortman-amd/cluster-manager)",
+    "demo-portal":     "(see https://github.com/cwortman-amd/demo-portal)"
   };
 
   function listCommands() { return Object.keys(CATALOG).sort(); }

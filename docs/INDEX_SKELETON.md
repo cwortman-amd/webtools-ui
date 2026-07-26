@@ -15,7 +15,7 @@ This doc describes the template + per-consumer values + strict-diff CI guard tha
 
 ```html
 <!doctype html>
-<html lang="en" data-skin="matte-dark" data-theme="dark">
+<html lang="en" data-skin="amd-gold" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -26,9 +26,10 @@ This doc describes the template + per-consumer values + strict-diff CI guard tha
   <link rel="stylesheet" href="../shared/css/material-symbols.css" />
   <link rel="stylesheet" href="../shared/css/base.css" />
 {{?PER_REPO_STYLESHEETS}}
-  <link rel="stylesheet" id="skinStylesheet" href="../shared/css/skins/matte-dark.css" />
+  <link rel="stylesheet" id="skinStylesheet" href="../shared/css/skins/amd-gold.css" />
   <link rel="stylesheet" href="../shared/css/chat-orb.css" />
   <link rel="stylesheet" href="../shared/css/demo-mode.css" />
+  <link rel="stylesheet" href="../shared/css/shell.css" />
 {{?MANIFEST_LINK}}
 {{?THEME_COLOR_META}}
   <!-- end:skeleton -->

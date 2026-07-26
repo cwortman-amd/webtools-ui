@@ -1025,8 +1025,8 @@ across all 4 repos.
   the right engine code path). The visible chrome harmonization is
   now end-to-end (catalog → picker modal → audience-aware controller),
   closing the "Phase 9.8e-2" item that was promised on commit. See
-  [`docs/DEMO.md` §3.1 adoption matrix](DEMO.md) for the per-repo
-  status. **Commits**: webtools-ui `<hash>` (`js/demo-picker.js` +
+  each consumer's own `docs/DEMO.md` §3.1 adoption matrix for the
+  per-repo status (that file lives in the consumer repos, not here). **Commits**: webtools-ui `<hash>` (`js/demo-picker.js` +
   `css/demo-mode.css` `.demo-picker*` rules + skeleton template
   promotion of `demo-mode.css` + `shared/js/demo-ui.js`
   `DcDemo.openLauncher` + vendor-manifest regen + PLAN/DEMO updates),

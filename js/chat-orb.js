@@ -234,7 +234,7 @@
         : ""),
       '<div class="ai-llm-card" id="chatLlmCard" role="region" aria-label="LLM agent settings">',
       '  <div class="ai-llm-row"><label for="chatLlmHost">Host</label><input type="text" id="chatLlmHost" placeholder="10.0.0.5:11434" autocomplete="off" /></div>',
-      '  <div class="ai-llm-row"><label for="chatLlmModel">Model</label><input type="text" id="chatLlmModel" placeholder="llama3.1:8b-instruct" autocomplete="off" /></div>',
+      '  <div class="ai-llm-row"><label for="chatLlmModel">Model</label><input type="text" id="chatLlmModel" placeholder="qwen2.5:0.5b" autocomplete="off" /></div>',
       '  <div class="ai-llm-row"><label for="chatLlmPath">API path</label><input type="text" id="chatLlmPath" placeholder="/v1/chat/completions" autocomplete="off" /></div>',
       '  <div class="ai-llm-row"><label for="chatLlmKey">API key</label><input type="password" id="chatLlmKey" placeholder="optional bearer token" autocomplete="off" /></div>',
       '  <div class="ai-llm-row"><label for="chatLlmMode">Mode</label><select id="chatLlmMode"><option value="fallback">Fallback (regex first)</option><option value="primary">Primary (LLM first)</option></select></div>',
@@ -255,6 +255,40 @@
       "</div>"
     ].join("");
     return panel;
+  }
+
+  // ── iOS software-keyboard tracking ───────────────────────────────
+  // On iPhone the panel is `position: fixed; bottom: 0`, but iOS Safari
+  // does NOT shrink the layout viewport when the keyboard opens — it
+  // overlays it. So the composer the user just tapped ends up behind the
+  // keyboard. visualViewport reports the *visible* rect, and the gap
+  // between its bottom edge and the layout viewport bottom is exactly the
+  // keyboard height. We publish it as `--ai-kb-inset`; chat-orb.css
+  // translates the panel up by that amount.
+  //
+  // `visualViewport` is absent on older browsers and on desktop the
+  // computed inset is always 0, so this is inert everywhere but mobile.
+  function trackKeyboardInset() {
+    var vv = global.visualViewport;
+    if (!vv) return;
+
+    function sync() {
+      // offsetTop covers the case where the page itself is scrolled
+      // within the visual viewport (pinch-zoom / scrolled-into-view).
+      var overlap = global.innerHeight - vv.height - vv.offsetTop;
+      var inset = overlap > 0 ? Math.round(overlap) : 0;
+      document.documentElement.style.setProperty("--ai-kb-inset", inset + "px");
+    }
+
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    sync();
+  }
+
+  // Coarse pointer == touch. Used to suppress desktop-only affordances
+  // (autofocus, which yanks up the keyboard and covers half the panel).
+  function isTouch() {
+    return !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
   }
 
   // ── Event wiring ─────────────────────────────────────────────────
@@ -353,8 +387,13 @@
       if (state.history.length === 0) {
         printSystem(state.cfg.greeting);
       }
-      setTimeout(function () { ui.input.focus(); }, 80);
+      // Don't autofocus on touch: it summons the iOS keyboard before the
+      // user has asked to type, hiding the message log they just opened.
+      if (!isTouch()) setTimeout(function () { ui.input.focus(); }, 80);
     } else {
+      // Blur so iOS retracts the keyboard along with the panel; without
+      // this the keyboard can linger over the page after the panel closes.
+      try { ui.input.blur(); } catch (_) {}
       ui.llmCard.classList.remove("show");
       if (ui.feedbackCard) ui.feedbackCard.classList.remove("show");
       if (ui.demoCard) ui.demoCard.classList.remove("show");
@@ -488,9 +527,12 @@
       catch (e) { console.warn("[chat-orb] onDemoSelect threw:", e); }
       return;
     }
-    if (global.SlashRouter && typeof global.SlashRouter.run === "function") {
-      global.SlashRouter.run("/demo " + audienceId);
-    }
+    // Route through this orb's own dispatcher. This used to call
+    // `SlashRouter.run(...)`, which SlashRouter never exported, so with no
+    // onDemoSelect configured the audience picker silently did nothing.
+    // Dispatching locally also means the fallback works whether or not
+    // slash-router.js is loaded.
+    runCommand("/demo " + audienceId, { echo: true });
   }
 
   function setFeedbackStatus(text, kind) {
@@ -582,7 +624,10 @@
   }
 
   // ── Message log ──────────────────────────────────────────────────
-  function addMessage(role, text, opts) {
+
+  // Render only. Kept separate from addMessage so history replay can paint
+  // the log without touching state.history or localStorage.
+  function renderMessage(role, text, opts) {
     opts = opts || {};
     var wrap = document.createElement("div");
     wrap.className = "ai-msg ai-msg-" + role;
@@ -596,7 +641,11 @@
     wrap.appendChild(bubble);
     ui.msgs.appendChild(wrap);
     ui.msgs.scrollTop = ui.msgs.scrollHeight;
+  }
 
+  function addMessage(role, text, opts) {
+    opts = opts || {};
+    renderMessage(role, text, opts);
     state.history.push({ role: role, text: text, html: !!opts.html, ts: Date.now() });
     saveHistory();
   }
@@ -672,14 +721,15 @@
     });
   }
 
-  function submitInput() {
-    var text = (ui.input.value || "").trim();
-    if (!text) return;
-    ui.input.value = "";
-    printUser(text);
+  // Dispatch `text` and render whatever comes back, exactly as if the user
+  // had typed it. Shared by the input box and by in-orb affordances (the
+  // demo audience picker) that need to trigger a command programmatically.
+  function runCommand(text, opts) {
+    opts = opts || {};
+    if (opts.echo) printUser(text);
 
     setTyping(true);
-    Promise.resolve(dispatch(text)).then(function (result) {
+    return Promise.resolve(dispatch(text)).then(function (result) {
       setTyping(false);
       if (!result) return;
       if (typeof result === "string") {
@@ -701,21 +751,48 @@
     });
   }
 
+  function submitInput() {
+    var text = (ui.input.value || "").trim();
+    if (!text) return;
+    ui.input.value = "";
+    runCommand(text, { echo: true });
+  }
+
   // ── Built-in slash handlers (/help, /clear, /llm) ────────────────
   function builtinHelp(args) {
-    var cmds = listCommands().filter(function (c) {
-      if (c === "*") return false;
+    var native = [];
+    var elsewhere = [];
+    listCommands().forEach(function (c) {
+      if (c === "*") return;
       var meta = (state.handlers[c] && state.handlers[c].meta) || {};
-      return !meta.outOfDomain && !meta.hiddenInHelp;
+      if (meta.hiddenInHelp) return;
+      (meta.outOfDomain ? elsewhere : native).push(c);
     });
+
     // Keep help as plain text so it survives history replay without
     // exposing raw HTML tags in the message bubble.
     var lines = ["Commands available in this chat orb:", ""];
-    cmds.forEach(function (c) {
+    native.forEach(function (c) {
       var meta = state.handlers[c].meta || {};
-      var desc = meta.description || "(no description)";
-      lines.push(c + " — " + desc);
+      lines.push(c + " — " + (meta.description || "(no description)"));
     });
+
+    // SlashRouter.coverAll() exists to give every consumer an identical
+    // command surface, registering the other apps' commands as friendly
+    // no-ops. Filtering `outOfDomain` out of /help entirely defeated that:
+    // the handlers answered when typed but were undiscoverable. List them
+    // in their own section instead, so they're advertised without being
+    // confused for features of this app.
+    if (elsewhere.length) {
+      lines.push("");
+      lines.push("Available in the other dashboards:");
+      lines.push("");
+      elsewhere.forEach(function (c) {
+        var meta = state.handlers[c].meta || {};
+        lines.push(c + " — " + (meta.description || "(no description)"));
+      });
+    }
+
     if (typeof state.cfg.onHelpExtra === "function") {
       var extra = state.cfg.onHelpExtra();
       if (extra) {
@@ -813,25 +890,31 @@
     }
 
     wireEvents();
+    trackKeyboardInset();
     refreshStatusSubtitle();
     global.addEventListener("voicebridge:tts-mode-changed", refreshStatusSubtitle);
 
     // Replay any persisted history (tail only, to keep things snappy).
+    //
+    // Replay renders without persisting. The previous version called
+    // addMessage and popped the duplicate afterwards, but addMessage had
+    // already written the duplicate to localStorage, so the next mount read
+    // it back as real history and the last message multiplied on every load.
+    //
+    // A message is rendered as HTML only when its stored `html` flag says so.
+    // There used to be a sniff here that re-flagged any stored system message
+    // matching /<(div|code|br)\b/ as HTML, for the benefit of legacy /help
+    // replies. That turned the log into a stored-XSS sink: dispatch() echoes
+    // unknown commands back verbatim ("Unknown command `…`") as a persisted
+    // system message, so typing a space-free payload like
+    // `/<div/onmouseover=alert(1)/style=position:fixed;inset:0>` got stored as
+    // plain text and then re-parsed as markup on every subsequent page load.
+    // /help emits plain text now, so the compatibility shim only bought
+    // correct rendering for history written by much older builds.
     state.history = loadHistory();
     state.history.slice(-10).forEach(function (m) {
-      var html = !!m.html;
-      // Backward compatibility: older /help replies were persisted as raw
-      // HTML strings without an `html` flag, which rendered literal tags
-      // after reopening. Detect and render those as HTML once.
-      if (!html && m && m.role === "system" && /<(div|code|br)\b/i.test(String(m.text || ""))) {
-        html = true;
-      }
-      addMessage(m.role, m.text, { html: html });
-      // Don't double-persist; remove the duplicate appended by addMessage.
-      state.history.pop();
+      renderMessage(m.role, m.text, { html: !!m.html });
     });
-    state.history = loadHistory(); // restore canonical history after replay
-    saveHistory();
 
     state.mounted = true;
     return Promise.resolve(api);
@@ -843,6 +926,9 @@
     unregister:  unregister,
     listCommands: listCommands,
     dispatch:    dispatch,
+    // dispatch() resolves the reply but renders nothing; run() dispatches
+    // and prints the result into the log, as typing the command would.
+    run:         function (text, opts) { return runCommand(text, opts || { echo: true }); },
     open:        function () { setOpen(true); },
     close:       function () { setOpen(false); },
     toggle:      toggle,

@@ -78,6 +78,12 @@ def render_template(template_text: str, values: dict) -> str:
     indentation). Inline placeholders within a line are substituted by
     string replacement.
     """
+    if not isinstance(values, dict):
+        raise ValueError(
+            "index.skeleton.values.json must contain a JSON object mapping "
+            f"placeholder names to strings, got {type(values).__name__}"
+        )
+
     out = []
     for line in template_text.split("\n"):
         m = LINE_PLACEHOLDER.match(line)
@@ -91,19 +97,44 @@ def render_template(template_text: str, values: dict) -> str:
                     f"Required placeholder {{{{{name}}}}} has no value in "
                     f"index.skeleton.values.json"
                 )
+            # Non-strings would survive to "\n".join() and fail there with a
+            # bare TypeError naming neither the placeholder nor the file.
+            if not isinstance(value, str):
+                raise ValueError(
+                    f"Placeholder {{{{{name}}}}} must be a string, got "
+                    f"{type(value).__name__} ({value!r})"
+                )
             out.append(value)
             continue
 
         def _sub(match: re.Match) -> str:
             name = match.group(1)
             if name in values and values[name] is not None:
-                return str(values[name])
+                value = values[name]
+                if not isinstance(value, str):
+                    raise ValueError(
+                        f"Placeholder {{{{{name}}}}} must be a string, got "
+                        f"{type(value).__name__} ({value!r})"
+                    )
+                return value
             raise KeyError(
                 f"Required placeholder {{{{{name}}}}} has no value in "
                 f"index.skeleton.values.json (line: {line!r})"
             )
 
-        out.append(INLINE_PLACEHOLDER.sub(_sub, line))
+        rendered_line = INLINE_PLACEHOLDER.sub(_sub, line)
+
+        # A placeholder the patterns don't recognise (lowercase name, a digit,
+        # an inline `{{?NAME}}`) otherwise passes through verbatim and shows up
+        # as an unexplained diff hunk rather than a template error.
+        if "{{" in rendered_line:
+            raise ValueError(
+                f"Unrecognised placeholder syntax in template line: "
+                f"{line!r}. Placeholder names must match [A-Z_]+, and the "
+                f"optional form {{{{?NAME}}}} is only valid on a line of its own."
+            )
+
+        out.append(rendered_line)
 
     return "\n".join(out)
 
@@ -203,8 +234,11 @@ def main(argv: list[str]) -> int:
 
     try:
         rendered = render_template(template_text, values)
-    except KeyError as e:
-        sys.stderr.write(f"error: {e}\n")
+    except (KeyError, ValueError) as e:
+        # Both are setup errors, not head divergence, so they must exit 2.
+        # An uncaught exception here would exit 1, which callers read as
+        # "index.html diverges" per the documented exit-code contract.
+        sys.stderr.write(f"error: {values_path}: {e}\n")
         return 2
 
     try:

@@ -126,6 +126,7 @@
   var _recognition = null;
   var _wakeWord = null;
   var _wakeRecognition = null;
+  var _wakeSuspended = false;   // true while push-to-talk owns the mic
   var _subscribers = [];
   var _lastTranscript = "";
   var _voiceCache = null;       // cached SpeechSynthesisVoice list
@@ -225,7 +226,11 @@
     rec.interimResults = true;
     rec.lang = _config.lang || (global.navigator && global.navigator.language) || "en-US";
     rec.onstart = function () { _active = true; };
-    rec.onend = function () { _active = false; };
+    rec.onend = function () {
+      _active = false;
+      // The mic is free again; let the wake-word listener take it back.
+      _resumeWakeWord();
+    };
     rec.onerror = function (ev) {
       _active = false;
       _emit("[voice error] " + (ev && ev.error ? ev.error : "unknown"), true);
@@ -281,7 +286,11 @@
 
     // Try the canonical Phase 2/3 orb first (preferred everywhere).
     if (target === "auto" || target === "chat-orb") {
-      // ChatOrb (canonical, Phase 2 / 3) — uses dispatch(text)
+      // ChatOrb.run() renders exactly as if the user typed the transcript.
+      if (global.ChatOrb && typeof global.ChatOrb.run === "function") {
+        try { global.ChatOrb.run(text, { echo: true }); return true; } catch (_) {}
+      }
+      // Older ChatOrb builds exposed only dispatch(text).
       if (global.ChatOrb && typeof global.ChatOrb.dispatch === "function") {
         try { global.ChatOrb.dispatch(text); return true; } catch (_) {}
       }
@@ -730,33 +739,139 @@
   // ───────────────────────────────────────────────────────────────────────────
   // WAKE WORD (continuous recognition watching for the phrase)
   // ───────────────────────────────────────────────────────────────────────────
+  // Errors the browser will keep raising no matter how often we retry:
+  // restarting on these produced an unbounded start→onerror→onend→start
+  // loop that pegged a core and flooded the console.
+  var WAKE_FATAL_ERRORS = {
+    "not-allowed": "microphone permission denied",
+    "service-not-allowed": "speech service unavailable",
+    "audio-capture": "no microphone available",
+    "language-not-supported": "language not supported"
+  };
+  var WAKE_MAX_RETRIES = 8;
+  var WAKE_BASE_DELAY_MS = 300;
+  var WAKE_MAX_DELAY_MS = 10000;
+
+  // Incremented on every enable/disable so that a superseded recognizer's
+  // late onend cannot resurrect itself. Previously, calling enableWakeWord
+  // twice left the old instance's onend handler live, and it restarted
+  // itself alongside the new one — two recognizers fighting for one mic,
+  // which the browser resolves by erroring, which restarted them again.
+  var _wakeGeneration = 0;
+  var _wakeRestartTimer = null;
+  var _wakeFailures = 0;
+
+  function _detachWake(rec) {
+    if (!rec) return;
+    rec.onresult = rec.onend = rec.onerror = rec.onstart = null;
+    try { rec.stop(); } catch (_) {}
+  }
+
   function enableWakeWord(phrase) {
     _wakeWord = String(phrase || "").trim().toLowerCase();
     if (!_wakeWord) return false;
     var R = _Recognition();
-    if (!R) return false;
-    if (_wakeRecognition) try { _wakeRecognition.stop(); } catch (_) {}
+    if (!R) { _wakeWord = null; return false; }
+
+    var myGeneration = ++_wakeGeneration;
+    if (_wakeRestartTimer) { clearTimeout(_wakeRestartTimer); _wakeRestartTimer = null; }
+    _detachWake(_wakeRecognition);
+    _wakeFailures = 0;
+
     var rec = new R();
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = _config.lang || (global.navigator && global.navigator.language) || "en-US";
+
+    function stillCurrent() {
+      return _wakeWord && myGeneration === _wakeGeneration;
+    }
+
+    function scheduleRestart() {
+      if (!stillCurrent()) return;
+      if (_wakeFailures >= WAKE_MAX_RETRIES) {
+        console.warn(
+          "[voice] wake word disabled after " + WAKE_MAX_RETRIES +
+          " consecutive restart failures"
+        );
+        disableWakeWord();
+        return;
+      }
+      // Exponential backoff, so a transient fault (a `network` blip, another
+      // tab grabbing the mic) recovers without spinning.
+      var delay = Math.min(
+        WAKE_BASE_DELAY_MS * Math.pow(2, _wakeFailures),
+        WAKE_MAX_DELAY_MS
+      );
+      _wakeFailures += 1;
+      _wakeRestartTimer = setTimeout(function () {
+        _wakeRestartTimer = null;
+        if (!stillCurrent()) return;
+        try { rec.start(); }
+        catch (_) { scheduleRestart(); }
+      }, delay);
+    }
+
+    rec.onstart = function () { _wakeFailures = 0; };
+
     rec.onresult = function (ev) {
       var i, transcript = "";
       for (i = ev.resultIndex; i < ev.results.length; i += 1) {
         transcript += ev.results[i][0].transcript;
       }
       if (transcript.toLowerCase().indexOf(_wakeWord) >= 0) {
+        // Hand the mic to the push-to-talk recognizer. Suppress this
+        // instance's restart while that session runs, otherwise both
+        // recognizers contend for the microphone.
+        _wakeSuspended = true;
         try { rec.stop(); } catch (_) {}
         start();
       }
     };
-    rec.onend = function () { if (_wakeWord) try { rec.start(); } catch (_) {} };
-    try { rec.start(); _wakeRecognition = rec; return true; }
-    catch (_) { return false; }
+
+    rec.onerror = function (ev) {
+      var code = (ev && ev.error) || "unknown";
+      if (WAKE_FATAL_ERRORS[code]) {
+        console.warn("[voice] wake word off — " + WAKE_FATAL_ERRORS[code] + " (" + code + ")");
+        disableWakeWord();
+        return;
+      }
+      // Non-fatal (no-speech, network, aborted): onend follows and backs off.
+    };
+
+    rec.onend = function () {
+      if (!stillCurrent()) return;
+      if (_wakeSuspended) return;   // resumed by the STT session ending
+      scheduleRestart();
+    };
+
+    try {
+      rec.start();
+      _wakeRecognition = rec;
+      _wakeSuspended = false;
+      return true;
+    } catch (_) {
+      _detachWake(rec);
+      _wakeWord = null;
+      return false;
+    }
   }
+
+  // Restart wake listening after a push-to-talk session releases the mic.
+  function _resumeWakeWord() {
+    if (!_wakeWord || !_wakeRecognition || !_wakeSuspended) return;
+    _wakeSuspended = false;
+    _wakeFailures = 0;
+    try { _wakeRecognition.start(); }
+    catch (_) { /* onend will schedule a backed-off retry */ }
+  }
+
   function disableWakeWord() {
     _wakeWord = null;
-    if (_wakeRecognition) try { _wakeRecognition.stop(); } catch (_) {}
+    _wakeGeneration += 1;
+    _wakeSuspended = false;
+    if (_wakeRestartTimer) { clearTimeout(_wakeRestartTimer); _wakeRestartTimer = null; }
+    _detachWake(_wakeRecognition);
     _wakeRecognition = null;
   }
 
@@ -956,8 +1071,22 @@
   // Auto-wire /voice onto chatLLM if it exists (cluster-manager
   // legacy path). The canonical orb (ChatOrb) registers /voice
   // itself via shared/js/slash-catalog.js + chat-orb-mount.js.
+  //
+  // chatLLM is a legacy global that only cluster-manager defines. The wait
+  // is bounded because the other two consumers never define it, and an
+  // unbounded `setTimeout(…, 50)` chain polled 20×/sec for the entire life
+  // of those pages, keeping a timer alive that also blocked bfcache-friendly
+  // idling and showed up as constant wakeups in profiles.
+  var WIRE_POLL_MS = 50;
+  var WIRE_TIMEOUT_MS = 10000;
+  var _wireDeadline = 0;
+
   function _wireSlashIntoChatLLM() {
-    if (!global.chatLLM) { setTimeout(_wireSlashIntoChatLLM, 50); return; }
+    if (!_wireDeadline) _wireDeadline = Date.now() + WIRE_TIMEOUT_MS;
+    if (!global.chatLLM) {
+      if (Date.now() < _wireDeadline) setTimeout(_wireSlashIntoChatLLM, WIRE_POLL_MS);
+      return;
+    }
     if (typeof global.chatLLM.dispatchSlash !== "function") return;
     if (global.chatLLM.__voiceWrapped) return;
     global.chatLLM.__voiceWrapped = true;

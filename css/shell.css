@@ -36,6 +36,11 @@ body {
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* This is the primary content scroller. Containing it stops iOS from
+     rubber-banding the whole shell (which exposes the page background
+     behind a fixed sidebar) and stops an over-scroll at the top from
+     triggering pull-to-refresh, which would discard unsaved form state. */
+  overscroll-behavior-y: contain;
 }
 
 .tab-panel.hidden {
@@ -109,6 +114,10 @@ a.sidebar-brand:hover h1 {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  /* Keep an over-scrolled flick inside the drawer instead of handing it
+     to the page behind. Pairs with the body scroll lock in
+     mobile-drawer.js, which stops the page moving at all while open. */
+  overscroll-behavior: contain;
 }
 
 .nav-btn {

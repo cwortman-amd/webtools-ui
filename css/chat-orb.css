@@ -9,12 +9,14 @@
  *
  * USAGE: <link rel="stylesheet" href="../shared/css/chat-orb.css">
  *
- * THEMING: Override the color palette by setting one or more of the
- * `--ai-*` custom properties on `:root` or `body` BEFORE this stylesheet
+ * THEMING: By default `--ai-accent` follows the active skin's
+ * `--ui-accent` (see css/skins/*.css), falling back to #4f8ef7 when no
+ * skin is loaded. Override the palette by setting one or more of the
+ * `--ai-*` custom properties on `:root` or `body` AFTER this stylesheet
  * loads:
  *
  *   :root {
- *     --ai-accent: #ED1C24;   // brand accent (default: #4f8ef7)
+ *     --ai-accent: #ED1C24;   // pin the accent, ignoring the skin
  *     --ai-text:   #f3f6fb;   // body text inside panel
  *   }
  *
@@ -24,7 +26,13 @@
  */
 
 :root {
-  --ai-accent: var(--accent, #4f8ef7);
+  /* `--ui-accent` is the token every skin in css/skins/ actually defines;
+     `--accent` is not defined anywhere in the codebase, so the previous
+     `var(--accent, #4f8ef7)` always fell through to the hardcoded blue and
+     the orb ignored the active skin entirely. `--accent` is kept in the
+     chain as a consumer-level override hook, matching the same fallback
+     order used by demo-mode.css. */
+  --ai-accent: var(--ui-accent, var(--accent, #4f8ef7));
   --ai-accent-soft: color-mix(in srgb, var(--ai-accent) 35%, transparent);
   --ai-accent-glow: color-mix(in srgb, var(--ai-accent) 55%, transparent);
   --ai-surface: color-mix(in srgb, #0b0f17 88%, rgba(255, 255, 255, .04));
@@ -43,6 +51,11 @@
          :root { --ai-orb-size: 60px; }  // back to the pre-shrink size
   */
   --ai-orb-size: 45px;
+  /* Height of the iOS software keyboard, published by chat-orb.js from
+     visualViewport. 0 on desktop and whenever the keyboard is closed —
+     the mobile panel translates up by this much so the composer stays
+     above the keyboard instead of behind it. */
+  --ai-kb-inset: 0px;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -66,47 +79,33 @@
   justify-content: center;
   isolation: isolate;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .22s cubic-bezier(.22, 1, .36, 1), filter .22s ease;
-  /* Phase 9.7.5 (2026-05-04): boost the orb's accent halo by stacking a
-     centered radial drop-shadow on top of the existing offset shadow.
-     The single offset drop-shadow `(0 14px 28px var(--ai-accent-glow))`
-     produced a pleasant downward depth shadow but the haze was barely
-     perceptible at typical viewport scales — adding a centered halo
-     `(0 0 24px var(--ai-accent-glow))` makes the haze radiate equally in
-     every direction so the orb feels ambient-lit rather than
-     surface-dropped at normal viewing distance. dc-planner's legacy
-     js/chat-feedback.js orb mirrors this stack inline. */
-  filter: drop-shadow(0 0 24px var(--ai-accent-glow)) drop-shadow(0 14px 28px var(--ai-accent-glow));
+  transition: transform .22s cubic-bezier(.22, 1, .36, 1);
+  /* No accent haze. The orb previously stacked a centered halo
+     `(0 0 24px var(--ai-accent-glow))` over an offset depth shadow
+     `(0 14px 28px var(--ai-accent-glow))` (Phase 9.7.5, 2026-05-04) so it read
+     as ambient-lit. That glow competed with the orb's own gradient body, so
+     the collapsed orb is now flat and unhazed — its shape comes solely from
+     the ::after radial body.
+     dc-planner's legacy js/chat-feedback.js orb sets the old stack inline and
+     is unaffected by this rule. */
 }
 
-.ai-orb::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  background: conic-gradient(from 140deg,
-      color-mix(in srgb, var(--ai-accent) 90%, #fff 10%),
-      color-mix(in srgb, var(--ai-accent) 30%, #0b0f17),
-      color-mix(in srgb, var(--ai-accent) 90%, #fff 15%),
-      color-mix(in srgb, var(--ai-accent) 35%, #0b0f17),
-      color-mix(in srgb, var(--ai-accent) 90%, #fff 10%));
-  filter: blur(.4px);
-  z-index: -2;
-  opacity: .95;
-  animation: ai-orb-spin 9s linear infinite;
-}
-
+/* Single flat layer. The orb used to stack a spinning conic ring (::before,
+   inset -3px) behind a body inset 2px inside it; the 5px of ring left showing
+   between the two read as a bright ring around the orb. The body now fills the
+   full circle (inset 0) with no ring behind it and no inset shading, so the
+   collapsed orb is one clean gradient disc. `ai-orb-spin` is consequently
+   unused here — it is kept for consumers that still drive their own ring. */
 .ai-orb::after {
   content: "";
   position: absolute;
-  inset: 2px;
+  inset: 0;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 28%,
       rgba(255, 255, 255, .55) 0%,
       rgba(255, 255, 255, .08) 22%,
       color-mix(in srgb, var(--ai-accent) 90%, #000 10%) 60%,
       color-mix(in srgb, var(--ai-accent) 60%, #05070b) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -8px 18px rgba(0, 0, 0, .45);
   z-index: -1;
 }
 
@@ -182,14 +181,12 @@
   display: inline-flex;
 }
 
+/* The breathing accent ring only ever showed while the orb was collapsed,
+   which is exactly the state we want unadorned. Hidden rather than deleted so
+   the element and its is-open/is-typing handling stay intact for consumers
+   that re-enable it. */
 .ai-orb .ai-orb-pulse {
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--ai-accent) 70%, transparent);
-  opacity: .6;
-  pointer-events: none;
-  animation: ai-orb-breath 3.6s ease-in-out infinite;
+  display: none;
 }
 
 .ai-orb.is-open .ai-orb-pulse,
@@ -198,9 +195,9 @@
   opacity: 0;
 }
 
+/* Lift only — re-adding a glow here would reintroduce the haze on hover. */
 .ai-orb:hover {
   transform: translateY(-1px) scale(1.05);
-  filter: drop-shadow(0 0 32px var(--ai-accent-glow)) drop-shadow(0 18px 34px var(--ai-accent-glow));
 }
 
 .ai-orb:active {
@@ -291,6 +288,7 @@
   bottom: calc(var(--ai-orb-size) + 44px);
   width: min(384px, calc(100vw - 20px));
   max-height: min(640px, calc(100vh - 130px));
+  max-height: min(640px, calc(100dvh - 130px));
   display: flex;
   flex-direction: column;
   z-index: 9999;
@@ -443,6 +441,11 @@
   max-height: 400px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, .18) transparent;
+  /* Keep flick-scrolling inside the log: without this, hitting the top or
+     bottom of the message list hands the gesture to the page behind the
+     panel, which then rubber-bands on iOS. */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ai-msgs::-webkit-scrollbar {
@@ -692,6 +695,14 @@
   background: color-mix(in srgb, var(--ai-accent) 18%, rgba(255, 255, 255, .05));
 }
 
+/* `.ai-quick-menu button` is (0,1,1) — the same specificity as base.css's
+   `button:focus-visible` — and chat-orb.css loads later, so its `all: unset`
+   won the tie and erased the keyboard focus ring. Restore it explicitly. */
+.ai-quick-menu button:focus-visible {
+  outline: 2px solid var(--ai-accent);
+  outline-offset: -2px;
+}
+
 /* ─────────────────────────────────────────────────────────────────
  * Feedback card (collapsible inside the panel).
  *
@@ -806,6 +817,14 @@
   background: color-mix(in srgb, var(--ai-accent) 22%, rgba(255, 255, 255, .05));
   border-color: color-mix(in srgb, var(--ai-accent) 55%, transparent);
   color: #fff;
+}
+
+/* Same specificity tie as `.ai-quick-menu button` above: `all: unset` here
+   out-ordered base.css's `button:focus-visible`, leaving the feedback form's
+   submit and cancel buttons with no keyboard focus indicator. */
+.ai-feedback-card button:focus-visible {
+  outline: 2px solid var(--ai-accent);
+  outline-offset: 2px;
 }
 
 .ai-feedback-card button.primary {
@@ -1143,10 +1162,30 @@
     bottom: 0;
     width: 100vw;
     max-height: 80vh;
+    /* dvh tracks iOS Safari's collapsing toolbars; vh does not, so an
+       80vh panel overflowed under the URL bar when it expanded. */
+    max-height: 80dvh;
     min-width: 0;
     min-height: 0;
     resize: none;
     border-radius: 20px 20px 0 0;
+    /* Clear the home indicator. The keyboard offset lives on `.open`
+       below so the closed-state slide-down animation is preserved. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Lift clear of the iOS software keyboard. --ai-kb-inset is published
+     by chat-orb.js from visualViewport and is 0px whenever the keyboard
+     is closed, so this collapses to the normal open position. The
+     existing `transform` transition on `.ai-panel` animates the shift. */
+  .ai-panel.open {
+    transform: translateY(calc(-1 * var(--ai-kb-inset, 0px))) scale(1);
+  }
+
+  /* With the keyboard up there is far less vertical room; the desktop
+     200px floor would push the composer off-screen. */
+  .ai-msgs {
+    min-height: 0;
   }
 
   .ai-quick-menu {

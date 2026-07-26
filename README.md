@@ -24,7 +24,10 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `css/demo-mode.css` | Demo Mode tutor-bar + launcher chip + transcript + audience-picker chrome (Phase 9.7 promotion + Phase 9.8e P5 picker rules + P9 picker theming refresh) |
 | `css/material-symbols.css` | `@font-face` + `.material-symbols-outlined` defaults for the canonical icon font (Phase 9.8d-D.1) |
 | `css/fonts/material-symbols-outlined.woff2` | Self-hosted icon font (3.55 MB) |
-| `css/skins/*.css` | 7 canonical skins: `amd`, `amd-gold`, `amd-teal`, `glass-dark`, `matte-dark` (default), `minimal-monochrome`, `soft-neutral-light` |
+| `css/skins/*.css` | 7 canonical skins: `amd`, `amd-gold` (default), `amd-teal`, `glass-dark`, `matte-dark`, `minimal-monochrome`, `soft-neutral-light` |
+| `css/shell.css` | Sidebar / top-nav shell chrome, nav + utility buttons, skin & mode pickers |
+| `css/chrome.css` | Top-nav action bar, tool popovers, segmented controls, tool action buttons |
+| `css/components.css` | Shared filter chips, active-filter chips, code blocks + copy button |
 
 ### JavaScript
 
@@ -43,6 +46,8 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/demo-picker.js` | `window.DemoPicker.open(...)` — cross-repo audience-picker modal (Phase 9.8e P5) |
 | `js/mobile-drawer.js` | Off-canvas drawer wiring for mobile (`MobileDrawer.install({...})`) (Phase 9.8e P2) |
 | `js/error-popup.js` | Dependency-free persistent error modal + global `onerror`/rejection/`alert()` handlers. `window.ErrorPopup`/`showError` (neutral) with `CMErrorPopup`/`showErrorPopup` back-compat aliases. Uses `--ui-*` theme tokens (Phase 10.1) |
+| `js/shell.js` | `window.Shell` — sidebar/top-nav layout, skin + theme + user-mode persistence. Reads its `localStorage` namespace from `window.SHELL_PREFIX`, which must be set before `Shell.init()` |
+| `js/chrome.js` | `window.Chrome` — configurable top-bar tools: skin/mode switchers, info link, optional browser-local secret/profile panel |
 
 ### Docs + tooling
 
@@ -55,6 +60,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/templates/{demo-track,voice-config}.schema.json` | JSON Schemas for `data/demo-tracks/*.json` and `voiceBridge.configure({...})` |
 | `templates/index.skeleton.html` | The canonical `pages/index.html` head template (rendered with per-consumer `pages/index.skeleton.values.json`) |
 | `scripts/check_index_skeleton.py` | Strict-diff CI guard for the head template |
+| `scripts/html_consistency_audit.py` | Cross-repo HTML consistency audit over all three consumers (skeleton, body attrs, critical CSS/JS links, nav structure, duplicate IDs). Exits non-zero on ERRORs; `--strict` also gates on WARNs. Supports `--json`, `--summary-only`, `--repo`, `--workspace` |
 | `scripts/build-vendor-manifest.sh` + `verify-vendor-manifest.sh` | Cross-repo vendor manifest tooling (Phase 8 CI gate) |
 | `scripts/vendor-manifest.json` | SHA256 + size manifest used to detect drift between consumer `shared/` mounts and canonical |
 | `scripts/export-pitch-pdf.mjs` | **Canonical** Playwright pitch-deck PDF exporter (1440×810, US Letter landscape). Consumers run `node shared/scripts/export-pitch-pdf.mjs` from their repo root (`--repo`/`--deck`/`--out` optional); Playwright is resolved from the consumer's `node_modules`. Replaces the three former per-repo copies |
@@ -92,11 +98,17 @@ In each consumer's HTML pages, reference canonical assets via `shared/`:
       as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="../shared/css/material-symbols.css" />
 <link rel="stylesheet" href="../shared/css/base.css" />
-<link rel="stylesheet" id="skinStylesheet" href="../shared/css/skins/matte-dark.css" />
+<link rel="stylesheet" id="skinStylesheet" href="../shared/css/skins/amd-gold.css" />
 <link rel="stylesheet" href="../shared/css/chat-orb.css" />
 <link rel="stylesheet" href="../shared/css/demo-mode.css" />
 <script src="../shared/js/chat-orb.js"></script>
 ```
+
+Set `data-skin` on **`<html>`**, not just `<body>`. Each skin scopes its dark
+palette to `:root[data-skin="…"]`, so a `data-skin` that appears only on
+`<body>` leaves `--ui-accent` and its siblings undefined — which silently
+voids every declaration that references them, including the shared focus
+ring. The canonical template sets it on both.
 
 The first ~18 lines of every consumer's `pages/index.html` head are locked down by [`docs/INDEX_SKELETON.md`](docs/INDEX_SKELETON.md)'s strict-diff guard. Per-repo customization (data, personas, repo-specific stylesheets) lives alongside `shared/` in each consumer's own `data/` and `css/` directories.
 

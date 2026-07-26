@@ -230,7 +230,7 @@ Every page in the three repos should now load CSS in this order:
 
 <!-- 4. Skin (swappable at runtime via data-skin attribute) -->
 <link id="skinStylesheet" rel="stylesheet"
-      href="../shared/css/skins/matte-dark.css" />
+      href="../shared/css/skins/amd-gold.css" />
 
 <!-- 5. Page-specific chrome -->
 <link rel="stylesheet" href="../shared/css/notes-panel.css" />  <!-- pitch.html -->

@@ -69,6 +69,49 @@
     return null;
   }
 
+  /* ── Body scroll lock ──────────────────────────────────────────────
+   * iOS Safari ignores `overflow: hidden` on <body> for touch scrolling,
+   * so an open drawer would let the page behind it scroll and rubber-band
+   * under the user's thumb. The reliable fix is to pin the body with
+   * `position: fixed` at a negative offset equal to the current scroll,
+   * then restore that scroll on unlock. `overscroll-behavior: contain`
+   * on the drawer itself (shell.css) stops the complementary problem —
+   * scroll *chaining* out of the drawer once it hits its own end.
+   * Locking is refcounted-by-flag so a close() before open() is a no-op.
+   * ─────────────────────────────────────────────────────────────────── */
+  var _locked = false;
+  var _savedScrollY = 0;
+  var _savedStyle = null;
+
+  function lockBodyScroll() {
+    if (_locked) return;
+    var body = document.body;
+    _savedScrollY = global.pageYOffset || document.documentElement.scrollTop || 0;
+    _savedStyle = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow
+    };
+    body.style.position = "fixed";
+    body.style.top = -_savedScrollY + "px";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    _locked = true;
+  }
+
+  function unlockBodyScroll() {
+    if (!_locked) return;
+    var body = document.body;
+    body.style.position = _savedStyle.position;
+    body.style.top = _savedStyle.top;
+    body.style.width = _savedStyle.width;
+    body.style.overflow = _savedStyle.overflow;
+    _locked = false;
+    // Restore synchronously so the page doesn't visibly jump to the top.
+    global.scrollTo(0, _savedScrollY);
+  }
+
   function install(cfg) {
     cfg = cfg || {};
     var menuBtn = resolveEl(cfg.menuBtn);
@@ -101,6 +144,10 @@
       document.body.classList.toggle("nav-mobile-open", nextOpen);
       menuBtn.setAttribute("aria-expanded", nextOpen ? "true" : "false");
       drawer.setAttribute("aria-hidden", nextOpen ? "false" : "true");
+      // Only pin the page on mobile — above the breakpoint the drawer is
+      // the persistent sidebar, not an overlay, and the page must scroll.
+      if (nextOpen && isMobile()) lockBodyScroll();
+      else unlockBodyScroll();
       if (nextOpen && onOpen) {
         try { onOpen(); } catch (e) { /* host hook errors should not break the drawer */ }
       } else if (!nextOpen && onClose) {

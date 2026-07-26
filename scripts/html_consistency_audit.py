@@ -29,9 +29,14 @@ Checks performed:
   23. Duplicate IDs       — scans index.html for duplicate HTML element IDs
 
 Exit codes:
-  0  no issues found
-  1  one or more issues found
+  0  no ERRORs found (WARNs may still be present)
+  1  one or more ERRORs found, or any issue at all under --strict
   2  invocation error
+
+WARNs are advisory — several checks are heuristics that flag "verify this"
+rather than proven breakage. They do not fail the build unless --strict is
+passed, so this can be wired into CI without pinning it to the current
+warning count.
 """
 
 from __future__ import annotations
@@ -47,13 +52,11 @@ from collections import Counter
 # ── Config ────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-WORKSPACE = SCRIPT_DIR.parent.parent  # /home/ubuntu/workspace
+# Consumers are checked out as siblings of webtools-ui; override with
+# --workspace when they live elsewhere.
+DEFAULT_WORKSPACE = SCRIPT_DIR.parent.parent
 
-REPOS = {
-    "cluster-manager": WORKSPACE / "cluster-manager",
-    "llm-benchmark":   WORKSPACE / "llm-benchmark",
-    "dc-planner":      WORKSPACE / "dc-planner",
-}
+CONSUMER_REPOS = ("cluster-manager", "llm-benchmark", "dc-planner")
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -67,19 +70,29 @@ DIM    = "\033[2m"
 
 issues: list[tuple[str, str, str]] = []   # (severity, repo, message)
 
+# Set by main(). Suppresses the per-check running commentary so that
+# --summary-only and --json produce clean output.
+QUIET = False
+
 
 def emit(severity: str, repo: str, msg: str) -> None:
     """Record an issue and print it inline."""
     issues.append((severity, repo, msg))
+    if QUIET:
+        return
     colour = RED if severity == "ERROR" else YELLOW
     print(f"  {colour}[{severity}]{RESET} {msg}")
 
 
 def ok(repo: str, msg: str) -> None:
+    if QUIET:
+        return
     print(f"  {GREEN}[OK]{RESET}    {msg}")
 
 
 def section(title: str) -> None:
+    if QUIET:
+        return
     print(f"\n{BOLD}{CYAN}── {title} ──{RESET}")
 
 
@@ -98,22 +111,30 @@ def check_skeleton(repo_name: str, repo_path: Path) -> None:
     if not checker.is_file():
         emit("ERROR", repo_name, f"check_index_skeleton.py not found at {checker}")
         return
-    result = subprocess.run(
-        [sys.executable, str(checker), "--repo", str(repo_path), "--quiet"],
-        capture_output=True, text=True,
-        stdin=subprocess.DEVNULL,  # never prompt interactively
-        timeout=30,
-    )
+    try:
+        result = subprocess.run(
+            [sys.executable, str(checker), "--repo", str(repo_path), "--quiet"],
+            capture_output=True, text=True,
+            stdin=subprocess.DEVNULL,  # never prompt interactively
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        emit("ERROR", repo_name, "Skeleton check timed out after 30s")
+        return
+    except OSError as e:
+        emit("ERROR", repo_name, f"Could not run check_index_skeleton.py: {e}")
+        return
+
     if result.returncode == 0:
         ok(repo_name, "index.html skeleton matches canonical template")
     elif result.returncode == 2:
         emit("ERROR", repo_name, f"Skeleton check invocation error: {result.stderr.strip()}")
     else:
         # Print the diff compactly
-        diff_lines = result.stderr.strip().splitlines()
         emit("ERROR", repo_name, "index.html skeleton DIVERGES from canonical template:")
-        for line in diff_lines:
-            print(f"      {DIM}{line}{RESET}")
+        if not QUIET:
+            for line in result.stderr.strip().splitlines():
+                print(f"      {DIM}{line}{RESET}")
 
 
 def check_body_attrs(repo_name: str, index_html: str) -> None:
@@ -314,27 +335,57 @@ def check_pitch_html(repo_name: str, repo_path: Path) -> None:
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main(argv: list[str]) -> int:
+    global QUIET
+
     parser = argparse.ArgumentParser(
         description="Cross-repo HTML consistency audit for webtools-ui dashboard ecosystem"
     )
-    parser.add_argument("--json", action="store_true", help="Output issues as JSON to stdout")
-    parser.add_argument("--summary-only", action="store_true", help="Only print the final summary")
+    parser.add_argument("--json", action="store_true",
+                        help="Output issues as JSON only (suppresses the human-readable report)")
+    parser.add_argument("--summary-only", action="store_true",
+                        help="Only print the final summary, not each individual check")
+    parser.add_argument("--strict", action="store_true",
+                        help="Exit non-zero on WARNs too, not just ERRORs")
+    parser.add_argument("--workspace", type=Path, default=DEFAULT_WORKSPACE,
+                        help=f"Directory holding the consumer repos (default: {DEFAULT_WORKSPACE})")
+    parser.add_argument("--repo", action="append", metavar="NAME", choices=CONSUMER_REPOS,
+                        help="Audit only this repo; repeatable (default: all three)")
     args = parser.parse_args(argv)
 
-    print(f"\n{BOLD}{'='*64}{RESET}")
-    print(f"{BOLD}  webtools-ui HTML Consistency Audit{RESET}")
-    print(f"{BOLD}  Repos: {', '.join(REPOS.keys())}{RESET}")
-    print(f"{BOLD}{'='*64}{RESET}")
+    QUIET = args.json or args.summary_only
 
-    for repo_name, repo_path in REPOS.items():
-        print(f"\n{BOLD}{'─'*60}{RESET}")
-        print(f"{BOLD}  {repo_name.upper()}{RESET}  →  {DIM}{repo_path}{RESET}")
-        print(f"{BOLD}{'─'*60}{RESET}")
+    selected = args.repo or list(CONSUMER_REPOS)
+    repos = {name: args.workspace.resolve() / name for name in selected}
+
+    if not QUIET:
+        print(f"\n{BOLD}{'='*64}{RESET}")
+        print(f"{BOLD}  webtools-ui HTML Consistency Audit{RESET}")
+        print(f"{BOLD}  Repos: {', '.join(repos.keys())}{RESET}")
+        print(f"{BOLD}{'='*64}{RESET}")
+
+    audited = 0
+    skipped: list[str] = []
+
+    for repo_name, repo_path in repos.items():
+        if not QUIET:
+            print(f"\n{BOLD}{'─'*60}{RESET}")
+            print(f"{BOLD}  {repo_name.upper()}{RESET}  →  {DIM}{repo_path}{RESET}")
+            print(f"{BOLD}{'─'*60}{RESET}")
+
+        # A repo that simply isn't checked out here is not a consistency
+        # failure — only a checked-out repo missing its index.html is.
+        if not repo_path.is_dir():
+            skipped.append(repo_name)
+            if not QUIET:
+                print(f"  {DIM}[SKIP]  not checked out at {repo_path}{RESET}")
+            continue
 
         index_html_path = repo_path / "pages" / "index.html"
         if not index_html_path.is_file():
             emit("ERROR", repo_name, f"pages/index.html not found at {index_html_path}")
             continue
+
+        audited += 1
 
         html = read(index_html_path)
 
@@ -375,33 +426,54 @@ def main(argv: list[str]) -> int:
         check_pitch_html(repo_name, repo_path)
 
     # ── Summary ──────────────────────────────────────────────────────────────
-    print(f"\n{BOLD}{'='*64}{RESET}")
-    print(f"{BOLD}  AUDIT SUMMARY{RESET}")
-    print(f"{BOLD}{'='*64}{RESET}\n")
-
     errors = [(s, r, m) for s, r, m in issues if s == "ERROR"]
     warns  = [(s, r, m) for s, r, m in issues if s == "WARN"]
 
-    if not issues:
-        print(f"  {GREEN}✅  No issues found across all repos!{RESET}\n")
-    else:
-        if errors:
-            print(f"  {RED}ERRORS ({len(errors)}){RESET}")
-            for _, repo, msg in errors:
-                print(f"    [{repo}] {msg}")
-
-        if warns:
-            print(f"\n  {YELLOW}WARNINGS ({len(warns)}){RESET}")
-            for _, repo, msg in warns:
-                print(f"    [{repo}] {msg}")
-
-    print(f"\n  Total: {len(errors)} errors, {len(warns)} warnings across {len(REPOS)} repos\n")
-
     if args.json:
-        out = [{"severity": s, "repo": r, "message": m} for s, r, m in issues]
-        print(json.dumps(out, indent=2))
+        print(json.dumps({
+            "audited": audited,
+            "skipped": skipped,
+            "errors": len(errors),
+            "warnings": len(warns),
+            "issues": [{"severity": s, "repo": r, "message": m} for s, r, m in issues],
+        }, indent=2))
+    else:
+        print(f"\n{BOLD}{'='*64}{RESET}")
+        print(f"{BOLD}  AUDIT SUMMARY{RESET}")
+        print(f"{BOLD}{'='*64}{RESET}\n")
 
-    return 1 if issues else 0
+        if not issues:
+            print(f"  {GREEN}✅  No issues found across all repos!{RESET}\n")
+        else:
+            if errors:
+                print(f"  {RED}ERRORS ({len(errors)}){RESET}")
+                for _, repo, msg in errors:
+                    print(f"    [{repo}] {msg}")
+
+            if warns:
+                print(f"\n  {YELLOW}WARNINGS ({len(warns)}){RESET}")
+                for _, repo, msg in warns:
+                    print(f"    [{repo}] {msg}")
+
+        print(f"\n  Total: {len(errors)} errors, {len(warns)} warnings "
+              f"across {audited} repo(s)")
+        if skipped:
+            print(f"  Skipped (not checked out): {', '.join(skipped)}")
+        if warns and not args.strict:
+            print(f"  {DIM}WARNs are advisory and do not fail the build; "
+                  f"use --strict to gate on them.{RESET}")
+        print()
+
+    # Nothing was actually inspected, so a 0 here would be a vacuous pass.
+    if audited == 0:
+        sys.stderr.write("error: no consumer repos were found to audit\n")
+        return 2
+
+    if errors:
+        return 1
+    if warns and args.strict:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

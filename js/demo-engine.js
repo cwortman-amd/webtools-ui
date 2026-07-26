@@ -441,19 +441,24 @@
     const ease = easeFnFor(o.easing);
     const startTime = performance.now();
     let rafId = null;
-    let cancelled = false;
+    let endTimer = null;
+    let settle = null;      // resolves `promise`; nulled once used
 
     const promise = new Promise((resolve) => {
+      settle = (value) => {
+        if (!settle) return;
+        settle = null;
+        resolve(value);
+      };
       function tick(now) {
-        if (cancelled) { resolve({ ok: false, reason: "cancelled", finalY: window.scrollY }); return; }
         const t = Math.min((now - startTime) / dur, 1);
         window.scrollTo(0, startY + (clamped - startY) * ease(t));
         if (t < 1) {
           rafId = requestAnimationFrame(tick);
         } else if (o.pause_at_end_ms > 0) {
-          setTimeout(() => resolve({ ok: true, finalY: clamped }), o.pause_at_end_ms);
+          endTimer = setTimeout(() => settle({ ok: true, finalY: clamped }), o.pause_at_end_ms);
         } else {
-          resolve({ ok: true, finalY: clamped });
+          settle({ ok: true, finalY: clamped });
         }
       }
       rafId = requestAnimationFrame(tick);
@@ -461,7 +466,18 @@
 
     return {
       promise,
-      cancel: () => { cancelled = true; if (rafId !== null) cancelAnimationFrame(rafId); }
+      // cancel() must settle the promise itself. It used to only set a flag
+      // and cancel the rAF — but the promise was resolved from inside the
+      // rAF callback, so cancelling meant the callback never ran again and
+      // the promise stayed pending forever. Every awaited scroll tour that
+      // got cancelled (pause, next, exit) leaked a promise plus whatever
+      // continuation was chained to it. The end-of-scroll timer was likewise
+      // left running and could fire after cancellation.
+      cancel: () => {
+        if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+        if (endTimer !== null) { clearTimeout(endTimer); endTimer = null; }
+        if (settle) settle({ ok: false, reason: "cancelled", finalY: window.scrollY });
+      }
     };
   }
 
@@ -539,6 +555,8 @@
     let phase = "idle"; // idle | playing | paused | complete
     let currentSpeechCancel = null;
     let cancelRequested = false;
+    // Generation counter for the playback chain; see invalidateRun().
+    let runToken = 0;
 
     function cancelAllScrollTours() {
       activeScrollTours.forEach(t => { try { t.cancel(); } catch (_) { /* noop */ } });
@@ -600,6 +618,11 @@
       // Stop any in-flight scroll tour so the page doesn't keep
       // scrolling after the audience clicks pause.
       cancelAllScrollTours();
+      // Deliberately does NOT invalidate the run: pause/resume relies on the
+      // in-flight chain staying alive so that resuming a paused utterance
+      // continues the same step. Chains that must not survive are cut by
+      // cancelCurrentSpeech(), and play()'s restart path supersedes them via
+      // runFromCurrent()'s own token claim.
       setPhase("paused");
     }
 
@@ -708,7 +731,23 @@
       bus.emit("track:exited", { restored: !!opts.restore });
     }
 
+    // Invalidate any playback chain currently in flight.
+    //
+    // runFromCurrent() is a long promise chain that awaits actions, speech,
+    // and pauses. It used to be guarded only by the shared `cancelRequested`
+    // and `phase` flags, neither of which changes when the cursor moves — so
+    // next()/prev()/goTo() started a second chain while the first was still
+    // suspended inside speak() or wait(). When the old chain resumed it saw
+    // phase === "playing", called autoAdvance(), and moved the cursor again:
+    // one click of Next could jump two or more steps, with two narration
+    // loops running against each other. Bumping the token makes every
+    // continuation of a superseded chain a no-op.
+    function invalidateRun() {
+      runToken += 1;
+    }
+
     function cancelCurrentSpeech() {
+      invalidateRun();
       if (cfg.voice) cfg.voice.cancel();
       if (typeof currentSpeechCancel === "function") {
         try { currentSpeechCancel(); } catch (_) { /* noop */ }
@@ -763,6 +802,12 @@
 
     function runFromCurrent() {
       if (!track) return Promise.resolve();
+
+      // Claim this run. Any later cursor move or pause bumps runToken and
+      // strands this chain at its next checkpoint.
+      const myRun = ++runToken;
+      const superseded = () => myRun !== runToken;
+
       const scene = track.scenes[sceneIdx];
       if (!scene) { finalize(); return Promise.resolve(); }
       const step = scene.steps[stepIdx];
@@ -787,7 +832,7 @@
 
       const runActions = actions.reduce((p, action) => {
         return p.then(() => {
-          if (cancelRequested || phase === "paused") return null;
+          if (superseded() || cancelRequested || phase === "paused") return null;
           return executeAction(action, ctx).then(result => {
             bus.emit("action:executed", { action, result });
             return result;
@@ -796,13 +841,13 @@
       }, Promise.resolve());
 
       return runActions.then(() => {
-        if (cancelRequested) return;
+        if (superseded() || cancelRequested) return;
         if (phase === "paused") return;
 
         const text = (step.narration || "").trim();
         if (!text) {
           // No narration on this step — small breath then advance.
-          return wait(step.pause_after_ms || 600).then(() => autoAdvance());
+          return wait(step.pause_after_ms || 600).then(() => autoAdvance(myRun));
         }
         bus.emit("narration:start", { text, sceneIdx, stepIdx });
         if (!cfg.voice) {
@@ -810,23 +855,27 @@
           // to reading time (~14 chars/sec ≈ 140 wpm).
           const fallbackMs = Math.max(2500, Math.min(20000, Math.round(text.length / 14 * 1000)));
           return wait(fallbackMs).then(() => {
+            if (superseded()) return;
             bus.emit("narration:end", { text, sceneIdx, stepIdx });
-            return autoAdvance();
+            return autoAdvance(myRun);
           });
         }
         return cfg.voice.speak(text).then(res => {
+          if (superseded()) return;
           bus.emit("narration:end", { text, sceneIdx, stepIdx, result: res });
           if (cancelRequested || phase !== "playing") return;
           return wait(step.pause_after_ms || (track.voice && track.voice.step_pause_ms) || 700)
-            .then(() => autoAdvance());
+            .then(() => autoAdvance(myRun));
         });
       }).catch(err => {
+        if (superseded()) return;
         bus.emit("error", { stage: "run-step", message: String(err && err.message || err) });
         if (typeof cfg.onError === "function") cfg.onError(err);
       });
     }
 
-    function autoAdvance() {
+    function autoAdvance(myRun) {
+      if (myRun !== undefined && myRun !== runToken) return;
       if (cancelRequested || phase !== "playing") return;
       const moved = advanceCursor();
       if (!moved) { finalize(); return; }

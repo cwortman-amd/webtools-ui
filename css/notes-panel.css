@@ -192,6 +192,10 @@ body.notes-open {
   overflow-y: auto;
   flex: 1;
   padding-right: 4px;
+  /* As a bottom-sheet on portrait phones this sits over the deck; an
+     over-scrolled flick must not scroll the slide behind it. */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .notes-panel-body p { margin: 0 0 12px; }

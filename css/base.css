@@ -71,6 +71,29 @@ html {
   margin: 0;
   width: 100%;
   min-height: 100%;
+  /* iOS inflates the font of text blocks it deems too narrow after a
+     portrait→landscape rotation, which desyncs our fixed-height chrome
+     from its contents. Opting out keeps rotation visually stable. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Suppress the grey flash iOS paints over any tapped element. Every
+   interactive surface here already has its own :active/:focus styling,
+   so the overlay is pure noise — and on the orb and drawer it lingers
+   long enough to look like a rendering bug. */
+button,
+a,
+summary,
+label,
+select,
+[role="button"],
+[role="tab"],
+.tab-btn,
+.nav-btn,
+.util-btn,
+.side-nav-tab {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -674,7 +697,15 @@ body.nav-mobile-open .nav-backdrop {
 
   /* Form controls — kill iOS zoom-on-focus by guaranteeing 16 px.
    * Per-page CSS may set smaller fonts on inputs; this rule wins
-   * because it's inside a media query. */
+   * because it's inside a media query.
+   *
+   * `input:not([type])` is load-bearing: an <input> with no type
+   * attribute behaves as text and reports `.type === "text"` in JS, but
+   * attribute selectors match the ATTRIBUTE, so `input[type="text"]`
+   * skips it. Bare inputs are common in the consumers (e.g.
+   * llm-benchmark's `<input id="planName" value="…">`), and every one
+   * of them was silently missing the zoom guard. */
+  input:not([type]),
   input[type="text"],
   input[type="number"],
   input[type="search"],
@@ -682,6 +713,11 @@ body.nav-mobile-open .nav-backdrop {
   input[type="password"],
   input[type="tel"],
   input[type="url"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  input[type="time"],
   select,
   textarea {
     font-size: 16px !important;
@@ -733,6 +769,82 @@ body.nav-mobile-open .nav-backdrop {
   }
 }
 
+/* ── Touch ergonomics (orientation-independent) ──────────────────────
+ * The block above is gated on `max-width: 640px`, which is a *layout*
+ * predicate: it decides when to collapse the tab strip and toolbar into
+ * the drawer. That gate is correct for layout and wrong for ergonomics,
+ * because an iPhone in landscape reports 844-956px wide and therefore
+ * matched none of it — so rotating the phone silently gave back the
+ * 28px tap targets and the sub-16px inputs that make iOS zoom on focus.
+ * Rotating a phone does not change the size of a thumb.
+ *
+ * These rules key off the input device instead of the viewport, so they
+ * hold in both orientations (and on iPad, which wants them too) while
+ * never applying to a narrow desktop window. Layout decisions stay in
+ * the width-based block above; only reach/legibility lives here.
+ * ─────────────────────────────────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* iOS auto-zooms any focused control whose computed font-size is
+     <16px, which shifts the whole page and strands the user mid-form.
+     16px is the documented threshold, not a preference.
+     See the note on `input:not([type])` in the block above.
+
+     The type list is exhaustive on purpose. A consumer stylesheet with a
+     blanket `input, select { font-size: 13px }` beats any type this list
+     forgets, so an unenumerated type is a silent regression waiting for
+     someone to add that input — which is exactly how `date` slipped
+     through. Excluded types (checkbox, radio, range, color, file,
+     button, submit, reset, hidden) have no text field to zoom. */
+  input:not([type]),
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  input[type="time"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 40px;
+  }
+
+  /* Apple HIG puts the minimum comfortable target at 44pt. 40px is the
+     compromise the ≤640px block already settled on for visual density;
+     matching it here keeps the two blocks from disagreeing. */
+  .hero-icon-btn,
+  .tab-btn,
+  .nav-btn,
+  .util-btn,
+  .side-nav-tab,
+  .modal-close {
+    min-height: 40px;
+  }
+
+  .hero-icon-btn {
+    min-width: 40px;
+  }
+
+  /* Landscape iPhone still has a home indicator. */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* :hover on a touch device latches on tap and stays until the user
+     taps elsewhere, leaving buttons stuck in their hover state. The
+     hover styling itself is defined unguarded throughout this file and
+     the component sheets; neutralising the transform here removes the
+     most visible artefact without unpicking every rule. */
+  .modal-close:hover {
+    transform: none;
+  }
+}
+
 /* ── Modals ───────────────────────────────────── */
 
 .modal-overlay, .modal-backdrop {
@@ -741,7 +853,12 @@ body.nav-mobile-open .nav-backdrop {
   background: rgba(0, 0, 0, 0.6);
   z-index: 200;
   align-items: center; justify-content: center;
-  padding: 16px;
+  /* Inset past the notch / home indicator so a centred modal is never
+     clipped by iPhone chrome — matters most in landscape, where the
+     notch eats one whole side. */
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+           max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  overscroll-behavior: contain;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   animation: modalFadeIn 0.2s ease-out;
@@ -762,6 +879,7 @@ body.nav-mobile-open .nav-backdrop {
   border-radius: 14px;
   width: min(540px, 95vw);
   max-height: 85vh;
+  max-height: 85dvh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -818,6 +936,9 @@ body.nav-mobile-open .nav-backdrop {
   padding: 20px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* Stop a flick that reaches the end of the modal body from scrolling
+     the page underneath it. */
+  overscroll-behavior: contain;
 }
 
 .modal-footer, .modal-actions {
@@ -831,4 +952,37 @@ body.nav-mobile-open .nav-backdrop {
 
 .modal-footer button, .modal-actions button {
   min-width: 80px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * Reduced motion
+ *
+ * Blanket guard rather than a per-selector allowlist. chat-orb.css and
+ * demo-mode.css each carried their own short list of animated selectors,
+ * which left base.css, shell.css, chrome.css, components.css, and
+ * notes-panel.css entirely uncovered — and quietly missed every element
+ * added after the list was written. Because base.css is the first
+ * stylesheet every consumer loads (see templates/index.skeleton.html),
+ * one rule here covers all of them plus anything added later.
+ *
+ * Durations collapse to a near-zero value instead of `none` so that
+ * `transitionend` / `animationend` listeners still fire; several
+ * components sequence their state off those events and would stall if
+ * the animation never ran at all.
+ * ───────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html:focus-within,
+  html {
+    scroll-behavior: auto !important;
+  }
 }

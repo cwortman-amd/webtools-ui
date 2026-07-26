@@ -70,10 +70,73 @@
     "defaultPersona": {
       "type": "string",
       "description": "Persona id to set active on first load (only if the user has not already pinned a different persona via `/voice persona <id>`)."
+    },
+    "cloudTTS": {
+      "$ref": "#/definitions/cloudTTS"
     }
   },
 
   "definitions": {
+    "cloudTTS": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Cloud text-to-speech routing. The bridge synthesizes through a hosted provider instead of (or in addition to) the browser's Web Speech voices. Provider API keys live in the consumer's own config and never leave the origin unless `mode` selects a cloud path.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["local", "cloud", "auto"],
+          "default": "local",
+          "description": "`local` uses Web Speech only. `cloud` always calls the selected provider. `auto` prefers cloud but falls back to Web Speech on error, timeout, or missing credentials — and is the mode that routes around iOS/iPadOS Web Speech limitations."
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["elevenlabs", "gemini", "grok"],
+          "default": "elevenlabs",
+          "description": "Which entry of `providers` to use when `mode` is `cloud` or `auto`."
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 25000,
+          "description": "Abort a cloud synthesis request after this many milliseconds. Under `auto`, a timeout falls back to Web Speech."
+        },
+        "providers": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Per-provider settings, merged (not replaced) across `configure()` calls.",
+          "properties": {
+            "elevenlabs": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "apiKey":       { "type": "string" },
+                "voiceId":      { "type": "string" },
+                "model":        { "type": "string" },
+                "outputFormat": { "type": "string" }
+              }
+            },
+            "gemini": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "apiKey": { "type": "string" },
+                "model":  { "type": "string" },
+                "voice":  { "type": "string" }
+              }
+            },
+            "grok": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "apiKey": { "type": "string" },
+                "model":  { "type": "string" },
+                "voice":  { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
     "persona": {
       "type": "object",
       "additionalProperties": true,

@@ -136,6 +136,7 @@ html[data-skin="minimal-monochrome"] {
   border: 1px solid var(--demo-bar-line-strong);
   border-radius: 999px;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   font: 0.78rem/1 inherit;
   color: var(--demo-bar-text-dim);
   opacity: 0;
@@ -309,6 +310,8 @@ html[data-skin="minimal-monochrome"] {
   flex: 1;
   padding: 12px 14px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .demo-transcript__step {
@@ -533,7 +536,10 @@ body.demo-active .demo-launcher { display: none; }
   padding: 28px 32px;
   width: min(520px, 92vw);
   max-height: 92vh;
+  max-height: 92dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   box-shadow: var(--ui-shadow-lg, 0 24px 64px rgba(0, 0, 0, 0.55));
   transform: translateY(8px);
   transition: transform 0.18s ease;

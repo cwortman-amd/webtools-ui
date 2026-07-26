@@ -42,12 +42,19 @@
       "  position: fixed; inset: 0; z-index: 99999;",
       "  background: rgba(0,0,0,0.55);",
       "  display: none; align-items: center; justify-content: center;",
-      "  padding: 16px; box-sizing: border-box;",
+      // Inset past the notch / home indicator so the modal isn't clipped
+      // on an iPhone, especially in landscape where the notch takes a side.
+      "  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))",
+      "          max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));",
+      "  box-sizing: border-box;",
       "}",
       ".cm-error-backdrop.cm-open { display: flex; }",
       ".cm-error-modal {",
       "  width: min(920px, calc(100vw - 32px));",
+      // dvh follows iOS Safari's collapsing toolbars; vh is the static
+      // largest viewport, so a vh-sized modal overflowed off-screen.
       "  max-height: calc(100vh - 32px);",
+      "  max-height: calc(100dvh - 32px);",
       "  overflow: hidden;",
       "  border-radius: 12px;",
       "  border: 1px solid var(--ui-line, #243244);",
@@ -86,6 +93,8 @@
       ".cm-error-detail {",
       "  margin: 0; padding: 10px;",
       "  max-height: min(42vh, 360px); overflow: auto;",
+      "  max-height: min(42dvh, 360px);",
+      "  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;",
       "  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;",
       "  font-size: 11px; line-height: 1.45; white-space: pre-wrap; word-break: break-word;",
       "  color: var(--ui-text, #e5e7eb);",
