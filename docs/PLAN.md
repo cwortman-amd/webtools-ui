@@ -715,6 +715,97 @@ appended to as phases complete.
   llm-benchmark still ship their own `scripts/export-pitch-pdf.mjs` (and
   llm-benchmark an older `js/error-popup.js`), and have not yet wired the voice
   endpoints — deferred as a follow-up.**
+- **2026-07-26 — Phase 10.2 — Audit remediation, gate hardening, iPhone
+  validation** — A code + docs audit across the shared surfaces, then the
+  fixes it justified.
+
+  *Gates.* `verify-vendor-manifest.sh` returned 0 when the manifest failed
+  to parse: the script has no `set -e`, so a parse failure left the entry
+  list empty, the compare loop never ran, and every counter stayed at zero
+  — a corrupt manifest reported success in all three consumers. The same
+  block interpolated the manifest path into `python3 -c`, so a path
+  containing a quote executed as Python. Both fixed; the path now goes
+  through argv. `build-vendor-manifest.sh` printf'd paths straight into
+  JSON and now serialises properly. `check_index_skeleton.py` exited 1 (read
+  as "head diverges") on a malformed values file and now exits 2 for setup
+  errors. `html_consistency_audit.py` failed the build on advisory WARNs,
+  crashed on subprocess timeout, and ignored its own `--summary-only`;
+  WARNs are advisory unless `--strict`.
+
+  *Security.* Chat-orb history replay re-flagged any stored system message
+  matching `/<(div|code|br)\b/` as HTML. `dispatch()` echoes unknown
+  commands back verbatim as persisted system messages, so a space-free
+  payload typed into the composer was stored as text and re-parsed as live
+  markup on every later page load — a stored XSS. Replay now honours only
+  the stored `html` flag. `export-pitch-pdf.mjs` guarded traversal with a
+  `startsWith` prefix test, which a sibling directory sharing the root's
+  name prefix defeated; replaced with an exact relative-path clamp.
+
+  *Correctness.* Persisted history duplicated its last message on every
+  mount; demo playback ran concurrent chains so Next advanced several steps
+  per press (fixed with a run token); wake-word recognition restarted from
+  `onend` with no `onerror`, so a denied microphone produced an unbounded
+  restart loop; `voice.js` polled for a legacy global 20x/sec forever in the
+  two consumers that never define it; `SlashRouter.run` was never exported;
+  a cancelled scroll tour left its promise permanently pending.
+
+  *Design system.* Promoted `css/chrome.css`, `css/components.css` and
+  `js/chrome.js`, which had been sitting untracked while the manifest
+  already shipped hashes for them — a fresh clone would have failed the
+  gate on three missing files. The stat-card block is named `.statcard`
+  rather than `.stat` on purpose: `base.css` already owns `.stats` / `.stat`
+  for the older 4-column summary strip and is loaded by every page, so
+  reusing the block names would have silently restyled every existing stat
+  block the moment the sheet was linked. **No consumer links these yet;
+  adoption is a per-repo follow-up.**
+
+  *Performance.* Two scroll handlers did read-then-write layout work once
+  per event rather than once per painted frame — `reAimHighlight` in
+  `demo-ui.js` (which forced a layout recalculation per read, during the
+  eased scroll a tour spends most of its time in) and the keyboard-inset
+  tracker in `chat-orb.js` (which invalidated style for the whole document
+  on every `visualViewport` scroll, including the overwhelming majority
+  where the inset is 0 and unchanged). Both coalesced into one rAF
+  callback; the inset tracker also skips unchanged values. Measured: 120
+  scroll events collapse to a single frame, and 120 scrolls with the
+  keyboard closed produce 0 root-style writes instead of 120.
+
+  *iPhone validation.* Added `tests/iphone-ui.mjs` — Playwright iPhone
+  device profiles against each consumer's real `pages/index.html` — plus
+  static checks 24 and 25 in the audit. The split is forced by a hard
+  limitation: headless Chromium resolves every `env(safe-area-inset-*)` to
+  0 whatever the device profile, so the notch is invisible to a browser
+  test and has to be checked by reading the stylesheets. Three real defects
+  found and fixed:
+    - `.ai-panel` overflowed off the **top** on every iPhone in landscape,
+      putting its header and close button out of reach. It carries
+      `min-height: 360px` alongside a `max-height` derived from `100dvh`,
+      and below 490px of viewport those conflict — CSS resolves in favour
+      of `min-height`. The mobile block already reset it, but keyed to
+      `max-width: 720px`, and iPhone 15 Pro landscape is 734px wide.
+      **Generalisable: gate ergonomics on `pointer` or `height`, never on
+      width — every current iPhone in landscape clears a 720px breakpoint.**
+    - `.skip-link` had no CSS anywhere, despite cluster-manager's markup
+      stating the style lived in `base.css`. The anchor rendered as
+      ordinary static text over the hero on every page load.
+    - The shared 40px touch floor was being erased by `all: unset`, which
+      resets `min-height` / `min-width` to their initial values.
+      `shell.css` does this to `.nav-btn` and `dc-planner.css` to
+      `.hero-icon-btn`, both loading after `base.css` at equal specificity,
+      so sidebar buttons measured 32-34px and dc-planner's toolbar —
+      including the mobile navigation hamburger — stayed 28x28 while the
+      siblings rendered 40x40. The floor now carries `!important`.
+      **This is the third distinct bug from `all: unset` in this codebase**
+      (the first two suppressed `:focus-visible` rings in `chat-orb.css`);
+      treat it as a known hazard whenever a shared floor must survive a
+      later sheet.
+
+  Matrix ends at 96 passed / 0 failed / 24 skipped across 4 device profiles
+  x 3 consumers. The audit's static iPhone checks report 13 advisory WARNs,
+  all consumer-owned (edge-pinned fixed overlays such as `.side-nav`,
+  `.yaml-overlay` and several custom modals that receive a safe-area inset
+  from no sheet the page loads, plus `dvh` lengths with no `vh` fallback)
+  — **deferred as a per-consumer follow-up; `--strict` gates on them.**
 
 ## Initiative status: complete
 

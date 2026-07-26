@@ -248,6 +248,63 @@ Every page in the three repos should now load CSS in this order:
 
 ---
 
+## Cascade hazards (2026-07-26)
+
+Three failure modes that the link order above makes possible. Each cost real
+debugging time because in every case the rule that was supposed to prevent the
+bug was present, correct-looking, and doing nothing.
+
+### `all: unset` erases shared floors
+
+`all: unset` resets **every** property to its initial value, including ones the
+rule never mentions — `min-height` and `min-width` among them. Per the order
+above, per-repo overrides (step 3) and page chrome (step 6) both load after
+`base.css` (step 2), so a later `all: unset` at equal specificity silently
+deletes a baseline the shared sheet established.
+
+This has now produced three separate bugs:
+
+| Sheet | Selector | What it erased |
+|---|---|---|
+| `chat-orb.css` | `.ai-quick-menu button` | `button:focus-visible` ring |
+| `chat-orb.css` | `.ai-feedback-card button` | `button:focus-visible` ring |
+| `shell.css` | `.nav-btn` | 40px touch floor |
+| `dc-planner.css` | `.hero-icon-btn` | 40px touch floor |
+
+If a shared rule is a *floor* rather than a preference, `all: unset` downstream
+will beat it. The touch-ergonomics block in `base.css` now uses `!important`
+for this reason, matching what its `font-size: 16px` already did. When you
+write `all: unset`, restate any shared floor the element depends on.
+
+### Width breakpoints do not catch landscape phones
+
+Every current iPhone in landscape is **wider than 720px** — iPhone 15 Pro
+landscape is 734x343. A `max-width: 720px` block steps straight over them, so
+rotating a phone silently drops out of every mobile rule keyed that way.
+
+`.ai-panel` hit this: it carries `min-height: 360px` alongside
+`max-height: min(640px, calc(100dvh - 130px))`, and below 490px of viewport
+those conflict. CSS resolves a min/max conflict in favour of `min-height`, so
+the panel rendered 360px tall inside a 343px viewport and overflowed off the
+**top**, putting its header and close button out of reach. The mobile block
+already reset `min-height: 0` — but keyed to width, so it never applied.
+
+Gate ergonomics on what you actually mean: `@media (hover: none) and
+(pointer: coarse)` for reach, `@media (max-height: …)` for vertical fit. Width
+belongs to layout decisions only. `base.css`'s "Touch ergonomics
+(orientation-independent)" block already makes this argument at length.
+
+### Block names are a shared namespace
+
+`components.css` shipped a BEM rewrite of the stat component. Naming its block
+`.stat` would have collided with the older 4-column summary strip that
+`base.css` has always owned — and since `base.css` loads first, linking the new
+sheet anywhere would have silently restyled every existing stat block in all
+three consumers. It is named `.statcard` instead, so the two coexist and
+adoption is opt-in per element. Check `base.css` before naming a new block.
+
+---
+
 ## Per-repo audit reports
 
 The detailed audit findings (file inventories, link-order checks, diff stats) live in each repo's `docs/HARMONIZATION.md`. This top-level doc tracks cross-repo status; the per-repo docs track repo-specific implementation notes.
@@ -261,3 +318,4 @@ The detailed audit findings (file inventories, link-order checks, diff stats) li
   - **D.1** Material Symbols self-host shipped to `llm-benchmark` + `cluster-manager`. New canonical assets: `webtools-ui/css/material-symbols.css` + `webtools-ui/css/fonts/material-symbols-outlined.woff2` (3.55 MB, md5 `998140309962b4c631d243c5baba487b`). dc-planner deferred pending Playwright icon-parity verification.
   - **D.3** Tier 1 (8 byte-identical selectors) and Tier 2 (11 whitespace-only-differing selectors) deduped from `dc-planner/css/dc-planner.css`. Self-check 531/0. Tier 3 (~55 selectors with semantic differences) deferred — categorized into 4 buckets (`var(--muted)` cleanup, layout-value differences, additive-delta merges, global element selectors).
   - **D.2** & **D.4** scope refined with concrete selector families, per-repo file lists, cascade-order risk notes. No code changes yet.
+- **2026-07-26** — Phase 10.2. New canonical sheets `css/chrome.css` (top-nav action bar, tool popovers, segmented controls) and `css/components.css` (filter chips, code blocks, stat cards) promoted out of untracked state, paired with `js/chrome.js`. **No consumer links either sheet yet — adoption is a per-repo follow-up.** Documented three cascade hazards found while fixing the iPhone layout defects (see [Cascade hazards](#cascade-hazards-2026-07-26)): `all: unset` erasing shared floors, width breakpoints missing landscape phones, and block-name collisions with `base.css`. The `.skip-link` style cluster-manager's markup had always assumed was finally added to `base.css`; it had never existed, so the anchor rendered as static text over the hero on every page load.
