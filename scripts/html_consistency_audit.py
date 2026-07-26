@@ -21,12 +21,14 @@ Checks performed:
   15. Pitch link          — verifies .hero-title links to pitch.html
   16. Layout default (JS) — warns if JS init uses layout default of "top"
   17. localStorage key    — detects mismatched localStorage prefix between repos
-  18. Present.html CSS    — checks each present.html loads base.css, skin CSS
+  18. Present.html CSS    — checks base.css + skin CSS where present.html exists
+                            (optional page; skipped in repos without one)
   19. Pitch.html meta     — verifies viewport + charset in pitch.html
   20. SHELL_PREFIX        — verifies window.SHELL_PREFIX is set before Shell.init()
   21. Mobile-drawer.js    — verifies mobile-drawer.js is loaded in index.html
   22. Agent-bridge.js     — verifies agent-bridge.js is loaded
-  23. Duplicate IDs       — scans index.html for duplicate HTML element IDs
+  23. Duplicate IDs       — scans index.html markup for duplicate element IDs
+                            (comments and script/style bodies are excluded)
 
 Exit codes:
   0  no ERRORs found (WARNs may still be present)
@@ -88,6 +90,13 @@ def ok(repo: str, msg: str) -> None:
     if QUIET:
         return
     print(f"  {GREEN}[OK]{RESET}    {msg}")
+
+
+def skip(repo: str, msg: str) -> None:
+    """Note a check that does not apply here. Not recorded as an issue."""
+    if QUIET:
+        return
+    print(f"  {DIM}[SKIP]  {msg}{RESET}")
 
 
 def section(title: str) -> None:
@@ -268,9 +277,28 @@ def check_agent_bridge(repo_name: str, html: str) -> None:
         emit("WARN", repo_name, "index.html: agent-bridge.js not loaded")
 
 
+def strip_non_markup(html: str) -> str:
+    """Drop comments and <script>/<style> bodies so attribute scans see only markup.
+
+    Without this, any prose that merely *mentions* an attribute is scanned as
+    if it were one. dc-planner/pages/index.html documents its tab wiring in an
+    HTML comment and again in a JS comment, both spelling out the placeholder
+    `id="tabXxxBtn"`, which a raw scan reported as a duplicate element ID.
+
+    Ids assembled inside script bodies are dropped too. They were never
+    reliably detectable statically (they are usually built by interpolation),
+    so the trade is a check that stays silent on dynamic ids in exchange for
+    one that does not cry wolf on static ones.
+    """
+    html = re.sub(r"<!--.*?-->", "", html, flags=re.DOTALL)
+    html = re.sub(r"<script\b[^>]*>.*?</script\s*>", "", html, flags=re.DOTALL | re.IGNORECASE)
+    html = re.sub(r"<style\b[^>]*>.*?</style\s*>", "", html, flags=re.DOTALL | re.IGNORECASE)
+    return html
+
+
 def check_duplicate_ids(repo_name: str, html: str) -> None:
     """Scan for duplicate id= values in HTML."""
-    ids = re.findall(r'\bid=["\']([^"\']+)["\']', html)
+    ids = re.findall(r'\bid=["\']([^"\']+)["\']', strip_non_markup(html))
     counts = Counter(ids)
     dups = {k: v for k, v in counts.items() if v > 1}
     if not dups:
@@ -281,10 +309,16 @@ def check_duplicate_ids(repo_name: str, html: str) -> None:
 
 
 def check_present_html(repo_name: str, repo_path: Path) -> None:
-    """Check present.html for cross-repo consistency."""
+    """Check present.html for cross-repo consistency, where the page exists.
+
+    present.html is an optional per-repo slide deck, not a canonical page:
+    nothing in the index skeleton, the slash catalog or the harmonization plan
+    requires one. cluster-manager deliberately has none, covering the same
+    ground with pitch.html, so its absence is not an inconsistency to report.
+    """
     present = repo_path / "pages" / "present.html"
     if not present.is_file():
-        emit("WARN", repo_name, "present.html: file not found")
+        skip(repo_name, "present.html: not present in this repo (optional page)")
         return
 
     html = read(present)
