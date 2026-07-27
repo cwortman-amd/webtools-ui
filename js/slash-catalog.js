@@ -32,7 +32,7 @@
    *   description: human-readable summary, shown in /help
    *   native:      array of consumer ids that natively implement this
    *                command. Allowed values: "llm-benchmark", "dc-planner",
-   *                "cluster-manager", "demo-portal".
+   *                "cluster-manager", "demo-portal", "knowledge-exchange".
    *   redirect:    optional URL — if present, the no-op variant becomes a
    *                redirect that points the user at the consumer that owns it.
    *   placeholder: optional string — overrides the default no-op reply.
@@ -43,7 +43,11 @@
                 native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
     "/clear": { description: "Clear the chat history",
                 native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
-    "/llm":   { description: "Configure or toggle the LLM agent",
+    // knowledge-exchange overrides the built-in handler so `/llm <question>`
+    // forces model synthesis for one question; `/llm settings` still opens the
+    // configuration card, and so does the header gear. Everywhere else this is
+    // the settings shortcut chat-orb.js registers.
+    "/llm":   { description: "Configure or toggle the LLM agent (knowledge-exchange: force a model-written answer for one question)",
                 native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
 
     // ── Cross-repo navigation (every consumer should implement) ─────
@@ -53,6 +57,16 @@
                     native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
     "/dashboard": { description: "Return to the main dashboard",
                     native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
+
+    // ── knowledge-exchange: choosing where an answer comes from ────
+    // Paired with `/llm` above. The two exist because the answers are not
+    // substitutes: `/wiki` is deterministic retrieval that completes in well
+    // under a second, `/llm` spends roughly ten seconds of model prefill to
+    // rewrite the same retrieved passages. Only the person asking knows which
+    // one they need, so neither is hidden behind server configuration.
+    "/wiki":  { description: "Answer from the compiled wiki only — cited, deterministic, never the model",
+                native: ["knowledge-exchange"],
+                placeholder: "`/wiki` answers from the Knowledge Exchange compiled wiki." },
 
     // ── demo-portal specific (manifest-driven catalog) ─────────────
     "/search":    { description: "Search the demo catalog",
@@ -115,7 +129,8 @@
     "llm-benchmark":   "(see https://github.com/cwortman-amd/llm-benchmark)",
     "dc-planner":      "(see https://github.com/cwortman-amd/dc-planner)",
     "cluster-manager": "(see https://github.com/cwortman-amd/cluster-manager)",
-    "demo-portal":     "(see https://github.com/cwortman-amd/demo-portal)"
+    "demo-portal":     "(see https://github.com/cwortman-amd/demo-portal)",
+    "knowledge-exchange": "(see https://github.com/cwortman-amd/knowledge-exchange)"
   };
 
   function listCommands() { return Object.keys(CATALOG).sort(); }
