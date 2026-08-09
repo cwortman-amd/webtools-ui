@@ -52,10 +52,19 @@
     });
     var sideLabel = document.querySelector("#themeToggleSide .util-label");
     if (sideLabel) sideLabel.textContent = theme === "dark" ? "Dark" : "Light";
-    var tTop = document.getElementById("themeToggleTop");
-    if (tTop) tTop.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
-    var tSide = document.getElementById("themeToggleSide");
-    if (tSide) tSide.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    // Name the *result* of the action, not the control ("Toggle light/dark
+    // mode" never tells you which state you're in). aria-label is set
+    // alongside title so the announced name matches the tooltip — the
+    // visible ".util-label" only says "Dark"/"Light" on its own.
+    //
+    // `#sideNavThemeBtn` is dc-planner's id for the same control; it is
+    // listed here so all three consumers announce identically instead of
+    // each shipping its own wording.
+    var themeName = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    document.querySelectorAll("#themeToggleTop, #themeToggleSide, #sideNavThemeBtn").forEach(function (btn) {
+      btn.title = themeName;
+      btn.setAttribute("aria-label", themeName);
+    });
   }
 
   function toggleTheme() {
@@ -77,6 +86,14 @@
     });
     var sideLabel = document.getElementById("modeLabelSide");
     if (sideLabel) sideLabel.textContent = MODE_LABELS[mode];
+    // The visible label is just "Standard", so a bare "User mode" accessible
+    // name drops the current state. Name it the way cluster-manager and
+    // dc-planner already do, and keep it in sync on every change.
+    document.querySelectorAll("#modeToggleSide, #userModeBtnSide").forEach(function (btn) {
+      var name = "User Mode: " + MODE_LABELS[mode];
+      btn.title = name;
+      btn.setAttribute("aria-label", name);
+    });
     document.dispatchEvent(new CustomEvent("shell:modeChanged", { detail: { mode: mode } }));
   }
 
@@ -126,7 +143,38 @@
    * markup (or other consumers that still ship the strip) stays in
    * sync if they reuse this helper. In llm-benchmark the strip is
    * gone and only `.sidebar-nav .nav-btn` matches. */
-  function switchTab(tabId) {
+  /* ── Deep linking ──────────────────────────────────────────
+   * Tabs were pure in-memory state here, so a view could not be
+   * bookmarked or shared and Back left the app instead of stepping
+   * between tabs. The canonical form is `?tab=<id>`; `#tab-<id>` is
+   * also accepted so links written against dc-planner's hash scheme
+   * resolve. `tabId` is the internal id, which is not always the
+   * visible label (llm-benchmark's "Deploy" tab is `queue`).
+   */
+  function tabFromUrl() {
+    var q = null;
+    try { q = new URLSearchParams(location.search).get("tab"); } catch (_) {}
+    if (q) return q;
+    var m = /^#tab-(.+)$/.exec(location.hash || "");
+    return m ? m[1] : null;
+  }
+
+  function knownTab(tabId) {
+    if (!tabId) return false;
+    return !!document.querySelector('.sidebar-nav .nav-btn[data-tab="' + CSS.escape(tabId) + '"]');
+  }
+
+  function writeTabToUrl(tabId) {
+    if (!global.history || !history.pushState) return;
+    var url = new URL(location.href);
+    if (url.searchParams.get("tab") === tabId) return;
+    url.searchParams.set("tab", tabId);
+    if (/^#tab-/.test(url.hash)) url.hash = "";
+    history.pushState({ tab: tabId }, "", url);
+  }
+
+  function switchTab(tabId, opts) {
+    if (!opts || opts.updateUrl !== false) writeTabToUrl(tabId);
     document.querySelectorAll(".hero-tabs .tab-btn, .sidebar-nav .nav-btn").forEach(function (t) {
       var isTarget = t.getAttribute("data-tab") === tabId;
       t.classList.toggle("active", isTarget);
@@ -304,6 +352,48 @@
         }
       });
     }
+
+    // Honour a deep link on load, and let Back/Forward walk the tab history
+    // instead of leaving the app.
+    var initial = tabFromUrl();
+    if (knownTab(initial)) switchTab(initial, { updateUrl: false });
+    global.addEventListener("popstate", function () {
+      var t = tabFromUrl();
+      if (knownTab(t)) switchTab(t, { updateUrl: false });
+    });
+
+    initTabShortcuts();
+  }
+
+  /* Ctrl+1..9 jumps to the Nth sidebar tab, matching the binding
+   * cluster-manager already shipped. Registered with the shared sheet so
+   * the shortcut is discoverable rather than tooltip-only. */
+  function initTabShortcuts() {
+    var tabs = [].slice.call(document.querySelectorAll(".sidebar-nav .nav-btn"));
+    if (!tabs.length) return;
+
+    document.addEventListener("keydown", function (e) {
+      if (!e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key < "1" || e.key > "9") return;
+      var target = tabs[parseInt(e.key, 10) - 1];
+      if (!target || target.disabled) return;
+      e.preventDefault();
+      switchTab(target.getAttribute("data-tab"));
+    });
+
+    if (!global.Shortcuts) return;
+    // Resolved on open: which tabs are enabled depends on the user mode.
+    global.Shortcuts.registerProvider("Navigation", function () {
+      return [].slice.call(document.querySelectorAll(".sidebar-nav .nav-btn"))
+        .slice(0, 9)
+        .map(function (t, i) {
+          var clone = t.cloneNode(true);
+          [].slice.call(clone.querySelectorAll(".material-symbols-outlined, .material-icons"))
+            .forEach(function (g) { g.parentNode.removeChild(g); });
+          var name = (clone.textContent || "").replace(/\s+/g, " ").trim();
+          return { keys: "Ctrl+" + (i + 1), label: "Go to " + (name || t.getAttribute("data-tab")) };
+        });
+    });
   }
 
   global.Shell = {

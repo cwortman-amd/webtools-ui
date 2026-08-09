@@ -258,9 +258,9 @@ async function checkChatOrbFits(page, viewport) {
       ? pass("chat orb button within viewport")
       : fail("chat orb button within viewport", `at (${Math.round(x)},${Math.round(y)}) ${Math.round(w)}x${Math.round(h)} in ${viewport.width}x${viewport.height}`);
 
-    (w >= MIN_TAP_PX && h >= MIN_TAP_PX)
-      ? pass(`chat orb button >= ${MIN_TAP_PX}px`)
-      : fail(`chat orb button >= ${MIN_TAP_PX}px`, `${Math.round(w)}x${Math.round(h)}`);
+    (w >= TAP_FLOOR_PX && h >= TAP_FLOOR_PX)
+      ? pass(`chat orb button >= ${TAP_FLOOR_PX}px`)
+      : fail(`chat orb button >= ${TAP_FLOOR_PX}px`, `${Math.round(w)}x${Math.round(h)}`);
   }
 
   const opened = await page.evaluate(() => {

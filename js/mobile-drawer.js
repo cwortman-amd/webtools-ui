@@ -60,11 +60,17 @@
 (function (global) {
   "use strict";
 
-  var INSTALLED = typeof WeakSet !== "undefined" ? new WeakSet() : null;
+  var INSTALLED = typeof WeakMap !== "undefined" ? new WeakMap() : null;
 
   function resolveEl(ref) {
     if (!ref) return null;
-    if (typeof ref === "string") return document.getElementById(ref);
+    if (typeof ref === "string") {
+      // Preserve the original ID shorthand while allowing reusable CSS
+      // selectors such as "#menu" or "[data-mobile-menu]".
+      var byId = document.getElementById(ref);
+      if (byId) return byId;
+      try { return document.querySelector(ref); } catch (_) { return null; }
+    }
     if (ref.nodeType === 1) return ref;
     return null;
   }
@@ -120,30 +126,39 @@
     if (!menuBtn || !backdrop || !drawer) {
       return null;
     }
-    if (INSTALLED && INSTALLED.has(menuBtn)) {
-      return null;
-    }
-    if (INSTALLED) INSTALLED.add(menuBtn);
+    if (INSTALLED && INSTALLED.has(menuBtn)) return INSTALLED.get(menuBtn);
 
     var mobileMQ = cfg.mobileMQ || "(max-width: 640px)";
-    var closeOnTap = Array.isArray(cfg.closeOnTap) ? cfg.closeOnTap.slice() : [];
+    var closeOnTap = Array.isArray(cfg.closeOnTap)
+      ? cfg.closeOnTap.slice()
+      : (typeof cfg.closeOnTap === "string" && cfg.closeOnTap.trim() ? [cfg.closeOnTap] : []);
     var onOpen = typeof cfg.onOpen === "function" ? cfg.onOpen : null;
     var onClose = typeof cfg.onClose === "function" ? cfg.onClose : null;
+    var media = global.matchMedia(mobileMQ);
 
     function isMobile() {
-      return global.matchMedia(mobileMQ).matches;
+      return media.matches;
     }
 
     function isOpen() {
       return document.body.classList.contains("nav-mobile-open");
     }
 
+    function syncAria() {
+      var open = isOpen() && isMobile();
+      menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      // A persistent desktop sidebar is visible content, not a hidden dialog.
+      drawer.setAttribute("aria-hidden", isMobile() && !open ? "true" : "false");
+    }
+
     function setOpen(open) {
-      var nextOpen = !!open;
-      if (nextOpen === isOpen()) return;
+      var nextOpen = !!open && isMobile();
+      if (nextOpen === isOpen()) {
+        syncAria();
+        return;
+      }
       document.body.classList.toggle("nav-mobile-open", nextOpen);
-      menuBtn.setAttribute("aria-expanded", nextOpen ? "true" : "false");
-      drawer.setAttribute("aria-hidden", nextOpen ? "false" : "true");
+      syncAria();
       // Only pin the page on mobile — above the breakpoint the drawer is
       // the persistent sidebar, not an overlay, and the page must scroll.
       if (nextOpen && isMobile()) lockBodyScroll();
@@ -180,20 +195,46 @@
       }
     });
 
-    global.addEventListener("resize", function () {
+    function handleResponsiveChange() {
       if (!isMobile() && isOpen()) {
         setOpen(false);
+      } else {
+        syncAria();
       }
-    });
+    }
+    if (media && typeof media.addEventListener === "function") {
+      media.addEventListener("change", handleResponsiveChange);
+    } else if (media && typeof media.addListener === "function") {
+      media.addListener(handleResponsiveChange);
+    }
+    global.addEventListener("resize", handleResponsiveChange);
 
-    return {
+    syncAria();
+    var handle = {
       open: function () { setOpen(true); },
       close: function () { setOpen(false); },
       isOpen: isOpen
     };
+    if (INSTALLED) INSTALLED.set(menuBtn, handle);
+    return handle;
+  }
+
+  function installDeclarative() {
+    var script = document.currentScript;
+    if (!script || !script.dataset || !script.dataset.mobileDrawer) return null;
+    var cfg = {
+      menuBtn: script.dataset.mobileDrawerMenu,
+      backdrop: script.dataset.mobileDrawerBackdrop,
+      drawer: script.dataset.mobileDrawer,
+      closeOnTap: script.dataset.mobileDrawerClose || "",
+      mobileMQ: script.dataset.mobileDrawerMedia || "(max-width: 640px)"
+    };
+    return install(cfg);
   }
 
   global.MobileDrawer = {
-    install: install
+    install: install,
+    installDeclarative: installDeclarative
   };
+  installDeclarative();
 })(typeof window !== "undefined" ? window : this);

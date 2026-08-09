@@ -49,6 +49,7 @@
  *
  *   ROUTING / SUBSCRIPTIONS:
  *     onTranscript(fn)          → fn(transcript, isFinal)
+ *     onState(fn)               → fn("listening"|"idle"|"error", detail)
  *     routeTranscript(text)     → manually inject a finalized
  *                                 transcript (used by demo engine)
  *     lastTranscript()
@@ -128,6 +129,7 @@
   var _wakeRecognition = null;
   var _wakeSuspended = false;   // true while push-to-talk owns the mic
   var _subscribers = [];
+  var _stateSubscribers = [];
   var _lastTranscript = "";
   var _voiceCache = null;       // cached SpeechSynthesisVoice list
   var _orbWrapped = false;
@@ -214,6 +216,12 @@
     });
   }
 
+  function _emitState(state, detail) {
+    _stateSubscribers.forEach(function (fn) {
+      try { fn(state, detail || null); } catch (_) {}
+    });
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // STT (push-to-talk)
   // ───────────────────────────────────────────────────────────────────────────
@@ -225,15 +233,21 @@
     rec.continuous = false;
     rec.interimResults = true;
     rec.lang = _config.lang || (global.navigator && global.navigator.language) || "en-US";
-    rec.onstart = function () { _active = true; };
+    rec.onstart = function () {
+      _active = true;
+      _emitState("listening");
+    };
     rec.onend = function () {
       _active = false;
+      _emitState("idle");
       // The mic is free again; let the wake-word listener take it back.
       _resumeWakeWord();
     };
     rec.onerror = function (ev) {
       _active = false;
-      _emit("[voice error] " + (ev && ev.error ? ev.error : "unknown"), true);
+      var code = ev && ev.error ? ev.error : "unknown";
+      _emitState("error", code);
+      _emit("[voice error] " + code, true);
     };
     rec.onresult = function (ev) {
       var transcript = "";
@@ -253,9 +267,15 @@
 
   function start() {
     var rec = _ensureRecognition();
-    if (!rec) return false;
+    if (!rec) {
+      _emitState("error", "unsupported");
+      return false;
+    }
     try { rec.start(); _active = true; return true; }
-    catch (_) { return false; }
+    catch (_) {
+      _emitState("error", "start-failed");
+      return false;
+    }
   }
   function stop() {
     if (!_recognition) return false;
@@ -882,6 +902,13 @@
     };
   }
 
+  function onState(fn) {
+    if (typeof fn === "function") _stateSubscribers.push(fn);
+    return function () {
+      _stateSubscribers = _stateSubscribers.filter(function (g) { return g !== fn; });
+    };
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // CONFIG (Phase 6 extension — phonetics + personas)
   // ───────────────────────────────────────────────────────────────────────────
@@ -1026,7 +1053,7 @@
   // PUBLIC FACADE
   // ───────────────────────────────────────────────────────────────────────────
   var bridge = {
-    version: 3,                  // v3 adds platform voice heuristics + cloud TTS adapters
+    version: 4,                  // v4 adds recognition lifecycle subscriptions
     isSupported: isSupported,
 
     // Recognition
@@ -1042,6 +1069,7 @@
 
     // Subscribe / inject
     onTranscript: onTranscript,
+    onState: onState,
     routeTranscript: routeTranscript,
     lastTranscript: function () { return _lastTranscript; },
 

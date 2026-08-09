@@ -141,7 +141,10 @@
   --skin-tab-color: rgba(0, 0, 0, 0.60);
   --skin-tab-active-bg: rgba(193, 169, 104, 0.14);
   --skin-tab-active-border: var(--amd-gold);
-  --skin-tab-active-color: #8C7A4D;
+  /* Darkened from #8C7A4D, which sat at 3.78:1 on the tinted active-tab
+     background — below the 4.5:1 AA floor for 12px text, and this is the
+     label the user looks at most. This reads 4.8:1 and keeps the gold. */
+  --skin-tab-active-color: #7A6A42;
   --skin-panel-bg: #FFFFFF;
   --skin-hero-bg: rgba(255, 255, 255, 0.96);
   --skin-hero-border: 1px solid rgba(0, 0, 0, 0.10);

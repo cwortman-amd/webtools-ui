@@ -41,7 +41,11 @@
     // ── Built-in (registered automatically by chat-orb.js) ──────────
     "/help":  { description: "Show all available commands",
                 native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
-    "/clear": { description: "Clear the chat history",
+    // knowledge-exchange overrides the built-in handler so a clear also stops
+    // whatever is still streaming into the log it is about to empty. The
+    // built-in `builtinClear` is unchanged and is still what the other four
+    // consumers get.
+    "/clear": { description: "Clear the chat history (knowledge-exchange: also stops an in-flight answer first)",
                 native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
     // knowledge-exchange overrides the built-in handler so `/llm <question>`
     // forces model synthesis for one question; `/llm settings` still opens the
@@ -67,6 +71,18 @@
     "/wiki":  { description: "Answer from the compiled wiki only — cited, deterministic, never the model",
                 native: ["knowledge-exchange"],
                 placeholder: "`/wiki` answers from the Knowledge Exchange compiled wiki." },
+
+    // ── knowledge-exchange: taking the answer back ─────────────────
+    // Both are about an answer already in flight, so both are catalogued
+    // rather than left as consumer-local commands: any orb that streams needs
+    // a way to stop the stream and a way to get out of the way, and a consumer
+    // without one should say so rather than answer "Unknown command".
+    "/stop":  { description: "Stop the answer that is streaming right now, keeping whatever text already arrived",
+                native: ["knowledge-exchange"],
+                placeholder: "`/stop` aborts an in-flight answer in the Knowledge Exchange orb." },
+    "/exit":  { description: "Minimize the chat orb to its icon, leaving the transcript intact",
+                native: ["knowledge-exchange"],
+                placeholder: "`/exit` minimizes the Knowledge Exchange orb (Escape does the same)." },
 
     // ── demo-portal specific (manifest-driven catalog) ─────────────
     "/search":    { description: "Search the demo catalog",

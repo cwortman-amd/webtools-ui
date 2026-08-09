@@ -60,6 +60,11 @@
     initials:    "AI",
     greeting:    "Hi! Type a question, or `/help` to see what I can do.",
     placeholder: "Ask me anything, or /command…",
+    // First-run chips under the greeting. Accepts command strings
+    // (["/demo", "/pitch"]) or {label, command, hint} objects; `false`
+    // disables them. Unset auto-picks from the registered commands, so a
+    // consumer that registers a command gets a chip without extra wiring.
+    suggestions: null,
     tooltip:     "Open AI chat",
     onHelpExtra: null,    // optional fn returning string to append to /help output
     // Optional extra header action: when truthy, a play_circle "Demo" button
@@ -90,7 +95,11 @@
     // with its own flow (dc-planner-style multi-step, a ticketing API, etc).
     showFeedbackBtn: false,
     onFeedbackClick: null,
-    githubRepo:      ""
+    githubRepo:      "",
+    // Opt-in push-to-talk composer control. `true` uses window.voiceBridge;
+    // an object may provide `{ bridge, registerSlash, coarseMQ }`.
+    // The default is off so consumers that do not load voice.js are unchanged.
+    voiceComposer: false
   };
   var LLM_DEFAULTS = {
     host:    "",
@@ -112,7 +121,8 @@
 
   var ui = { orb: null, panel: null, msgs: null, input: null, send: null,
              close: null, llmBtn: null, llmCard: null, demoBtn: null,
-             demoCard: null, feedbackBtn: null, feedbackCard: null };
+             demoCard: null, feedbackBtn: null, feedbackCard: null,
+             voiceBtn: null, voiceStatus: null };
 
   function resolveVoiceModeLabel() {
     try {
@@ -187,7 +197,10 @@
     var panel = document.createElement("section");
     panel.className = "ai-panel";
     panel.id = "chatPanel";
-    panel.setAttribute("role", "dialog");
+    // Non-modal: the page stays interactive and focus is deliberately not trapped,
+    // so this is a complementary landmark rather than a dialog. As a landmark it
+    // also shows up in screen-reader landmark navigation.
+    panel.setAttribute("role", "complementary");
     panel.setAttribute("aria-label", state.cfg.title);
     panel.innerHTML = [
       '<div class="ai-hdr">',
@@ -247,10 +260,18 @@
       "  </div>",
       "</div>",
       '<div class="ai-msgs" id="chatMsgs" role="log" aria-live="polite"></div>',
+      (state.cfg.voiceComposer
+        ? '<div class="ai-voice-status" id="chatVoiceStatus" role="status" aria-live="polite"></div>'
+        : ""),
       '<div class="ai-input-row">',
       '  <div class="ai-input-wrap">',
-      '    <textarea id="chatInput" class="ai-input" rows="1" placeholder="' + escapeAttr(state.cfg.placeholder) + '" maxlength="600"></textarea>',
+      '    <ul id="chatPalette" class="ai-palette" role="listbox" aria-label="Slash commands" hidden></ul>',
+      '    <textarea id="chatInput" class="ai-input" rows="1" placeholder="' + escapeAttr(state.cfg.placeholder) + '" maxlength="600"' +
+      ' role="combobox" aria-expanded="false" aria-controls="chatPalette" aria-autocomplete="list"></textarea>',
       "  </div>",
+      (state.cfg.voiceComposer
+        ? '  <button type="button" id="chatVoiceBtn" class="ai-voice" aria-controls="chatInput" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>'
+        : ""),
       '  <button type="button" id="chatSend" class="ai-send" aria-label="Send message"><span class="material-symbols-outlined">arrow_upward</span></button>',
       "</div>"
     ].join("");
@@ -311,6 +332,146 @@
     return !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
   }
 
+  function wireVoiceComposer() {
+    if (!ui.voiceBtn || !ui.voiceStatus) return;
+    var opts = state.cfg.voiceComposer === true ? {} : (state.cfg.voiceComposer || {});
+    var bridge = opts.bridge || global.voiceBridge;
+    var coarseMQ = opts.coarseMQ || "(pointer: coarse)";
+    var coarse = !!(global.matchMedia && global.matchMedia(coarseMQ).matches);
+    var ignoreClickUntil = 0;
+    var receivedFinal = false;
+    var receivedError = false;
+    var hasStateEvents = !!(bridge && typeof bridge.onState === "function");
+    var supported = !!(
+      bridge &&
+      typeof bridge.start === "function" &&
+      typeof bridge.stop === "function" &&
+      typeof bridge.isActive === "function" &&
+      typeof bridge.isSupported === "function" &&
+      bridge.isSupported()
+    );
+
+    function setVoiceState(active, message, isError) {
+      ui.voiceBtn.classList.toggle("is-listening", !!active);
+      ui.voiceBtn.setAttribute("aria-pressed", active ? "true" : "false");
+      ui.voiceBtn.setAttribute(
+        "aria-label",
+        active ? "Stop voice input" : (coarse ? "Hold to talk" : "Start voice input")
+      );
+      ui.voiceBtn.title = active
+        ? "Listening — release or activate again to stop"
+        : (coarse ? "Hold to talk" : "Start voice input");
+      ui.voiceStatus.textContent = message || "";
+      ui.voiceStatus.classList.toggle("is-visible", !!message);
+      ui.voiceStatus.classList.toggle("is-error", !!isError);
+    }
+
+    function startVoice() {
+      receivedFinal = false;
+      receivedError = false;
+      setVoiceState(false, "Requesting microphone access…", false);
+      if (!bridge.start()) {
+        setVoiceState(false, "Microphone access failed or was denied.", true);
+        return false;
+      }
+      if (!hasStateEvents) {
+        setVoiceState(true, coarse ? "Listening… release to send." : "Listening… activate again to stop.", false);
+      }
+      return true;
+    }
+
+    function stopVoice() {
+      setVoiceState(false, "Processing speech…", false);
+      bridge.stop();
+    }
+
+    setVoiceState(false, "", false);
+    if (!supported) {
+      ui.voiceBtn.disabled = true;
+      ui.voiceBtn.setAttribute("aria-disabled", "true");
+      setVoiceState(false, "Voice input is not supported by this browser.", true);
+      return;
+    }
+
+    if (typeof bridge.onTranscript === "function") {
+      bridge.onTranscript(function (text, isFinal) {
+        var transcript = String(text || "");
+        if (/^\[voice error\]/i.test(transcript)) {
+          receivedError = true;
+          var code = transcript.replace(/^\[voice error\]\s*/i, "");
+          var message = /^(not-allowed|service-not-allowed)$/i.test(code)
+            ? "Microphone permission was denied."
+            : (/^audio-capture$/i.test(code) ? "No microphone is available." : "Voice error: " + code);
+          setVoiceState(false, message, true);
+        } else if (isFinal) {
+          receivedFinal = true;
+          setVoiceState(false, transcript ? "Voice message sent." : "No speech detected.", !transcript);
+        } else if (transcript) {
+          setVoiceState(true, "Hearing: " + transcript.slice(0, 80), false);
+        }
+      });
+    }
+
+    if (hasStateEvents) {
+      bridge.onState(function (voiceState, detail) {
+        if (voiceState === "listening") {
+          setVoiceState(true, coarse ? "Listening… release to send." : "Listening… activate again to stop.", false);
+        } else if (voiceState === "error") {
+          receivedError = true;
+          var code = String(detail || "unknown");
+          setVoiceState(
+            false,
+            /^(not-allowed|service-not-allowed)$/.test(code)
+              ? "Microphone permission was denied."
+              : (code === "audio-capture" ? "No microphone is available." : "Voice error: " + code),
+            true
+          );
+        } else if (voiceState === "idle" && !receivedFinal && !receivedError) {
+          setVoiceState(false, "No speech detected.", true);
+        }
+      });
+    }
+
+    ui.voiceBtn.addEventListener("pointerdown", function (event) {
+      if (!coarse || (event.pointerType && event.pointerType === "mouse")) return;
+      event.preventDefault();
+      ignoreClickUntil = Date.now() + 600;
+      try { ui.voiceBtn.setPointerCapture(event.pointerId); } catch (_) {}
+      if (!bridge.isActive()) startVoice();
+    });
+    ui.voiceBtn.addEventListener("pointerup", function (event) {
+      if (!coarse || (event.pointerType && event.pointerType === "mouse")) return;
+      event.preventDefault();
+      ignoreClickUntil = Date.now() + 600;
+      if (bridge.isActive()) stopVoice();
+    });
+    ui.voiceBtn.addEventListener("pointercancel", function () {
+      if (bridge.isActive()) stopVoice();
+    });
+    ui.voiceBtn.addEventListener("click", function () {
+      if (Date.now() < ignoreClickUntil) return;
+      if (bridge.isActive()) stopVoice();
+      else startVoice();
+    });
+  }
+
+  function registerVoiceSlash() {
+    var opts = state.cfg.voiceComposer === true ? {} : (state.cfg.voiceComposer || {});
+    if (!state.cfg.voiceComposer || !opts.registerSlash) return;
+    register("/voice", function (args) {
+      var bridge = opts.bridge || global.voiceBridge;
+      if (!bridge || typeof bridge.handleSlash !== "function") {
+        return { reply: "Voice controls are unavailable in this browser session.", kind: "system" };
+      }
+      return Promise.resolve(bridge.handleSlash(args || "")).then(function (result) {
+        return {
+          reply: (result && (result.text || result.reply)) || "Voice command completed.",
+          kind: "system"
+        };
+      });
+    }, { description: "Control push-to-talk, speech output, and voice personas" });
+  }
+
   // ── Event wiring ─────────────────────────────────────────────────
   function wireEvents() {
     ui.orb.addEventListener("click", toggle);
@@ -362,14 +523,23 @@
 
     ui.send.addEventListener("click", submitInput);
     ui.input.addEventListener("keydown", function (e) {
+      if (paletteKeydown(e)) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         submitInput();
       }
     });
+    ui.input.addEventListener("input", refreshPalette);
+    ui.input.addEventListener("blur", function () {
+      // Delay so a click on an option lands before the list is torn down.
+      setTimeout(closePalette, 120);
+    });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && state.open) { setOpen(false); }
+      if (e.key !== "Escape") return;
+      // Escape dismisses the palette first, the panel second.
+      if (paletteOpen()) { closePalette(); return; }
+      if (state.open) setOpen(false);
     });
 
     // LLM card buttons
@@ -406,6 +576,7 @@
       // Render any backlog history if first open.
       if (state.history.length === 0) {
         printSystem(state.cfg.greeting);
+        renderSuggestions();
       }
       // Don't autofocus on touch: it summons the iOS keyboard before the
       // user has asked to type, hiding the message log they just opened.
@@ -674,8 +845,81 @@
   function printAi(text, opts) { addMessage("ai", text, opts); }
   function printSystem(text) { addMessage("system", text); }
 
+  // ── First-run suggestion chips ───────────────────────────────────
+  // The greeting used to be the only onboarding: a paragraph telling the
+  // user to type "/demo" or "/help". Nobody types a command they've never
+  // seen, so the first run now offers the same commands as one-tap chips.
+  // Deliberately NOT written to state.history — these are an affordance,
+  // not a message, and replaying them on every load would be noise.
+
+  // `suggestions` may be command strings ("/demo") or {label, command}.
+  // Unset falls back to whatever the consumer registered, so a repo that
+  // adds a command gets a chip for free.
+  function resolveSuggestions() {
+    var configured = state.cfg.suggestions;
+    if (configured === false) return [];
+    var list = configured;
+    if (!list) {
+      // Auto-pick is a fallback — consumers should curate `suggestions`.
+      // Commands that destroy state or end a session are never offered as a
+      // first thing to try.
+      var NEVER_SUGGEST = /^\/(help|clear|exit|stop|undo|redo|privacy)$/;
+      list = listCommands()
+        .filter(function (c) { return c !== "*" && !NEVER_SUGGEST.test(c); })
+        .slice(0, 3);
+      if (state.handlers["/help"]) list.push("/help");
+    }
+    return list.map(function (item) {
+      if (typeof item === "string") {
+        var entry = state.handlers[item.toLowerCase()];
+        return {
+          command: item,
+          label: item,
+          hint: (entry && entry.meta && entry.meta.description) || ""
+        };
+      }
+      return { command: item.command, label: item.label || item.command, hint: item.hint || "" };
+    }).filter(function (s) { return !!s.command; }).slice(0, 4);
+  }
+
+  function clearSuggestions() {
+    if (ui.suggestions && ui.suggestions.parentNode) {
+      ui.suggestions.parentNode.removeChild(ui.suggestions);
+    }
+    ui.suggestions = null;
+  }
+
+  function renderSuggestions() {
+    clearSuggestions();
+    var items = resolveSuggestions();
+    if (!items.length) return;
+
+    var row = document.createElement("div");
+    row.className = "ai-suggestions";
+    row.setAttribute("role", "group");
+    row.setAttribute("aria-label", "Suggested commands");
+
+    items.forEach(function (item) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "ai-suggestion";
+      chip.textContent = item.label;
+      if (item.hint) chip.title = item.hint;
+      chip.addEventListener("click", function () {
+        clearSuggestions();
+        runCommand(item.command, { echo: true });
+      });
+      row.appendChild(chip);
+    });
+
+    ui.suggestions = row;
+    ui.msgs.appendChild(row);
+    ui.msgs.scrollTop = ui.msgs.scrollHeight;
+  }
+
   function clearLog() {
     ui.msgs.innerHTML = "";
+    ui.suggestions = null;   // node went with the innerHTML wipe
     state.history.length = 0;
     saveHistory();
   }
@@ -746,6 +990,7 @@
   // demo audience picker) that need to trigger a command programmatically.
   function runCommand(text, opts) {
     opts = opts || {};
+    clearSuggestions();
     if (opts.echo) printUser(text);
 
     setTyping(true);
@@ -775,7 +1020,158 @@
     var text = (ui.input.value || "").trim();
     if (!text) return;
     ui.input.value = "";
+    closePalette();
     runCommand(text, { echo: true });
+  }
+
+  // ── Slash-command palette ────────────────────────────────────────
+  // Each consumer registers ~34 commands, but the only way to see them
+  // was `/help` dumping a wall of text into the log. Typing "/" now
+  // filters the same registry inline, so the long tail is reachable
+  // without memorising it.
+  // `navigated` records whether the user actively moved through the list.
+  // Enter only autocompletes once they have; otherwise typing a command in
+  // full and pressing Enter would complete it instead of running it.
+  var palette = { items: [], index: -1, navigated: false };
+
+  function paletteOpen() {
+    return !!(ui.palette && !ui.palette.hidden);
+  }
+
+  /* The palette only applies while the caret is still inside the leading
+   * command token — once the user types an argument, they have chosen. */
+  function paletteQuery() {
+    var v = ui.input.value || "";
+    if (v.charAt(0) !== "/") return null;
+    if (/\s/.test(v)) return null;
+    return v;
+  }
+
+  function paletteCandidates(q) {
+    var needle = q.slice(1).toLowerCase();
+    var native = [];
+    var elsewhere = [];
+    listCommands().forEach(function (c) {
+      if (c === "*") return;
+      var meta = (state.handlers[c] && state.handlers[c].meta) || {};
+      if (meta.hiddenInHelp) return;
+      if (needle && c.slice(1).toLowerCase().indexOf(needle) !== 0) return;
+      (meta.outOfDomain ? elsewhere : native).push({
+        command: c,
+        description: meta.description || "",
+        elsewhere: !!meta.outOfDomain
+      });
+    });
+    return native.concat(elsewhere).slice(0, 12);
+  }
+
+  function closePalette() {
+    if (!ui.palette) return;
+    ui.palette.hidden = true;
+    ui.palette.innerHTML = "";
+    palette.items = [];
+    palette.index = -1;
+    palette.navigated = false;
+    ui.input.setAttribute("aria-expanded", "false");
+    ui.input.removeAttribute("aria-activedescendant");
+  }
+
+  function highlight(i) {
+    if (!palette.items.length) return;
+    palette.index = (i + palette.items.length) % palette.items.length;
+    [].slice.call(ui.palette.children).forEach(function (li, n) {
+      var on = n === palette.index;
+      li.classList.toggle("is-active", on);
+      li.setAttribute("aria-selected", String(on));
+      if (on) {
+        ui.input.setAttribute("aria-activedescendant", li.id);
+        if (li.scrollIntoView) li.scrollIntoView({ block: "nearest" });
+      }
+    });
+  }
+
+  function acceptPalette() {
+    var pick = palette.items[palette.index];
+    if (!pick) return false;
+    // Leave a trailing space so an argument can be typed straight away,
+    // and keep the palette closed now that a command is chosen.
+    ui.input.value = pick.command + " ";
+    closePalette();
+    ui.input.focus();
+    return true;
+  }
+
+  function refreshPalette() {
+    if (!ui.palette) return;
+    var q = paletteQuery();
+    if (q === null) { closePalette(); return; }
+    var items = paletteCandidates(q);
+    if (!items.length) { closePalette(); return; }
+
+    palette.items = items;
+    palette.navigated = false;
+    ui.palette.innerHTML = "";
+    items.forEach(function (it, n) {
+      var li = document.createElement("li");
+      li.className = "ai-palette-item";
+      li.id = "chatPaletteOpt" + n;
+      li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", "false");
+
+      var cmd = document.createElement("span");
+      cmd.className = "ai-palette-cmd";
+      cmd.textContent = it.command;
+      li.appendChild(cmd);
+
+      if (it.description) {
+        var desc = document.createElement("span");
+        desc.className = "ai-palette-desc";
+        desc.textContent = it.description;
+        li.appendChild(desc);
+      }
+      if (it.elsewhere) {
+        var tag = document.createElement("span");
+        tag.className = "ai-palette-tag";
+        tag.textContent = "other app";
+        li.appendChild(tag);
+      }
+
+      // mousedown, not click: the input's blur would otherwise close the
+      // list before the click resolved.
+      li.addEventListener("mousedown", function (ev) {
+        ev.preventDefault();
+        palette.index = n;
+        acceptPalette();
+      });
+      ui.palette.appendChild(li);
+    });
+
+    ui.palette.hidden = false;
+    // The list grows upward from the composer, so a fixed max-height
+    // punched through the panel header on short panels (and off the top
+    // of the panel entirely on a phone). Cap it to the gap that is
+    // actually free between the header and the composer.
+    var wrap = ui.palette.parentNode.getBoundingClientRect();
+    var hdr = ui.panel && ui.panel.querySelector(".ai-hdr");
+    var top = hdr ? hdr.getBoundingClientRect().bottom : 0;
+    ui.palette.style.maxHeight = Math.max(96, Math.round(wrap.top - top - 12)) + "px";
+
+    ui.input.setAttribute("aria-expanded", "true");
+    highlight(0);
+  }
+
+  /* Returns true when the palette consumed the key. */
+  function paletteKeydown(e) {
+    if (!paletteOpen()) return false;
+    if (e.key === "ArrowDown") { e.preventDefault(); palette.navigated = true; highlight(palette.index + 1); return true; }
+    if (e.key === "ArrowUp")   { e.preventDefault(); palette.navigated = true; highlight(palette.index - 1); return true; }
+    if (e.key === "Tab")       { e.preventDefault(); acceptPalette(); return true; }
+    // stopPropagation, or the panel-level Escape handler would see a
+    // now-closed palette and close the whole panel in the same keystroke.
+    if (e.key === "Escape")    { e.preventDefault(); e.stopPropagation(); closePalette(); return true; }
+    // Enter submits what was typed unless the user picked from the list.
+    if (e.key === "Enter" && !e.shiftKey && palette.navigated) { e.preventDefault(); return acceptPalette(); }
+    return false;
   }
 
   // ── Built-in slash handlers (/help, /clear, /llm) ────────────────
@@ -892,6 +1288,7 @@
 
     ui.msgs    = document.getElementById("chatMsgs");
     ui.input   = document.getElementById("chatInput");
+    ui.palette = document.getElementById("chatPalette");
     ui.send    = document.getElementById("chatSend");
     ui.close   = document.getElementById("chatClose");
     ui.llmBtn  = document.getElementById("chatLlmBtn");
@@ -900,6 +1297,8 @@
     ui.demoCard = document.getElementById("chatDemoCard"); // null when showDemoBtn=false
     ui.feedbackBtn  = document.getElementById("chatFeedbackBtn");   // null when showFeedbackBtn=false
     ui.feedbackCard = document.getElementById("chatFeedbackCard");  // null when showFeedbackBtn=false
+    ui.voiceBtn = document.getElementById("chatVoiceBtn");          // null when voiceComposer=false
+    ui.voiceStatus = document.getElementById("chatVoiceStatus");    // null when voiceComposer=false
 
     // Built-in commands
     register("/help",  builtinHelp,  { description: "Show all available commands" });
@@ -908,8 +1307,10 @@
     if (state.cfg.showFeedbackBtn) {
       register("/feedback", builtinFeedback, { description: "Send product feedback — file a GitHub issue" });
     }
+    registerVoiceSlash();
 
     wireEvents();
+    wireVoiceComposer();
     trackKeyboardInset();
     refreshStatusSubtitle();
     global.addEventListener("voicebridge:tts-mode-changed", refreshStatusSubtitle);

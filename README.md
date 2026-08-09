@@ -33,7 +33,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 
 | Path | Purpose |
 | :--- | :--- |
-| `js/chat-orb.js` | Animated orb mount + slash router + LLM settings UI + message log (no domain intents) |
+| `js/chat-orb.js` | Animated orb mount + slash router + LLM settings UI + message log; optional voiceBridge push-to-talk composer |
 | `js/slash-router.js` | Pluggable slash-command dispatcher + cross-repo `coverAll()` no-op coverage |
 | `js/slash-catalog.js` | Catalog of every slash command shipped by any sibling consumer (drives `coverAll()`) |
 | `js/voice.js` | TTS + STT + wake-word + persona/phonetic registry; iOS/iPadOS-aware voice routing in `cloudTTS.mode="auto"` (Phase 9.8e P6) |
@@ -44,7 +44,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/demo-interactive.js` | `window.InteractiveNarration` — push-to-talk controller for interactive narrated walkthroughs (pause demo → capture question → context-grounded `chatLLM` answer → speak → auto-resume); backend-agnostic |
 | `js/demo-audiences.js` | `window.DemoAudiences` — shared audience catalog (Standard / Advanced / Expert) (Phase 9.8e) |
 | `js/demo-picker.js` | `window.DemoPicker.open(...)` — cross-repo audience-picker modal (Phase 9.8e P5) |
-| `js/mobile-drawer.js` | Off-canvas drawer wiring for mobile (`MobileDrawer.install({...})`) (Phase 9.8e P2) |
+| `js/mobile-drawer.js` | Off-canvas drawer wiring for mobile (`MobileDrawer.install({...})` or declarative script attributes) |
 | `js/error-popup.js` | Dependency-free persistent error modal + global `onerror`/rejection/`alert()` handlers. `window.ErrorPopup`/`showError` (neutral) with `CMErrorPopup`/`showErrorPopup` back-compat aliases. Uses `--ui-*` theme tokens (Phase 10.1) |
 | `js/shell.js` | `window.Shell` — sidebar/top-nav layout, skin + theme + user-mode persistence. Reads its `localStorage` namespace from `window.SHELL_PREFIX`, which must be set before `Shell.init()` |
 | `js/chrome.js` | `window.Chrome` — configurable top-bar tools: skin/mode switchers, info link, optional browser-local secret/profile panel |
@@ -56,7 +56,9 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/PLAN.md` | The harmonization plan + status log (single source of truth for cross-repo work) |
 | `docs/INDEX_SKELETON.md` | `pages/index.html` canonical-prefix template + strict-diff CI guard contract (Phase 9.8e P4) |
 | `docs/CSS_HARMONIZATION.md` | Phase 9.8c/9.8d CSS audit + per-bucket dedup tracking |
-| `docs/templates/*.skeleton.md` | Shared H1–H3 outlines for `DEMO`, `AGENT`, `CHAT`, `VOICE`, `PITCH`, `STYLE` (Phase 7) |
+| `docs/TESTING_STRATEGY.md` | **Canonical** testing framework for every consumer: runtime/seam model, Tier 0–6 vocabulary, cross-runtime boundary testing, anti-false-positive protocol, UI coverage + combinatorial strategy. Read via `shared/`, never copied; each consumer keeps a short local instance |
+| `docs/FRONTEND_PERFORMANCE.md` | **Canonical** frontend performance + responsiveness framework: metric model (Core Web Vitals at p75, task timings at p50/p95), asset-weight budgets, the wait ladder with delay-threshold/minimum-duration constants, the long-job model, FE/NFR requirement matrices, and the instrumentation contract. Verified through Tier 6 of the testing framework. Read via `shared/`, never copied |
+| `docs/templates/*.skeleton.md` | Shared H1–H3 outlines for `DEMO`, `AGENT`, `CHAT`, `VOICE`, `PITCH`, `STYLE` (Phase 7) + `TESTING_STRATEGY` and `FRONTEND_PERFORMANCE` (the local-instance outlines for the two frameworks above) |
 | `docs/templates/{demo-track,voice-config}.schema.json` | JSON Schemas for `data/demo-tracks/*.json` and `voiceBridge.configure({...})` |
 | `templates/index.skeleton.html` | The canonical `pages/index.html` head template (rendered with per-consumer `pages/index.skeleton.values.json`) |
 | `scripts/check_index_skeleton.py` | Strict-diff CI guard for the head template |
@@ -104,6 +106,39 @@ In each consumer's HTML pages, reference canonical assets via `shared/`:
 <link rel="stylesheet" href="../shared/css/demo-mode.css" />
 <script src="../shared/js/chat-orb.js"></script>
 ```
+
+Mobile features are opt-in. A drawer can be installed without a consumer
+adapter by configuring the shared script itself:
+
+```html
+<script src="../shared/js/mobile-drawer.js" defer
+        data-mobile-drawer="#sideNavDrawer"
+        data-mobile-drawer-menu="#navMobileMenuBtn"
+        data-mobile-drawer-backdrop="#navBackdrop"
+        data-mobile-drawer-close=".nav-btn,.util-btn,.sidebar-brand"
+        data-mobile-drawer-media="(max-width: 640px)"></script>
+```
+
+The installer accepts ID shorthands, CSS selectors, or elements, synchronizes
+responsive ARIA state, and pins/restores the body scroll position on iOS. A
+second install for the same menu button returns the existing handle, keeping
+legacy `Shell.init()` consumers compatible without duplicate listeners.
+
+To add push-to-talk to the canonical composer, load `voice.js` before
+`chat-orb.js`, then opt in at mount time:
+
+```js
+ChatOrb.mount({
+  voiceComposer: { bridge: window.voiceBridge, registerSlash: true }
+});
+```
+
+This does not request microphone permission or begin recognition on load.
+Permission is requested only after the user activates the mic. Final
+transcripts follow `voiceBridge.routeTranscript()` through the normal
+`ChatOrb.run()` send path. Web Speech recognition still requires a secure
+context (or localhost), browser support, and user-granted permission; iOS may
+use a network speech service and cannot be guaranteed offline.
 
 Set `data-skin` on **`<html>`**, not just `<body>`. Each skin scopes its dark
 palette to `:root[data-skin="…"]`, so a `data-skin` that appears only on

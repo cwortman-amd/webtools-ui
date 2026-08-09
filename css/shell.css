@@ -384,7 +384,7 @@ body[data-user-mode="advanced"] .mode-expert {
    * AND below the iPhone notch (the .hero now extends into the
    * safe-area top inset, so shell-body needs to match). */
   .shell-body {
-    padding-top: calc(40px + env(safe-area-inset-top)) !important;
+    padding-top: var(--ui-safe-header-height, calc(40px + env(safe-area-inset-top))) !important;
   }
 
   body.nav-side .shell-body {
