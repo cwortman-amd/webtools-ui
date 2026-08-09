@@ -3,7 +3,7 @@
 > **Status**: live (Phase 9.8e P4, 2026-05-05)
 > **Source of truth**: [`templates/index.skeleton.html`](../templates/index.skeleton.html)
 > **CI guard**: [`scripts/check_index_skeleton.py`](../scripts/check_index_skeleton.py)
-> **Adopted by**: `llm-benchmark`, `cluster-manager`, `dc-planner`
+> **Adopted by**: `llm-benchmark`, `cluster-manager`, `dc-planner` (dashboard profile); `knowledge-exchange` (catalog profile via [`templates/catalog.skeleton.html`](../templates/catalog.skeleton.html))
 
 The three consumer dashboards (`llm-benchmark`, `cluster-manager`, `dc-planner`) all serve their main entry from `pages/index.html`. The first ~18 lines — doctype, `<html>`, `<head>` charset/viewport, title, icon, canonical stylesheet stack, optional manifest + theme-color — are structurally identical (modulo per-repo titles, icons, and a few optional metadata blocks). Without a guard, this prefix routinely drifts: stylesheet load order swaps, viewport meta loses `viewport-fit=cover`, dc-planner's font preload re-points at a local `../css/...` path instead of the canonical `../shared/css/...`, etc.
 
@@ -125,7 +125,9 @@ python3 scripts/check_index_skeleton.py --repo /path/to/llm-benchmark
 * `cluster-manager` — `scripts/self-check.sh` Stage 1b (runs as a static validator, before the slow Playwright stages).
 * `dc-planner` — `tests/self-check.sh` §2x (runs immediately after the existing `index.html` structure & feature checks).
 
-All three exit non-zero on drift, so any branch that diverges from the canonical skeleton fails CI before it can land.
+* `knowledge-exchange` — `make index-skeleton-check` / `make ci` (catalog profile: `tokens.css`, `chrome.css`, `components.css`).
+
+All four exit non-zero on drift, so any branch that diverges from the canonical skeleton fails CI before it can land.
 
 ## 4. Modifying the template
 

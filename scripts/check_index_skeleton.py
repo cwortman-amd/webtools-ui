@@ -62,6 +62,10 @@ from pathlib import Path
 # of how it's invoked (consumer's CI, webtools-ui CI, manual run).
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_TEMPLATE = SCRIPT_DIR.parent / "templates" / "index.skeleton.html"
+PROFILE_TEMPLATES = {
+    "dashboard": DEFAULT_TEMPLATE,
+    "catalog": SCRIPT_DIR.parent / "templates" / "catalog.skeleton.html",
+}
 
 LINE_PLACEHOLDER = re.compile(r"^(\s*)\{\{(\??)([A-Z_]+)\}\}\s*$")
 INLINE_PLACEHOLDER = re.compile(r"\{\{([A-Z_]+)\}\}")
@@ -191,10 +195,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "Must contain pages/index.html and pages/index.skeleton.values.json.",
     )
     p.add_argument(
+        "--profile",
+        choices=sorted(PROFILE_TEMPLATES),
+        default="dashboard",
+        help="Consumer head profile: dashboard (shell layout) or catalog (topnav + chrome).",
+    )
+    p.add_argument(
         "--template",
         type=Path,
-        default=DEFAULT_TEMPLATE,
-        help=f"Path to the skeleton template (default: {DEFAULT_TEMPLATE}).",
+        default=None,
+        help="Path to the skeleton template (overrides --profile when set).",
     )
     p.add_argument(
         "--quiet",
@@ -210,7 +220,7 @@ def main(argv: list[str]) -> int:
     repo = args.repo.resolve()
     index_html = repo / "pages" / "index.html"
     values_path = repo / "pages" / "index.skeleton.values.json"
-    template_path = args.template.resolve()
+    template_path = (args.template or PROFILE_TEMPLATES[args.profile]).resolve()
 
     for path, label in [
         (index_html, "pages/index.html"),

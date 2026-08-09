@@ -37,6 +37,7 @@ PROFILES: dict[str, tuple[str, ...]] = {
     ),
     "catalog": (
         "css/material-symbols.css",
+        "css/tokens.css",
         "css/base.css",
         "css/chat-orb.css",
         "css/chrome.css",

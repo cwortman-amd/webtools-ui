@@ -1,0 +1,24 @@
+/*!
+ * webtools-ui canonical asset: tokens.css
+ *
+ * Explicit --ui-* defaults consumed by base.css, chrome.css, and skins.
+ * Skins override these; consumers should not invent parallel token names.
+ * See docs/TOKENS.md (harmonization T4.1).
+ */
+:root {
+  --ui-bg: #0b0f14;
+  --ui-bg-soft: #121820;
+  --ui-panel: #151b24;
+  --ui-line: rgba(255, 255, 255, 0.12);
+  --ui-border: var(--ui-line);
+  --ui-text: #e8eaed;
+  --ui-body: var(--ui-text);
+  --ui-muted: #9aa3ad;
+  --ui-header: #f3f4f6;
+  --ui-accent: #2bb5a0;
+  --ui-accent-soft: color-mix(in srgb, var(--ui-accent) 16%, transparent);
+  --ui-accent-contrast: var(--ui-bg);
+  --ui-link: var(--ui-accent);
+  --ui-link-hover: color-mix(in srgb, var(--ui-accent) 82%, white);
+  --ui-warning-text: #f5c842;
+}
