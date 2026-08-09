@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plugin-gate:
+    name: Plugin manifests + consumer mounts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout webtools-ui
+        uses: actions/checkout@v4
+        with:
+          path: webtools-ui
+
+      - name: Checkout consumer repos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ws="$(dirname "$GITHUB_WORKSPACE")"
+          for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-portal; do
+            git clone --depth 1 "https://github.com/${{ github.repository_owner }}/${repo}.git" "${ws}/${repo}"
+          done
+
+      - name: Run plugin CI gate
+        working-directory: webtools-ui
+        env:
+          WORKSPACE: ${{ github.workspace }}/..
+        run: make ci
+
+      - name: Enhanced cross-repo validation (L0-L3)
+        working-directory: webtools-ui
+        env:
+          WORKSPACE: ${{ github.workspace }}/..
+        run: make enhanced-validation

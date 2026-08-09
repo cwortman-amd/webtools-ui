@@ -1,12 +1,16 @@
 # webtools-ui
 
-Canonical implementations of UI surfaces shared across three sibling consumer dashboards:
+Canonical implementations of UI surfaces shared across **five sibling consumer dashboards**
+(community plugins). See [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md) and
+[`plugins.registry.json`](plugins.registry.json).
 
-- [`llm-benchmark`](https://github.com/cwortman-amd/llm-benchmark)
-- [`dc-planner`](https://github.com/cwortman-amd/dc-planner)
-- [`cluster-manager`](https://github.com/cwortman-amd/cluster-manager)
+- [`cluster-manager`](https://github.com/cwortman-amd/cluster-manager) — dashboard
+- [`dc-planner`](https://github.com/cwortman-amd/dc-planner) — dashboard
+- [`llm-benchmark`](https://github.com/cwortman-amd/llm-benchmark) — dashboard
+- [`demo-portal`](https://github.com/cwortman-amd/demo-portal) — hub (demo catalog)
+- [`knowledge-exchange`](https://github.com/cwortman-amd/knowledge-exchange) — catalog (learning portal)
 
-Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is a relative symlink to `~/workspace/webtools-ui/`; the original `git subtree` workflow is retained as a fallback for fresh clones / CI). See [`docs/PLAN.md`](docs/PLAN.md) for the full harmonization history (Phase 0 through Phase 9.8e P9) and rationale.
+Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is a relative symlink to `~/workspace/webtools-ui/`; the original `git subtree` workflow is retained as a fallback for fresh clones / CI). Each consumer ships `plugin.manifest.json` at its repo root. See [`docs/PLAN.md`](docs/PLAN.md) for the full harmonization history (Phase 0 through Phase 9.8e P9) and rationale.
 
 > **Note**: this repo was renamed from `shared-ui` to `webtools-ui` on 2026-05-04 (Phase 9.8c). Historical phase narratives in `docs/PLAN.md` retain the original "shared-ui" name for traceability; the canonical path going forward is `~/workspace/webtools-ui/`.
 
@@ -48,6 +52,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/error-popup.js` | Dependency-free persistent error modal + global `onerror`/rejection/`alert()` handlers. `window.ErrorPopup`/`showError` (neutral) with `CMErrorPopup`/`showErrorPopup` back-compat aliases. Uses `--ui-*` theme tokens (Phase 10.1) |
 | `js/shell.js` | `window.Shell` — sidebar/top-nav layout, skin + theme + user-mode persistence. Reads its `localStorage` namespace from `window.SHELL_PREFIX`, which must be set before `Shell.init()` |
 | `js/chrome.js` | `window.Chrome` — configurable top-bar tools: skin/mode switchers, info link, optional browser-local secret/profile panel |
+| `js/platform.js` | `window.WebtoolsPlatform` — formal App object for community plugins; wraps Shell, ChatOrb, SlashRouter, demo, voice (see [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md)) |
 
 ### Docs + tooling
 
@@ -58,6 +63,9 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/CSS_HARMONIZATION.md` | Phase 9.8c/9.8d CSS audit + per-bucket dedup tracking |
 | `docs/TESTING_STRATEGY.md` | **Canonical** testing framework for every consumer: runtime/seam model, Tier 0–6 vocabulary, cross-runtime boundary testing, anti-false-positive protocol, UI coverage + combinatorial strategy. Read via `shared/`, never copied; each consumer keeps a short local instance |
 | `docs/FRONTEND_PERFORMANCE.md` | **Canonical** frontend performance + responsiveness framework: metric model (Core Web Vitals at p75, task timings at p50/p95), asset-weight budgets, the wait ladder with delay-threshold/minimum-duration constants, the long-job model, FE/NFR requirement matrices, and the instrumentation contract. Verified through Tier 6 of the testing framework. Read via `shared/`, never copied |
+| `docs/PLUGIN_CONTRACT.md` | Community plugin contract: manifest schema, lifecycle, platform API, registered consumers |
+| `plugins.registry.json` | Catalog of known community plugins (sibling repos) |
+| `schemas/plugin.manifest.schema.json` | JSON Schema for per-repo `plugin.manifest.json` |
 | `docs/templates/*.skeleton.md` | Shared H1–H3 outlines for `DEMO`, `AGENT`, `CHAT`, `VOICE`, `PITCH`, `STYLE` (Phase 7) + `TESTING_STRATEGY` and `FRONTEND_PERFORMANCE` (the local-instance outlines for the two frameworks above) |
 | `docs/templates/{demo-track,voice-config}.schema.json` | JSON Schemas for `data/demo-tracks/*.json` and `voiceBridge.configure({...})` |
 | `templates/index.skeleton.html` | The canonical `pages/index.html` head template (rendered with per-consumer `pages/index.skeleton.values.json`) |
@@ -219,13 +227,21 @@ bash scripts/build-vendor-manifest.sh
 
 ---
 
-## Sibling Repositories
+## Sibling Repositories (Community Plugins)
 
-This toolkit is designed to work in concert with the following consumer repositories. Each repo provides a specific dashboard or service that consumes the canonical assets in this repository.
+This toolkit is the **platform base** for the following consumer repositories. Each repo ships
+`plugin.manifest.json` and extends shared primitives via mount adapters (typically
+`js/chat-orb-mount.js` or `portal/chat-orb-mount.js`).
 
-- **[LLM Benchmarking Toolkit (llm-benchmark)](../llm-benchmark/README.md)**: Local benchmarking, sweep optimization, and queue orchestration for AMD Instinct GPUs.
-- **[Cluster Manager (cluster-manager)](../cluster-manager/README.md)**: Automation toolkit for installing, configuring, and validating AMD ROCm and AI-NIC (Pollara) clusters.
-- **[DC Planner (dc-planner)](../dc-planner/README.md)**: Browser-based planning tool for GPU infrastructure scenarios (BOM, TCO, Rack, Power).
+| Plugin id | Repo | Type |
+| --- | --- | --- |
+| `cluster-manager` | [Cluster Manager](../cluster-manager/README.md) | dashboard |
+| `dc-planner` | [DC Planner](../dc-planner/README.md) | dashboard |
+| `llm-benchmark` | [LLM Benchmark](../llm-benchmark/README.md) | dashboard |
+| `demo-portal` | [Demo Portal](../demo-portal/README.md) | hub |
+| `knowledge-exchange` | [Knowledge Exchange](../knowledge-exchange/README.md) | catalog |
+
+Validate manifests: `python3 scripts/check_plugin_manifests.py --strict`
 
 ---
 
@@ -242,6 +258,8 @@ For local development, it is recommended to clone all repositories into a common
    git clone https://github.com/cwortman-amd/llm-benchmark.git
    git clone https://github.com/cwortman-amd/cluster-manager.git
    git clone https://github.com/cwortman-amd/dc-planner.git
+   git clone https://github.com/cwortman-amd/demo-portal.git
+   git clone https://github.com/cwortman-amd/knowledge-exchange.git
    ```
 
 2. **Initialize shared symlinks**:
@@ -287,6 +305,26 @@ In this setup, your directory structure on the server would mirror your local wo
 
 ---
 
+## Validation (plugin platform)
+
+```bash
+make ci                         # strict manifests + all consumer shared mounts
+make enhanced-validation        # L0–L3 cross-repo gate (self-checks + syntax)
+make enhanced-validation-quick  # L0–L1 + syntax only
+make check-plugins-strict
+make sync-plugin-registry       # refresh demo-portal hub snapshot
+```
+
+Contract: [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md) · Registry:
+[`plugins.registry.json`](plugins.registry.json)
+
+---
+
 ## Status
 
-The harmonization initiative is **complete** — Phases 0 through 9.8e P9 are landed. See [`docs/PLAN.md`](docs/PLAN.md) §"Initiative status" and the chronological status log for the full rollout. Live cross-repo gates: vendor manifest in all 3 consumers, `test_offline.sh §25` in `llm-benchmark`, `scripts/self-check.sh` in `cluster-manager`, `tests/self-check.sh` in `dc-planner`.
+The harmonization initiative is **complete** — Phases 0 through 9.8e P9 are landed, plus the
+**community plugin platform** (manifest schema, registry, `platform.js`, enhanced validation).
+See [`docs/PLAN.md`](docs/PLAN.md) §"Initiative status" and the chronological status log for the
+full rollout. Live cross-repo gates: `make enhanced-validation`, vendor manifest in all consumers,
+`test_offline.sh §25` in `llm-benchmark`, `scripts/self-check.sh` in `cluster-manager`,
+`tests/self-check.sh` in `dc-planner`.

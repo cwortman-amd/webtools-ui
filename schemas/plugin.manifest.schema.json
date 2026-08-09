@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cwortman-amd/webtools-ui/schemas/plugin.manifest.schema.json",
+  "title": "Webtools UI Community Plugin Manifest",
+  "description": "Declares how a sibling consumer repo extends the webtools-ui base (Obsidian App equivalent).",
+  "type": "object",
+  "required": ["id", "name", "version", "minWebtoolsVersion", "type", "entry"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Stable plugin id; must match slash-catalog consumer id when registered."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.]+)?$"
+    },
+    "minWebtoolsVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["dashboard", "catalog", "hub"],
+      "description": "dashboard = sidebar+iframe shell; catalog = topnav+cards; hub = aggregates other plugins."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "draft", "harmonization-in-progress", "deprecated"],
+      "default": "active"
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "description": "GitHub URL for the consumer repo."
+    },
+    "entry": {
+      "type": "object",
+      "required": ["html"],
+      "additionalProperties": false,
+      "properties": {
+        "html": {
+          "type": "string",
+          "description": "Primary page relative to repo root (usually pages/index.html)."
+        },
+        "mount": {
+          "type": "string",
+          "description": "onload equivalent: ChatOrb + SlashRouter registration script."
+        },
+        "voice": {
+          "type": "string",
+          "description": "Voice persona / voiceBridge configuration script."
+        },
+        "styles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Product-specific CSS paths loaded after shared styles."
+        },
+        "scripts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional product JS loaded after shared modules."
+        }
+      }
+    },
+    "webtools": {
+      "type": "object",
+      "description": "Which canonical webtools-ui modules this plugin consumes.",
+      "properties": {
+        "css": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "js": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "defaultSkin": {
+          "type": "string"
+        },
+        "shellLayout": {
+          "type": "string",
+          "enum": ["sidebar-iframe", "catalog-topnav", "custom"]
+        }
+      }
+    },
+    "registrations": {
+      "type": "object",
+      "properties": {
+        "slashCommands": { "type": "string" },
+        "demoTracks": { "type": "string" },
+        "voicePersonas": { "type": "string" },
+        "shellTabs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "plugins": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Other community plugin ids required at deploy time (sibling repos)."
+        },
+        "webtoolsModules": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Logical module names: shell, chat-orb, demo-engine, voice, chrome, mobile-drawer."
+        }
+      }
+    },
+    "aggregates": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "For hub plugins: ids of plugins linked or catalogued."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

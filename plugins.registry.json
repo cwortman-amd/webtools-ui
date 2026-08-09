@@ -1,0 +1,121 @@
+{
+  "$schema": "./schemas/plugin.manifest.schema.json",
+  "version": 1,
+  "webtoolsVersion": "0.9.0",
+  "generatedNote": "Canonical registry of webtools-ui community plugins (sibling consumer repos). Each entry mirrors a plugin.manifest.json at the consumer repo root. Validated by scripts/check_plugin_manifests.py.",
+  "base": {
+    "id": "webtools-ui",
+    "role": "platform",
+    "description": "Canonical shared UI: shell, chat orb, demo engine, voice, skins, mobile drawer.",
+    "contract": "docs/PLUGIN_CONTRACT.md",
+    "platformApi": "js/platform.js"
+  },
+  "plugins": [
+    {
+      "id": "cluster-manager",
+      "name": "Cluster Manager",
+      "version": "2.0.0",
+      "minWebtoolsVersion": "0.9.0",
+      "description": "Automation toolkit for installing, configuring, and validating AMD ROCm and AI-NIC clusters.",
+      "type": "dashboard",
+      "status": "active",
+      "repository": "https://github.com/cwortman-amd/cluster-manager",
+      "manifestPath": "../cluster-manager/plugin.manifest.json",
+      "localUrl": "../../cluster-manager/pages/index.html",
+      "entry": { "html": "pages/index.html" },
+      "webtools": {
+        "shellLayout": "sidebar-iframe",
+        "defaultSkin": "amd-gold"
+      },
+      "dependencies": {
+        "webtoolsModules": ["shell", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      }
+    },
+    {
+      "id": "dc-planner",
+      "name": "DC Planner",
+      "version": "2.0.0",
+      "minWebtoolsVersion": "0.9.0",
+      "description": "Browser-based planning for GPU infrastructure: BOM, TCO, rack layout, power, and pitch export.",
+      "type": "dashboard",
+      "status": "active",
+      "repository": "https://github.com/cwortman-amd/dc-planner",
+      "manifestPath": "../dc-planner/plugin.manifest.json",
+      "localUrl": "../../dc-planner/pages/index.html",
+      "entry": { "html": "pages/index.html" },
+      "webtools": {
+        "shellLayout": "sidebar-iframe",
+        "defaultSkin": "amd-gold"
+      },
+      "dependencies": {
+        "webtoolsModules": ["shell", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      }
+    },
+    {
+      "id": "llm-benchmark",
+      "name": "LLM Benchmark",
+      "version": "2.0.0",
+      "minWebtoolsVersion": "0.9.0",
+      "description": "Local benchmarking, sweep optimization, and queue orchestration for AMD Instinct GPUs.",
+      "type": "dashboard",
+      "status": "active",
+      "repository": "https://github.com/cwortman-amd/llm-benchmark",
+      "manifestPath": "../llm-benchmark/plugin.manifest.json",
+      "localUrl": "../../llm-benchmark/pages/index.html",
+      "entry": { "html": "pages/index.html" },
+      "webtools": {
+        "shellLayout": "sidebar-iframe",
+        "defaultSkin": "amd-gold"
+      },
+      "dependencies": {
+        "webtoolsModules": ["shell", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      }
+    },
+    {
+      "id": "demo-portal",
+      "name": "Demo Portal",
+      "version": "1.0.0",
+      "minWebtoolsVersion": "0.9.0",
+      "description": "GPU demo catalog and launcher; aggregates links to sibling dashboard plugins.",
+      "type": "hub",
+      "status": "active",
+      "repository": "https://github.com/cwortman-amd/demo-portal",
+      "manifestPath": "../demo-portal/plugin.manifest.json",
+      "localUrl": "./index.html",
+      "entry": { "html": "pages/index.html" },
+      "webtools": {
+        "shellLayout": "catalog-topnav",
+        "defaultSkin": "amd-gold"
+      },
+      "aggregates": ["cluster-manager", "dc-planner", "llm-benchmark", "knowledge-exchange"],
+      "dependencies": {
+        "webtoolsModules": ["chrome", "components", "chat-orb"]
+      }
+    },
+    {
+      "id": "knowledge-exchange",
+      "name": "Knowledge Exchange",
+      "version": "0.1.0",
+      "minWebtoolsVersion": "0.9.0",
+      "description": "AMD Instinct training catalog, learning paths, wiki tutor, and curriculum portal.",
+      "type": "catalog",
+      "status": "harmonization-in-progress",
+      "repository": "https://github.com/cwortman-amd/knowledge-exchange",
+      "manifestPath": "../knowledge-exchange/plugin.manifest.json",
+      "localUrl": "../../knowledge-exchange/pages/index.html",
+      "entry": { "html": "pages/index.html" },
+      "webtools": {
+        "shellLayout": "catalog-topnav",
+        "defaultSkin": "matte-dark"
+      },
+      "dependencies": {
+        "webtoolsModules": ["chat-orb", "slash-router", "slash-catalog"]
+      },
+      "notes": [
+        "Shadow consumer: partial webtools-ui adoption; harmonization tracked in knowledge-exchange/docs/design-system/WEBTOOLS_UI_HARMONIZATION.md.",
+        "Training deck/video tooling lives in knowledge-exchange/common/ and is NOT part of the webtools-ui plugin surface.",
+        "Build pipeline (ke/, scripts/) is a separate layer; see knowledge-exchange/docs/meta/21-webtools-ui-plugin.md."
+      ]
+    }
+  ]
+}

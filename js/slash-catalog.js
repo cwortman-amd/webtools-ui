@@ -59,6 +59,8 @@
                     native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
     "/demo":      { description: "Open or start a demo experience",
                     native: ["llm-benchmark", "dc-planner", "cluster-manager", "demo-portal"] },
+    "/demo-shared": { description: "Start a canonical narrated demo track (shared demo engine)",
+                      native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
     "/dashboard": { description: "Return to the main dashboard",
                     native: ["llm-benchmark", "dc-planner", "cluster-manager"] },
 
