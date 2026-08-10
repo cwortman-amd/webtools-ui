@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/cwortman-amd/webtools-ui/schemas/plugin.manifest.schema.json",
   "title": "Webtools UI Community Plugin Manifest",
-  "description": "Declares how a sibling consumer repo extends the webtools-ui base (Obsidian App equivalent).",
+  "description": "Declares how a sibling consumer repo extends the webtools-ui platform (T2 product plugin). See docs/PLATFORM_MODEL.md.",
   "type": "object",
   "required": ["id", "name", "version", "minWebtoolsVersion", "type", "entry"],
   "additionalProperties": false,
@@ -100,7 +100,12 @@
         "voicePersonas": { "type": "string" },
         "shellTabs": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string" },
+          "description": "Deprecated: use shellModules path instead."
+        },
+        "shellModules": {
+          "type": "string",
+          "description": "Path to data/shell-modules.json (dashboard tab registry)."
         }
       }
     },
@@ -124,9 +129,57 @@
       "items": { "type": "string" },
       "description": "For hub plugins: ids of plugins linked or catalogued."
     },
+    "contributes": {
+      "type": "object",
+      "description": "VS Code-style contribution points. See docs/CONTRIBUTIONS.md.",
+      "properties": {
+        "views": {
+          "type": "object",
+          "properties": {
+            "sidebar": { "type": "string", "description": "Path to shell-modules.json" },
+            "catalog": { "type": "string", "description": "Path to catalog view config" }
+          }
+        },
+        "commands": {
+          "type": "object",
+          "properties": {
+            "source": { "type": "string" },
+            "coverAll": { "type": "boolean", "default": true }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "chat": { "$ref": "#/$defs/serviceToggle" },
+            "demo": { "$ref": "#/$defs/serviceToggle" },
+            "voice": { "$ref": "#/$defs/serviceToggle" }
+          }
+        },
+        "activationEvents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "e.g. onStartup, onTab:plan, onUserMode:expert"
+        }
+      }
+    },
     "notes": {
       "type": "array",
       "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "serviceToggle": {
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "config": { "type": "string" },
+            "tracks": { "type": "string" }
+          }
+        }
+      ]
     }
   }
 }

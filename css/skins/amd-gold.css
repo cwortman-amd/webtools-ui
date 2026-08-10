@@ -47,6 +47,9 @@
   --ui-text: #FFFFFF;
   --ui-muted: var(--amd-gray-4);
   --ui-accent: #C1A968;
+  /* #FFFFFF on #C1A968 is ~2.3:1 (fails primary CTA floor). Dark ink matches
+     --skin-btn-color and reads ~8:1 on the base gold fill. */
+  --ui-accent-contrast: #1A1200;
   --ui-header: #FFFFFF;
   --ui-link: #D6C18F;
   --ui-link-hover: #E5D3A8;

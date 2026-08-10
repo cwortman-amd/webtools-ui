@@ -1,8 +1,13 @@
 # webtools-ui
 
-Canonical implementations of UI surfaces shared across **five sibling consumer dashboards**
-(community plugins). See [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md) and
-[`plugins.registry.json`](plugins.registry.json).
+**UI SDK** for AMD Instinct web tools — canonical **look and feel** (tokens, skins, typography)
+and **common components** (sidebar shell, catalog topnav, buttons, chips, forms, chat orb, demo
+chrome). Sibling products mount this repo at `shared/` and compose domain UI from SDK primitives.
+
+Start here: [`docs/SDK.md`](docs/SDK.md) · Design spec: [`docs/DESIGN.md`](docs/DESIGN.md) ·
+Platform: [`docs/PLATFORM_MODEL.md`](docs/PLATFORM_MODEL.md)
+
+Five registered **consumer plugins**:
 
 - [`cluster-manager`](https://github.com/cwortman-amd/cluster-manager) — dashboard
 - [`dc-planner`](https://github.com/cwortman-amd/dc-planner) — dashboard
@@ -30,6 +35,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `css/fonts/material-symbols-outlined.woff2` | Self-hosted icon font (3.55 MB) |
 | `css/skins/*.css` | 7 canonical skins: `amd`, `amd-gold` (default), `amd-teal`, `glass-dark`, `matte-dark`, `minimal-monochrome`, `soft-neutral-light` |
 | `css/shell.css` | Sidebar / top-nav shell chrome, nav + utility buttons, skin & mode pickers |
+| `css/tokens.css` | Neutral `--ui-*` defaults before skin overrides (see [`docs/TOKENS.md`](docs/TOKENS.md)) |
 | `css/chrome.css` | Top-nav action bar, tool popovers, segmented controls, tool action buttons |
 | `css/components.css` | Shared filter chips, active-filter chips, code blocks + copy button |
 
@@ -51,6 +57,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/mobile-drawer.js` | Off-canvas drawer wiring for mobile (`MobileDrawer.install({...})` or declarative script attributes) |
 | `js/error-popup.js` | Dependency-free persistent error modal + global `onerror`/rejection/`alert()` handlers. `window.ErrorPopup`/`showError` (neutral) with `CMErrorPopup`/`showErrorPopup` back-compat aliases. Uses `--ui-*` theme tokens (Phase 10.1) |
 | `js/shell.js` | `window.Shell` — sidebar/top-nav layout, skin + theme + user-mode persistence. Reads its `localStorage` namespace from `window.SHELL_PREFIX`, which must be set before `Shell.init()` |
+| `js/shell-modules.js` | `window.ShellModules` — declarative sidebar tab registry; lifecycle hooks snap product views onto `Shell` |
 | `js/chrome.js` | `window.Chrome` — configurable top-bar tools: skin/mode switchers, info link, optional browser-local secret/profile panel |
 | `js/platform.js` | `window.WebtoolsPlatform` — formal App object for community plugins; wraps Shell, ChatOrb, SlashRouter, demo, voice (see [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md)) |
 
@@ -59,19 +66,29 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | Path | Purpose |
 | :--- | :--- |
 | `docs/PLAN.md` | The harmonization plan + status log (single source of truth for cross-repo work) |
+| `docs/SDK.md` | **UI SDK** — look & feel, component catalog, mount contract, extension rules |
+| `docs/CONTRIBUTIONS.md` | VS Code/Obsidian-style contribution points — swap, mix, toggle modules & services |
+| `docs/PLATFORM_MODEL.md` | Four-tier platform architecture |
+| `docs/DESIGN.md` | Dashboard shell look & style — sidebar, hero toolbar, menus, skins (canonical spec) |
+| `docs/SHELL_MODULES.md` | Modular sidebar tab infrastructure — registry, JSON schema, migration path |
 | `docs/INDEX_SKELETON.md` | `pages/index.html` canonical-prefix template + strict-diff CI guard contract (Phase 9.8e P4) |
 | `docs/CSS_HARMONIZATION.md` | Phase 9.8c/9.8d CSS audit + per-bucket dedup tracking |
 | `docs/TESTING_STRATEGY.md` | **Canonical** testing framework for every consumer: runtime/seam model, Tier 0–6 vocabulary, cross-runtime boundary testing, anti-false-positive protocol, UI coverage + combinatorial strategy. Read via `shared/`, never copied; each consumer keeps a short local instance |
 | `docs/FRONTEND_PERFORMANCE.md` | **Canonical** frontend performance + responsiveness framework: metric model (Core Web Vitals at p75, task timings at p50/p95), asset-weight budgets, the wait ladder with delay-threshold/minimum-duration constants, the long-job model, FE/NFR requirement matrices, and the instrumentation contract. Verified through Tier 6 of the testing framework. Read via `shared/`, never copied |
 | `docs/PLUGIN_CONTRACT.md` | Community plugin contract: manifest schema, lifecycle, platform API, registered consumers |
 | `plugins.registry.json` | Catalog of known community plugins (sibling repos) |
-| `schemas/plugin.manifest.schema.json` | JSON Schema for per-repo `plugin.manifest.json` |
+| `schemas/shell-module.schema.json` | JSON Schema for `data/shell-modules.json` dashboard tab registry |
+| `data/shell-module.example.json` | Example shell module registry (llm-benchmark tabs) |
 | `docs/templates/*.skeleton.md` | Shared H1–H3 outlines for `DEMO`, `AGENT`, `CHAT`, `VOICE`, `PITCH`, `STYLE` (Phase 7) + `TESTING_STRATEGY` and `FRONTEND_PERFORMANCE` (the local-instance outlines for the two frameworks above) |
 | `docs/templates/{demo-track,voice-config}.schema.json` | JSON Schemas for `data/demo-tracks/*.json` and `voiceBridge.configure({...})` |
 | `templates/index.skeleton.html` | The canonical `pages/index.html` head template (rendered with per-consumer `pages/index.skeleton.values.json`) |
 | `scripts/check_index_skeleton.py` | Strict-diff CI guard for the head template |
-| `scripts/html_consistency_audit.py` | Cross-repo HTML consistency audit over all three consumers (skeleton, body attrs, critical CSS/JS links, nav structure, duplicate IDs, iOS safe-area + viewport units). Exits non-zero on ERRORs; `--strict` also gates on WARNs. Supports `--json`, `--summary-only`, `--repo`, `--workspace` |
-| `tests/iphone-ui.mjs` | Live iPhone UI validation across four device profiles × all three consumers. See [iPhone validation](#iphone-validation) |
+| `scripts/html_consistency_audit.py` | Cross-repo HTML consistency audit over four dashboard consumers including knowledge-exchange (skeleton, body attrs, critical CSS/JS links, nav structure, duplicate IDs, iOS safe-area + viewport units). Exits non-zero on ERRORs; `--strict` also gates on WARNs. Supports `--json`, `--summary-only`, `--repo`, `--workspace` |
+| `docs/CROSS_CONSUMER_TESTING.md` | Cross-consumer Playwright matrix, shared test lib layout, tier wiring, and consumer adoption roadmap |
+| `tests/cross-consumer-shell.mjs` | Generic Playwright shell regression — tab panels, button visual contract, tab-switch recovery. See [`docs/CROSS_CONSUMER_TESTING.md`](docs/CROSS_CONSUMER_TESTING.md) |
+| `tests/iphone-ui.mjs` | Live iPhone UI validation across device profiles × all dashboard consumers. CDP safe-area insets + coarse-pointer probes via `tests/lib/iphone-helpers.mjs`. See [iPhone validation](#iphone-validation) |
+| `tests/playwright/cross-consumer-shell.spec.js` | Importable `@playwright/test` spec — run from any consumer via `shared/tests/playwright.config.mjs` |
+| `scripts/run_cross_consumer_smoke.sh` | One-command L0 node + L2 Playwright smoke (`make cross-consumer-smoke`) |
 | `scripts/build-vendor-manifest.sh` + `verify-vendor-manifest.sh` | Cross-repo vendor manifest tooling (Phase 8 CI gate) |
 | `scripts/vendor-manifest.json` | SHA256 + size manifest used to detect drift between consumer `shared/` mounts and canonical |
 | `scripts/export-pitch-pdf.mjs` | **Canonical** Playwright pitch-deck PDF exporter (1440×810, US Letter landscape). Consumers run `node shared/scripts/export-pitch-pdf.mjs` from their repo root (`--repo`/`--deck`/`--out` optional); Playwright is resolved from the consumer's `node_modules`. Replaces the three former per-repo copies |
@@ -123,8 +140,7 @@ adapter by configuring the shared script itself:
         data-mobile-drawer="#sideNavDrawer"
         data-mobile-drawer-menu="#navMobileMenuBtn"
         data-mobile-drawer-backdrop="#navBackdrop"
-        data-mobile-drawer-close=".nav-btn,.util-btn,.sidebar-brand"
-        data-mobile-drawer-media="(max-width: 640px)"></script>
+        data-mobile-drawer-close=".nav-btn,.util-btn,.sidebar-brand"></script>
 ```
 
 The installer accepts ID shorthands, CSS selectors, or elements, synchronizes
@@ -308,12 +324,19 @@ In this setup, your directory structure on the server would mirror your local wo
 ## Validation (plugin platform)
 
 ```bash
-make ci                         # strict manifests + all consumer shared mounts
-make enhanced-validation        # L0–L3 cross-repo gate (self-checks + syntax)
-make enhanced-validation-quick  # L0–L1 + syntax only
+make ci                         # strict manifests + shared node tests (lib/*.test.mjs + mobile-api)
+make test-shared                # node unit tests + mobile-api contract only
+make test-playwright            # cross-consumer shell + iPhone matrix
+make cross-consumer-smoke       # L0 + L2 Playwright smoke (all consumers)
+make enhanced-validation        # L0–L3 cross-repo gate (L2c Playwright required)
+make enhanced-validation-quick  # L0–L1 + syntax; skips L2c Playwright
 make check-plugins-strict
 make sync-plugin-registry       # refresh demo-portal hub snapshot
 ```
+
+Cross-consumer testing blueprint: [`docs/CROSS_CONSUMER_TESTING.md`](docs/CROSS_CONSUMER_TESTING.md)
+
+Nightly: `.github/workflows/nightly-cross-consumer.yml` runs `make cross-consumer-smoke` at 06:00 UTC.
 
 Contract: [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md) · Registry:
 [`plugins.registry.json`](plugins.registry.json)

@@ -11,19 +11,27 @@ status: active
 
 ## Purpose
 
-This document formalizes how **sibling consumer repositories** extend `webtools-ui` — the shared
-UI base for AMD web dashboards. The model mirrors Obsidian's platform + community plugin pattern:
+This document formalizes how **sibling consumer repositories** extend the **webtools-ui SDK**
+(`shared/` mount). Start with [`SDK.md`](SDK.md) for look, feel, and components.
 
-| Obsidian | webtools-ui ecosystem |
-| --- | --- |
-| Obsidian App | `webtools-ui` (canonical CSS/JS/docs) |
-| Community plugin | Sibling repo (`cluster-manager`, `dc-planner`, …) |
-| `manifest.json` | `plugin.manifest.json` at consumer repo root |
-| `Plugin.onload(app)` | `chat-orb-mount.js` (+ optional `WebtoolsPlatform.register`) |
-| Community plugin list | `plugins.registry.json` |
+**Primary architecture:** [`docs/PLATFORM_MODEL.md`](PLATFORM_MODEL.md) — refined four-tier model
+(Platform → Product Plugin → Shell Module → Platform Service). Read that first.
+
+The early **Obsidian comparison** below remains a useful onboarding shorthand, not the full design.
+
+| Obsidian (shorthand) | webtools-ui ecosystem | Refinement |
+| --- | --- | --- |
+| Obsidian App | `webtools-ui` (canonical CSS/JS/docs) | **T1 Platform** |
+| Community plugin | Sibling repo (`cluster-manager`, …) | **T2 Product plugin** (`dashboard` / `catalog` / `hub`) |
+| Plugin settings / views | Sidebar tabs, catalog cards | **T3 Shell modules** (see [`SHELL_MODULES.md`](SHELL_MODULES.md)) |
+| Commands, ribbon | Chat orb, slash, demo, voice | **T4 Platform services** |
+| `manifest.json` | `plugin.manifest.json` at consumer repo root | + `registrations.shellModules` |
+| `Plugin.onload(app)` | `plugin-mount.js` / `WebtoolsPlatform.register` | Shell modules init **before** `Shell.init()` |
+| Community plugin list | `plugins.registry.json` | + demo-portal Tools hub |
 
 **This is not an Obsidian plugin contract.** Consumer repos are static web applications deployed
-beside `webtools-ui`, not extensions loaded inside Obsidian.
+beside `webtools-ui`, not extensions loaded inside Obsidian. See [`PLATFORM_MODEL.md`](PLATFORM_MODEL.md)
+§ “Obsidian vs webtools-ui” for an honest comparison.
 
 ---
 
@@ -125,7 +133,8 @@ Defined in [`js/platform.js`](../js/platform.js). Exposes canonical modules:
 
 | Property | Canonical module | Purpose |
 | --- | --- | --- |
-| `platform.shell` | `window.Shell` | Sidebar/top-nav layout, skin persistence |
+| `platform.shell` | `window.Shell` | Sidebar/top-nav layout, skin persistence, tab switching |
+| `platform.shellModules` | `window.ShellModules` | Declarative sidebar tab registry + lifecycle hooks |
 | `platform.chrome` | `window.WebtoolsChrome` | Top-bar tools |
 | `platform.commands` | `window.SlashRouter` | Slash command registry |
 | `platform.chat` | `window.ChatOrb` | Chat orb UI |
@@ -142,6 +151,50 @@ Methods:
 
 Plugins MUST NOT modify files under `webtools-ui/` from product code. Push reusable fixes
 upstream.
+
+---
+
+## Shell modules (dashboard tabs)
+
+Dashboard plugins (`type: dashboard`, `shellLayout: sidebar-iframe`) express each sidebar tab as a
+**shell module** — a snap-on unit registered against shared chrome.
+
+| Artifact | Path |
+| --- | --- |
+| Architecture | [`docs/SHELL_MODULES.md`](SHELL_MODULES.md) |
+| Runtime | [`js/shell-modules.js`](../js/shell-modules.js) |
+| JSON schema | [`schemas/shell-module.schema.json`](../schemas/shell-module.schema.json) |
+| Example data | [`data/shell-module.example.json`](../data/shell-module.example.json) |
+
+### Manifest hook
+
+```json
+{
+  "registrations": {
+    "shellModules": "data/shell-modules.json",
+    "slashCommands": "js/chat-orb-mount.js"
+  }
+}
+```
+
+### Bootstrap (recommended)
+
+```javascript
+window.SHELL_PREFIX = "cm";
+ShellModules.init({ source: "data/shell-modules.json", hooksOnly: true });
+Shell.init();
+WebtoolsPlatform.register({ id: "cluster-manager", onload: mountProduct });
+```
+
+**Integration modes:**
+
+1. **hooksOnly** — keep static `index.html` sidebar; registry drives lifecycle and gating
+2. **render** — generate `.nav-btn` + `.tab-panel` from JSON (greenfield)
+
+Global services (chat orb, demo, voice, slash commands) remain in the mount script — shell modules
+only define **navigation units**.
+
+Full swap/mix standard: [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md).
 
 ---
 
@@ -228,13 +281,18 @@ make ci                           # L0 platform gate only
 | **3 (landed)** | KE WebtoolsChrome adapter; CI plugin gates; enhanced validation; llm-benchmark offline green |
 | **4** | Hub launcher reads registry for cross-links (demo-portal `?view=tools`) — landed |
 | **5 (landed)** | CI: `check_plugin_manifests.py --strict` + `enhanced_validation.sh` in webtools-ui workflow |
+| **6 (landed)** | Shell module registry (`shell-modules.js`); all dashboards on JSON + `plugin-mount.js` |
+| **7 (landed)** | `PLATFORM_MODEL.md`; `check_shell_modules.py` + L1b in enhanced validation |
 
 ---
 
 ## Related Documents
 
+- [`docs/PLATFORM_MODEL.md`](PLATFORM_MODEL.md) — **primary architecture** (beyond Obsidian analogy)
+- [`docs/CONTRIBUTIONS.md`](CONTRIBUTIONS.md) — contribution points, swap/mix patterns
 - [`README.md`](../README.md) — asset inventory and symlink mount
 - [`docs/PLAN.md`](PLAN.md) — harmonization history
-- [`docs/INDEX_SKELETON.md`](INDEX_SKELETON.md) — head template contract
+- [`docs/DESIGN.md`](DESIGN.md) — sidebar visual spec
+- [`docs/SHELL_MODULES.md`](SHELL_MODULES.md) — modular tab infrastructure
 - [`js/slash-catalog.js`](../js/slash-catalog.js) — cross-repo slash command registry
 - Knowledge Exchange: `knowledge-exchange/docs/meta/21-webtools-ui-plugin.md`

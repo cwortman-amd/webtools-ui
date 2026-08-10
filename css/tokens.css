@@ -17,7 +17,8 @@
   --ui-header: #f3f4f6;
   --ui-accent: #2bb5a0;
   --ui-accent-soft: color-mix(in srgb, var(--ui-accent) 16%, transparent);
-  --ui-accent-contrast: var(--ui-bg);
+  /* Text/icons on solid accent fills (primary CTAs, badges on --ui-accent). */
+  --ui-accent-contrast: #ffffff;
   --ui-link: var(--ui-accent);
   --ui-link-hover: color-mix(in srgb, var(--ui-accent) 82%, white);
   --ui-warning-text: #f5c842;

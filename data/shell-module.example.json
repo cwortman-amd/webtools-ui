@@ -1,0 +1,51 @@
+{
+  "$schema": "../schemas/shell-module.schema.json",
+  "defaultTab": "plan",
+  "modules": [
+    {
+      "id": "plan",
+      "label": "Plan",
+      "icon": "science",
+      "mode": "standard",
+      "order": 10,
+      "title": "Configure test parameters",
+      "panel": { "type": "iframe", "src": "plan.html", "lazy": true }
+    },
+    {
+      "id": "queue",
+      "label": "Deploy",
+      "icon": "rocket_launch",
+      "mode": "standard",
+      "order": 20,
+      "title": "Run benchmarks and manage queue",
+      "panel": { "type": "iframe", "src": "queue.html", "lazy": true }
+    },
+    {
+      "id": "view",
+      "label": "View",
+      "icon": "bar_chart",
+      "mode": "standard",
+      "order": 30,
+      "title": "View benchmark results",
+      "panel": { "type": "iframe", "src": "view.html", "lazy": true }
+    },
+    {
+      "id": "profile",
+      "label": "Profile",
+      "icon": "tune",
+      "mode": "advanced",
+      "order": 40,
+      "title": "GPU profiling tools",
+      "panel": { "type": "iframe", "src": "profile.html", "lazy": true }
+    },
+    {
+      "id": "report",
+      "label": "Report",
+      "icon": "summarize",
+      "mode": "expert",
+      "order": 50,
+      "title": "Export and report builder",
+      "panel": { "type": "iframe", "src": "report.html", "lazy": true }
+    }
+  ]
+}

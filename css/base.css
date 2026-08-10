@@ -637,7 +637,7 @@ a.hero-title:hover .hero-title-text {
 
 .hero-title .material-symbols-outlined {
   font-size: 18px;
-  color: var(--ui-accent);
+  color: var(--ui-muted);
   flex-shrink: 0;
 }
 
@@ -835,6 +835,31 @@ body.nav-mobile-open .nav-backdrop {
   }
 }
 
+/* Touch landscape (641–900px): hamburger drawer chrome when shell.css
+ * keeps the off-canvas sidebar for coarse pointers above 640px (iPhone
+ * landscape is ~734px). Portrait rules above do not match this width. */
+@media (hover: none) and (pointer: coarse) and (min-width: 641px) and (max-width: 900px) {
+  .hero {
+    padding-top: env(safe-area-inset-top);
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    height: calc(40px + env(safe-area-inset-top));
+  }
+
+  .hero-tabs,
+  .hero-toolbar {
+    display: none !important;
+  }
+
+  .hero .hero-mobile-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    order: -1;
+    margin-right: 4px;
+  }
+}
+
 /* ── Touch ergonomics (orientation-independent) ──────────────────────
  * The block above is gated on `max-width: 640px`, which is a *layout*
  * predicate: it decides when to collapse the tab strip and toolbar into
@@ -896,6 +921,7 @@ body.nav-mobile-open .nav-backdrop {
   .hero-icon-btn,
   .tab-btn,
   .nav-btn,
+  .sidebar-routes .nav-btn,
   .util-btn,
   .side-nav-tab,
   .hero-title,

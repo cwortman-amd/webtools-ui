@@ -124,7 +124,7 @@
   padding: 0 5px;
   border-radius: 9px;
   background: var(--chrome-accent);
-  color: var(--ui-bg);
+  color: var(--ui-accent-contrast);
   font-size: 0.7rem;
   font-weight: 800;
 }
@@ -324,7 +324,7 @@
   padding: 7px 10px;
   border-radius: var(--chrome-radius-sm);
   background: var(--chrome-accent);
-  color: var(--ui-bg);
+  color: var(--ui-accent-contrast);
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;

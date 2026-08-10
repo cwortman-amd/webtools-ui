@@ -1,0 +1,86 @@
+{
+  "$schema": "consumer-matrix-v1",
+  "description": "Cross-consumer Playwright matrix — entry paths, demo suppression, shell selectors.",
+  "consumers": [
+    {
+      "id": "cluster-manager",
+      "entryPath": "/pages/index.html",
+      "shellNavSelector": ".sidebar-nav .nav-btn",
+      "panelSelector": ".tab-panel",
+      "demoBannerKeys": ["cm-demo.welcome.shown"],
+      "userModeKey": "su-user-mode",
+      "requirePortalView": false,
+      "buttonVisualContract": false,
+      "shellTabChangedRecovery": false,
+      "requiresPlaywright": true
+    },
+    {
+      "id": "dc-planner",
+      "entryPath": "/pages/index.html",
+      "shellNavSelector": ".sidebar-nav .nav-btn",
+      "panelSelector": ".tab-panel",
+      "demoBannerKeys": [],
+      "userModeKey": "dc-user-mode",
+      "requirePortalView": false,
+      "buttonVisualContract": true,
+      "shellTabChangedRecovery": false,
+      "requiresPlaywright": true
+    },
+    {
+      "id": "llm-benchmark",
+      "entryPath": "/pages/index.html",
+      "shellNavSelector": ".sidebar-nav .nav-btn",
+      "panelSelector": ".tab-panel",
+      "demoBannerKeys": [],
+      "userModeKey": "lb-user-mode",
+      "requirePortalView": false,
+      "buttonVisualContract": true,
+      "shellTabChangedRecovery": false,
+      "requiresPlaywright": true
+    },
+    {
+      "id": "knowledge-exchange",
+      "entryPath": "/pages/index.html",
+      "shellNavSelector": ".sidebar-nav .nav-btn",
+      "panelSelector": ".tab-panel",
+      "portalViewAttr": "data-portal-view",
+      "profileKey": "knowledge-exchange:portal-profile",
+      "demoBannerKeys": [],
+      "userModeKey": "app-user-mode",
+      "requirePortalView": true,
+      "buttonVisualContract": true,
+      "shellTabChangedRecovery": true,
+      "requiresPlaywright": true
+    }
+  ],
+  "iphoneDevices": [
+    {
+      "name": "iPhone SE",
+      "descriptor": "iPhone SE",
+      "insets": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+      "notched": false,
+      "orientation": "portrait"
+    },
+    {
+      "name": "iPhone 13",
+      "descriptor": "iPhone 13",
+      "insets": { "top": 47, "right": 0, "bottom": 34, "left": 0 },
+      "notched": true,
+      "orientation": "portrait"
+    },
+    {
+      "name": "iPhone 15 Pro Max",
+      "descriptor": "iPhone 15 Pro Max",
+      "insets": { "top": 59, "right": 0, "bottom": 34, "left": 0 },
+      "notched": true,
+      "orientation": "portrait"
+    },
+    {
+      "name": "iPhone 15 Pro landscape",
+      "descriptor": "iPhone 15 Pro landscape",
+      "insets": { "top": 0, "right": 59, "bottom": 21, "left": 59 },
+      "notched": true,
+      "orientation": "landscape"
+    }
+  ]
+}

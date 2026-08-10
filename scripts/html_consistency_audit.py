@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 html_consistency_audit.py — Cross-repo HTML consistency checker for the
-webtools-ui dashboard ecosystem (cluster-manager, dc-planner, llm-benchmark).
+webtools-ui dashboard ecosystem (cluster-manager, dc-planner, llm-benchmark,
+knowledge-exchange).
 
 Checks performed:
   1. Skeleton guard       — runs check_index_skeleton.py for each repo
@@ -67,7 +68,16 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 # --workspace when they live elsewhere.
 DEFAULT_WORKSPACE = SCRIPT_DIR.parent.parent
 
-CONSUMER_REPOS = ("cluster-manager", "llm-benchmark", "dc-planner")
+CONSUMER_REPOS = ("cluster-manager", "llm-benchmark", "dc-planner", "knowledge-exchange")
+
+# Skeleton / HTML profile per consumer. Catalog repos (knowledge-exchange) use
+# chrome.css + matte-dark defaults instead of the dashboard shell bundle.
+CONSUMER_PROFILES: dict[str, str] = {
+    "cluster-manager": "dashboard",
+    "llm-benchmark": "dashboard",
+    "dc-planner": "dashboard",
+    "knowledge-exchange": "catalog",
+}
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -123,7 +133,7 @@ def read(path: Path) -> str:
 
 # ── Check functions ───────────────────────────────────────────────────────────
 
-def check_skeleton(repo_name: str, repo_path: Path) -> None:
+def check_skeleton(repo_name: str, repo_path: Path, profile: str = "dashboard") -> None:
     """Run the existing skeleton check script."""
     checker = SCRIPT_DIR / "check_index_skeleton.py"
     if not checker.is_file():
@@ -131,7 +141,15 @@ def check_skeleton(repo_name: str, repo_path: Path) -> None:
         return
     try:
         result = subprocess.run(
-            [sys.executable, str(checker), "--repo", str(repo_path), "--quiet"],
+            [
+                sys.executable,
+                str(checker),
+                "--repo",
+                str(repo_path),
+                "--profile",
+                profile,
+                "--quiet",
+            ],
             capture_output=True, text=True,
             stdin=subprocess.DEVNULL,  # never prompt interactively
             timeout=30,
@@ -155,7 +173,7 @@ def check_skeleton(repo_name: str, repo_path: Path) -> None:
                 print(f"      {DIM}{line}{RESET}")
 
 
-def check_body_attrs(repo_name: str, index_html: str) -> None:
+def check_body_attrs(repo_name: str, index_html: str, profile: str = "dashboard") -> None:
     """Check <body> element for required classes and attributes."""
     body_match = re.search(r'<body([^>]*)>', index_html)
     if not body_match:
@@ -168,7 +186,12 @@ def check_body_attrs(repo_name: str, index_html: str) -> None:
     else:
         emit("ERROR", repo_name, '<body> is missing class="nav-side" — sidebar will not be the default on first paint')
 
-    if 'data-skin="amd-gold"' in body_attrs:
+    if profile == "catalog":
+        if re.search(r'data-skin="[^"]+"', body_attrs):
+            ok(repo_name, "<body> has data-skin (catalog profile)")
+        else:
+            emit("WARN", repo_name, "<body> is missing data-skin")
+    elif 'data-skin="amd-gold"' in body_attrs:
         ok(repo_name, '<body> has data-skin="amd-gold"')
     else:
         emit("WARN", repo_name, '<body> is missing data-skin="amd-gold"')
@@ -239,8 +262,16 @@ def check_sidebar_elements(repo_name: str, html: str) -> None:
         emit("WARN", repo_name, "index.html: .sidebar-brand missing (sidebar has no brand header)")
 
 
-def check_pitch_link(repo_name: str, html: str) -> None:
-    """Verify the hero-title links to pitch.html."""
+def check_pitch_link(repo_name: str, html: str, profile: str = "dashboard") -> None:
+    """Verify pitch.html is linked from the shell chrome."""
+    if profile == "catalog":
+        if re.search(r'class="sidebar-brand"[^>]*href="(?:\./)?pitch\.html"', html) or \
+           re.search(r'href="(?:\./)?pitch\.html"[^>]*class="sidebar-brand"', html):
+            ok(repo_name, "index.html: .sidebar-brand links to pitch.html")
+        else:
+            emit("WARN", repo_name, "index.html: .sidebar-brand may not link to pitch.html — verify deck link target")
+        return
+
     # Look for hero-title with pitch.html href
     if re.search(r'class="hero-title"[^>]*href="pitch\.html"', html) or \
        re.search(r'href="pitch\.html"[^>]*class="hero-title"', html):
@@ -520,7 +551,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--workspace", type=Path, default=DEFAULT_WORKSPACE,
                         help=f"Directory holding the consumer repos (default: {DEFAULT_WORKSPACE})")
     parser.add_argument("--repo", action="append", metavar="NAME", choices=CONSUMER_REPOS,
-                        help="Audit only this repo; repeatable (default: all three)")
+                        help="Audit only this repo; repeatable (default: all four)")
     args = parser.parse_args(argv)
 
     QUIET = args.json or args.summary_only
@@ -559,12 +590,13 @@ def main(argv: list[str]) -> int:
         audited += 1
 
         html = read(index_html_path)
+        profile = CONSUMER_PROFILES.get(repo_name, "dashboard")
 
         section("1. Skeleton Guard")
-        check_skeleton(repo_name, repo_path)
+        check_skeleton(repo_name, repo_path, profile)
 
         section("2. Body Attributes")
-        check_body_attrs(repo_name, html)
+        check_body_attrs(repo_name, html, profile)
 
         section("3. Viewport & Font Preload")
         check_viewport(repo_name, html)
@@ -573,19 +605,28 @@ def main(argv: list[str]) -> int:
         section("4. Critical CSS Links")
         check_css_link(repo_name, html, "shell.css")
         check_css_link(repo_name, html, "chat-orb.css")
-        check_css_link(repo_name, html, "demo-mode.css")
+        if profile == "dashboard":
+            check_css_link(repo_name, html, "demo-mode.css")
+        else:
+            skip(repo_name, "demo-mode.css: not required for catalog profile")
         check_skin_id(repo_name, html)
 
         section("5. Navigation Structure")
         check_hamburger(repo_name, html)
         check_sidebar_elements(repo_name, html)
-        check_pitch_link(repo_name, html)
+        check_pitch_link(repo_name, html, profile)
 
         section("6. JavaScript Integrity")
         check_layout_default_js(repo_name, html)
-        check_shell_prefix(repo_name, html)
+        if profile == "dashboard":
+            check_shell_prefix(repo_name, html)
+        else:
+            skip(repo_name, "SHELL_PREFIX: catalog profile uses chrome.js, not Shell.init()")
         check_mobile_drawer(repo_name, html)
-        check_agent_bridge(repo_name, html)
+        if profile == "dashboard":
+            check_agent_bridge(repo_name, html)
+        else:
+            skip(repo_name, "agent-bridge.js: not required for catalog profile")
 
         section("7. Duplicate IDs")
         check_duplicate_ids(repo_name, html)

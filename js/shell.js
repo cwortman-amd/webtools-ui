@@ -339,8 +339,14 @@
      * switcher. */
 
     document.querySelectorAll(".sidebar-nav .nav-btn").forEach(function (tab) {
+      // ShellModules wires these first in hooksOnly/bootstrap flows; its handler
+      // calls the patched Shell.switchTab. Re-binding here with the closure's
+      // switchTab would run after and hide every panel (panel-{tabId} ≠ panel-browse).
+      if (tab._shellModulesBound) return;
       tab.addEventListener("click", function () {
-        if (!this.disabled) switchTab(this.getAttribute("data-tab"));
+        if (!this.disabled && global.Shell && typeof global.Shell.switchTab === "function") {
+          global.Shell.switchTab(this.getAttribute("data-tab"));
+        }
       });
     });
 
@@ -356,10 +362,14 @@
     // Honour a deep link on load, and let Back/Forward walk the tab history
     // instead of leaving the app.
     var initial = tabFromUrl();
-    if (knownTab(initial)) switchTab(initial, { updateUrl: false });
+    if (knownTab(initial) && global.Shell && typeof global.Shell.switchTab === "function") {
+      global.Shell.switchTab(initial, { updateUrl: false });
+    }
     global.addEventListener("popstate", function () {
       var t = tabFromUrl();
-      if (knownTab(t)) switchTab(t, { updateUrl: false });
+      if (knownTab(t) && global.Shell && typeof global.Shell.switchTab === "function") {
+        global.Shell.switchTab(t, { updateUrl: false });
+      }
     });
 
     initTabShortcuts();
@@ -378,7 +388,9 @@
       var target = tabs[parseInt(e.key, 10) - 1];
       if (!target || target.disabled) return;
       e.preventDefault();
-      switchTab(target.getAttribute("data-tab"));
+      if (global.Shell && typeof global.Shell.switchTab === "function") {
+        global.Shell.switchTab(target.getAttribute("data-tab"));
+      }
     });
 
     if (!global.Shortcuts) return;

@@ -5,6 +5,7 @@
 #   L0  Platform gate     — manifest registry + all consumer shared mounts
 #   L1  Plugin contract   — per-repo shared-check + check-plugins --strict
 #   L2  Consumer suites   — repo-native quick/offline self-checks (when present)
+#   L2c Playwright matrix — cross-consumer shell + iPhone UI (required when not --skip-slow)
 #   L3  Syntax probes     — node --check on harmonized chrome/mount adapters
 #
 # Usage:
@@ -82,6 +83,30 @@ for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-por
   run_layer "$repo" "L1 plugin contract" "cd '$consumer' && make shared-check check-plugins"
 done
 
+# ── L1b: shell module registry (dashboard consumers) ────────────────────────
+for repo in cluster-manager dc-planner llm-benchmark demo-portal knowledge-exchange; do
+  consumer="$WORKSPACE/$repo"
+  if [[ -d "$consumer" ]]; then
+    run_layer "$repo" "L1b shell modules" \
+      "python3 '$ROOT/scripts/check_shell_modules.py' --repo '$consumer'"
+  fi
+done
+
+# ── L2b: shared mobile API + cross-consumer Playwright ──────────────────────
+run_layer "webtools-ui" "L2b mobile-api" "cd '$ROOT' && node tests/mobile-api-contract.mjs"
+
+if [[ "$SKIP_SLOW" == "0" ]]; then
+  run_layer "webtools-ui" "L2c cross-consumer shell" \
+    "cd '$ROOT' && node tests/cross-consumer-shell.mjs --json"
+  run_layer "webtools-ui" "L2c iPhone UI matrix" \
+    "cd '$ROOT' && node tests/iphone-ui.mjs --json"
+else
+  ((SKIP+=2))
+  RESULTS+=("SKIP|webtools-ui|L2c cross-consumer shell")
+  RESULTS+=("SKIP|webtools-ui|L2c iPhone UI matrix")
+  echo "[skip-slow] L2c Playwright matrix skipped"
+fi
+
 # ── L2: consumer quick suites ───────────────────────────────────────────────
 if [[ "$SKIP_SLOW" == "0" ]]; then
   run_layer "cluster-manager" "L2 self-check --quick" \
@@ -106,10 +131,10 @@ fi
 # ── L3: harmonized JS syntax probes ─────────────────────────────────────────
 declare -A SYNTAX=(
   ["knowledge-exchange"]="node --check portal/chrome.js && node --check portal/chat-orb-mount.js"
-  ["demo-portal"]="node --check js/chrome.js && node --check js/chat-orb-mount.js && node --check js/plugins-hub.js"
-  ["cluster-manager"]="node --check js/chat-orb-mount.js"
-  ["dc-planner"]="node --check js/chat-orb-mount.js"
-  ["llm-benchmark"]="node --check js/chat-orb-mount.js"
+  ["demo-portal"]="node --check js/plugin-mount.js && node --check js/chat-orb-mount.js && node --check js/plugins-hub.js"
+  ["cluster-manager"]="node --check js/plugin-mount.js && node --check js/shell-tab-controller.js && node --check js/chat-orb-mount.js"
+  ["dc-planner"]="node --check js/plugin-mount.js && node --check js/chat-orb-mount.js"
+  ["llm-benchmark"]="node --check js/plugin-mount.js && node --check js/chat-orb-mount.js"
 )
 
 for repo in "${!SYNTAX[@]}"; do

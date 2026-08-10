@@ -1,19 +1,19 @@
-name: CI
+name: Nightly cross-consumer smoke
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: nightly-cross-consumer
+  cancel-in-progress: false
 
 jobs:
-  plugin-gate:
-    name: Plugin manifests + consumer mounts
+  cross-consumer-smoke:
+    name: L0 + L2 Playwright smoke (all consumers)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout webtools-ui
         uses: actions/checkout@v4
@@ -40,14 +40,8 @@ jobs:
           npm ci
           npx playwright install chromium --with-deps
 
-      - name: Run plugin CI gate
+      - name: Run cross-consumer smoke (with Playwright)
         working-directory: webtools-ui
         env:
           WORKSPACE: ${{ github.workspace }}/..
-        run: make ci
-
-      - name: Enhanced cross-repo validation (L0-L3)
-        working-directory: webtools-ui
-        env:
-          WORKSPACE: ${{ github.workspace }}/..
-        run: make enhanced-validation
+        run: make cross-consumer-smoke

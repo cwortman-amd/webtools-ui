@@ -30,7 +30,7 @@
  *     llm-benchmark to remember + revert that switch on close via a
  *     `nav-mobile-temp` flag.
  *   - `mobileMQ`: the breakpoint media query (defaults to the canonical
- *     `(max-width: 640px)`)
+ *     touch-drawer query shared with shell.css)
  *
  * Usage:
  *
@@ -59,6 +59,10 @@
 
 (function (global) {
   "use strict";
+
+  /** Matches shell.css touch drawer layout — ≤640px plus coarse pointers up to 900px. */
+  var TOUCH_DRAWER_MQ =
+    "(max-width: 640px), ((hover: none) and (pointer: coarse) and (max-width: 900px))";
 
   var INSTALLED = typeof WeakMap !== "undefined" ? new WeakMap() : null;
 
@@ -128,7 +132,7 @@
     }
     if (INSTALLED && INSTALLED.has(menuBtn)) return INSTALLED.get(menuBtn);
 
-    var mobileMQ = cfg.mobileMQ || "(max-width: 640px)";
+    var mobileMQ = cfg.mobileMQ || TOUCH_DRAWER_MQ;
     var closeOnTap = Array.isArray(cfg.closeOnTap)
       ? cfg.closeOnTap.slice()
       : (typeof cfg.closeOnTap === "string" && cfg.closeOnTap.trim() ? [cfg.closeOnTap] : []);
@@ -227,14 +231,15 @@
       backdrop: script.dataset.mobileDrawerBackdrop,
       drawer: script.dataset.mobileDrawer,
       closeOnTap: script.dataset.mobileDrawerClose || "",
-      mobileMQ: script.dataset.mobileDrawerMedia || "(max-width: 640px)"
+      mobileMQ: script.dataset.mobileDrawerMedia || TOUCH_DRAWER_MQ
     };
     return install(cfg);
   }
 
   global.MobileDrawer = {
     install: install,
-    installDeclarative: installDeclarative
+    installDeclarative: installDeclarative,
+    TOUCH_DRAWER_MQ: TOUCH_DRAWER_MQ
   };
   installDeclarative();
 })(typeof window !== "undefined" ? window : this);

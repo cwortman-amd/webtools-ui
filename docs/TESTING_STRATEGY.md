@@ -341,8 +341,10 @@ before asserting anything that depends on it — otherwise the test passes by ne
 path it claims to cover.
 
 This repo ships a canonical cross-consumer implementation of that discipline in
-[`tests/iphone-ui.mjs`](../tests/iphone-ui.mjs), which runs four device profiles against every
-consumer, and an API-shape check in [`tests/mobile-api-contract.mjs`](../tests/mobile-api-contract.mjs).
+[`tests/iphone-ui.mjs`](../tests/iphone-ui.mjs) (CDP safe-area insets via [`tests/lib/iphone-helpers.mjs`](../tests/lib/iphone-helpers.mjs)),
+[`tests/cross-consumer-shell.mjs`](../tests/cross-consumer-shell.mjs) (generic shell tab/panel regression),
+and an API-shape check in [`tests/mobile-api-contract.mjs`](../tests/mobile-api-contract.mjs).
+See [`docs/CROSS_CONSUMER_TESTING.md`](CROSS_CONSUMER_TESTING.md) for the full matrix, CI wiring, and consumer adoption map.
 
 ---
 

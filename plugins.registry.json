@@ -99,20 +99,20 @@
       "minWebtoolsVersion": "0.9.0",
       "description": "AMD Instinct training catalog, learning paths, wiki tutor, and curriculum portal.",
       "type": "catalog",
-      "status": "harmonization-in-progress",
+      "status": "active",
       "repository": "https://github.com/cwortman-amd/knowledge-exchange",
       "manifestPath": "../knowledge-exchange/plugin.manifest.json",
       "localUrl": "../../knowledge-exchange/pages/index.html",
-      "entry": { "html": "pages/index.html" },
+      "entry": { "html": "pages/index.html", "mount": "js/plugin-mount.js" },
       "webtools": {
-        "shellLayout": "catalog-topnav",
+        "shellLayout": "sidebar-iframe",
         "defaultSkin": "matte-dark"
       },
       "dependencies": {
-        "webtoolsModules": ["chat-orb", "slash-router", "slash-catalog"]
+        "webtoolsModules": ["shell", "shell-modules", "mobile-drawer", "chat-orb", "slash-router", "slash-catalog"]
       },
       "notes": [
-        "Shadow consumer: partial webtools-ui adoption; harmonization tracked in knowledge-exchange/docs/design-system/WEBTOOLS_UI_HARMONIZATION.md.",
+        "Dashboard sidebar shell (Pathways / Catalog / Resources / Progress / Create).",
         "Training deck/video tooling lives in knowledge-exchange/common/ and is NOT part of the webtools-ui plugin surface.",
         "Build pipeline (ke/, scripts/) is a separate layer; see knowledge-exchange/docs/meta/21-webtools-ui-plugin.md."
       ]

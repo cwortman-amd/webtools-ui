@@ -94,7 +94,7 @@ a.sidebar-brand:hover h1 {
 }
 
 .sidebar-brand .material-symbols-outlined {
-  color: var(--ui-accent);
+  color: var(--ui-muted);
 }
 
 .sidebar-brand h1 {
@@ -359,7 +359,7 @@ body[data-user-mode="advanced"] .mode-expert {
   display: none !important;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 640px), ((hover: none) and (pointer: coarse) and (max-width: 900px)) {
   /* Keep the top-bar header visible regardless of layout mode. */
   body.nav-side .hero {
     display: flex;
@@ -367,7 +367,8 @@ body[data-user-mode="advanced"] .mode-expert {
 
   /* Hide the desktop sidebar by default; the drawer will slide it
    * back in with the .nav-mobile-open class below. The shell-body
-   * area always uses full viewport width on mobile. */
+   * area always uses full viewport width on mobile. Honor notch,
+   * curved-edge, and home-indicator insets inside the drawer. */
   body.nav-side .sidebar {
     position: fixed;
     top: 0;
@@ -378,6 +379,10 @@ body[data-user-mode="advanced"] .mode-expert {
     transition: transform 0.22s ease;
     z-index: 110;
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.35);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    box-sizing: border-box;
   }
 
   /* All layouts on mobile: the iframe area starts BELOW the .hero
@@ -391,8 +396,38 @@ body[data-user-mode="advanced"] .mode-expert {
     left: 0 !important;
   }
 
+  /* Scroll panels must clear the home indicator — body padding does
+   * not affect fixed .shell-body children. */
+  .shell-body .tab-panel {
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
+  }
+
   body.nav-mobile-open .sidebar {
     transform: translateX(0);
+  }
+
+  /* Persisted desktop collapse must not shrink the off-canvas drawer
+   * into an icon rail on touch viewports. */
+  body.nav-side.nav-collapsed .sidebar {
+    width: min(78vw, 280px);
+  }
+
+  body.nav-side.nav-collapsed .shell-body {
+    left: 0 !important;
+  }
+
+  body.nav-side.nav-collapsed .sidebar-brand h1,
+  body.nav-side.nav-collapsed .nav-label,
+  body.nav-side.nav-collapsed .util-label {
+    display: block;
+  }
+
+  body.nav-side.nav-collapsed .nav-btn,
+  body.nav-side.nav-collapsed .util-btn {
+    justify-content: flex-start;
+    padding: 12px 14px;
+    gap: 10px;
   }
 
   /* Sidebar nav items on mobile: bump padding for thumb tappability. */
@@ -410,6 +445,7 @@ body[data-user-mode="advanced"] .mode-expert {
   /* The sidebar-collapse toggle and layout toggle don't make sense
    * on mobile (the drawer is the layout). Hide them. */
   #sidebarCollapseBtn,
+  #collapseToggle,
   #layoutToggleTop,
   #layoutToggleSide {
     display: none !important;

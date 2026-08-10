@@ -17,35 +17,26 @@
  * is resolved from whichever sibling consumer has it installed. If none
  * does, the suite exits 2 rather than reporting a false pass.
  *
- * KNOWN LIMITATION — safe-area insets. Headless Chromium resolves every
- * env(safe-area-inset-*) to 0 regardless of the device profile, so the
- * notch and home-indicator cutouts cannot be measured here. Whether the
- * stylesheets actually reference those insets is enforced statically
- * instead, by check_ios_safe_area() in scripts/html_consistency_audit.py.
- * The two checks are complements; neither covers this on its own.
+ * Safe-area insets. Headless Chromium resolves env(safe-area-inset-*) to 0
+ * unless overridden via CDP. This runner applies matrix insets through
+ * tests/lib/iphone-helpers.mjs (applyInsets). Whether stylesheets reference
+ * those insets is still enforced statically by check_ios_safe_area() in
+ * scripts/html_consistency_audit.py — the two checks complement each other.
  */
 
-import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
+import { loadPlaywright, loadStaticServerHelper } from "./lib/playwright-resolve.mjs";
+import { loadConsumerMatrix } from "./lib/consumer-matrix.mjs";
+import {
+  applyInsets,
+  assertCoarsePointerBlockIsLive,
+  settle,
+  validateDeviceCases,
+} from "./lib/iphone-helpers.mjs";
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SHARED = path.resolve(HERE, "..");
-const WORKSPACE = path.resolve(SHARED, "..");
-
-const CONSUMERS = ["llm-benchmark", "dc-planner", "cluster-manager"];
-
-// A spread rather than a catalogue: the narrowest viewport still supported,
-// a common notched handset, the widest current handset, and one landscape
-// profile because that is the orientation where the notch moves to the side
-// and horizontal space is tightest.
-const DEVICES = [
-  "iPhone SE",           // 320x568 — narrowest; overflow shows up here first
-  "iPhone 13",           // 390x664 — the common modern portrait case
-  "iPhone 15 Pro Max",   // 430x739 — widest
-  "iPhone 15 Pro landscape",
-];
+// Device spread from consumer-matrix.json — override via --device (name).
+const { iphoneDevices: DEVICE_CASES, workspace: WORKSPACE } = loadConsumerMatrix();
 
 // Apple's Human Interface Guidelines put the comfortable tap target at
 // 44x44pt. base.css deliberately settles on 40px instead — see the
@@ -61,17 +52,7 @@ const TAP_FLOOR_PX = 40;
 const TAP_HIG_PX = 44;
 
 // ── Playwright resolution ────────────────────────────────────────────────
-
-function loadPlaywright() {
-  for (const repo of CONSUMERS) {
-    const pkg = path.join(WORKSPACE, repo, "package.json");
-    if (!fs.existsSync(pkg)) continue;
-    try {
-      return createRequire(pkg)("@playwright/test");
-    } catch { /* try the next consumer */ }
-  }
-  return null;
-}
+// (see tests/lib/playwright-resolve.mjs)
 
 // ── Result plumbing ──────────────────────────────────────────────────────
 
@@ -315,12 +296,14 @@ async function checkKeyboardInsetPlumbing(page) {
 
 // ── Runner ───────────────────────────────────────────────────────────────
 
-async function runMatrix({ chromium, devices, repos, deviceNames, startStaticServer }) {
+async function runMatrix({ chromium, devices, repos, deviceCases, startStaticServer }) {
   const browser = await chromium.launch();
 
   for (const repo of repos) {
     const repoPath = path.join(WORKSPACE, repo);
-    const indexPath = path.join(repoPath, "pages", "index.html");
+    const def = loadConsumerMatrix().consumers.find((c) => c.id === repo);
+    const entryRel = def?.entryPath ?? "/pages/index.html";
+    const indexPath = path.join(repoPath, entryRel.replace(/^\//, ""));
     if (!fs.existsSync(indexPath)) {
       currentScope = `${repo}`;
       skip("repo reachable", `no pages/index.html at ${repoPath}`);
@@ -329,20 +312,23 @@ async function runMatrix({ chromium, devices, repos, deviceNames, startStaticSer
 
     const { server, port } = await startStaticServer(repoPath);
     try {
-      for (const deviceName of deviceNames) {
-        const device = devices[deviceName];
+      for (const deviceCase of deviceCases) {
+        const { name: deviceName, descriptor, insets } = deviceCase;
+        const device = devices[descriptor];
         currentScope = `${repo} · ${deviceName}`;
         if (!device) { skip("device profile known", deviceName); continue; }
 
         const context = await browser.newContext({ ...device });
         const page = await context.newPage();
+        const cdp = await context.newCDPSession(page);
         try {
-          await page.goto(`http://127.0.0.1:${port}/pages/index.html`, {
+          await applyInsets(cdp, insets);
+          await page.goto(`http://127.0.0.1:${port}${entryRel}`, {
             waitUntil: "domcontentloaded",
             timeout: 30000,
           });
-          // Let deferred scripts mount the shared chrome before measuring.
-          await page.waitForTimeout(1200);
+          await applyInsets(cdp, insets);
+          await settle(page);
 
           const viewport = page.viewportSize();
           await checkViewportMeta(page);
@@ -351,6 +337,17 @@ async function runMatrix({ chromium, devices, repos, deviceNames, startStaticSer
           await checkTapTargets(page);
           await checkKeyboardInsetPlumbing(page);
           await checkChatOrbFits(page, viewport);
+
+          // Coarse-pointer touch block — required on iPhone SE; run on all profiles.
+          try {
+            await assertCoarsePointerBlockIsLive(page, currentScope);
+            pass("coarse-pointer touch block live");
+          } catch (err) {
+            fail(
+              "coarse-pointer touch block live",
+              String(err && err.message ? err.message : err).slice(0, 160)
+            );
+          }
         } catch (err) {
           fail("page loaded", String(err && err.message ? err.message : err).slice(0, 160));
         } finally {
@@ -377,25 +374,32 @@ async function main() {
 
   const pw = loadPlaywright();
   if (!pw) {
+    const ids = loadConsumerMatrix().consumers.map((c) => c.id);
     console.error("iphone-ui: @playwright/test not resolvable from any sibling consumer.");
-    console.error("  Install it in one of: " + CONSUMERS.join(", "));
+    console.error("  Install it in one of: " + ids.join(", "));
     process.exit(2);
   }
 
-  let startStaticServer;
-  try {
-    ({ startStaticServer } = await import(path.join(SHARED, "scripts", "export-pitch-pdf.mjs")));
-  } catch (err) {
-    console.error("iphone-ui: could not load the static server helper:", err.message);
-    process.exit(2);
-  }
+  const { startStaticServer } = await loadStaticServerHelper();
+
+  validateDeviceCases(pw.devices, DEVICE_CASES);
 
   const repoArg = arg("--repo");
   const deviceArg = arg("--device");
-  const repos = repoArg ? [repoArg] : CONSUMERS;
-  const deviceNames = deviceArg ? [deviceArg] : DEVICES;
+  const defaultRepos = loadConsumerMatrix().consumers.map((c) => c.id);
+  const repos = repoArg ? [repoArg] : defaultRepos;
+  const deviceCases = deviceArg
+    ? DEVICE_CASES.filter((d) => d.name === deviceArg)
+    : DEVICE_CASES;
+  if (deviceArg && deviceCases.length === 0) {
+    console.error(
+      `iphone-ui: unknown device "${deviceArg}". ` +
+        `Known: ${DEVICE_CASES.map((d) => d.name).join(", ")}`
+    );
+    process.exit(2);
+  }
 
-  await runMatrix({ chromium: pw.chromium, devices: pw.devices, repos, deviceNames, startStaticServer });
+  await runMatrix({ chromium: pw.chromium, devices: pw.devices, repos, deviceCases, startStaticServer });
 
   const failed = results.filter((r) => r.status === "FAIL");
   const passed = results.filter((r) => r.status === "PASS");
