@@ -25,10 +25,11 @@
  *   <script src="../shared/js/chat-orb.js"></script>
  *   <script>
  *     ChatOrb.mount({
- *       title:       "LLM Benchmark Agent",
- *       initials:    "LB",
- *       greeting:    "Ask me about a sweep, or type /help to see commands.",
- *       placeholder: "Ask, navigate, or /command…"
+ *       title:          "LLM Benchmark Agent",
+ *       initials:       "LB",
+ *       storagePrefix:  "llm-benchmark",
+ *       greeting:       "Ask me about a sweep, or type /help to see commands.",
+ *       placeholder:    "Ask, navigate, or /command…"
  *     });
  *
  *     ChatOrb.register("/pitch", function () {
@@ -45,17 +46,16 @@
   "use strict";
 
   // ── Module state ─────────────────────────────────────────────────
-  // NOTE: the `shared-ui:` namespace on these localStorage keys predates
-  // the 2026-05-04 directory rename to `webtools-ui` (Phase 9.8c). They
-  // are intentionally NOT renamed — these keys carry per-user orb history
-  // and LLM settings across all 3 sibling consumers, and a rename would
-  // silently lose that state for every existing user with no migration
-  // path. New keys added after this date should use the `webtools-ui:`
-  // prefix; legacy keys keep their original namespace.
-  var STORAGE_KEY = "shared-ui:chat-orb:v1";
-  var LLM_KEY     = "shared-ui:chat-orb:llm:v1";
+  // Legacy keys (`shared-ui:chat-orb:*`) predated per-product isolation.
+  // Pass `storagePrefix: "<product-id>"` in mount() so each sibling keeps
+  // its own transcript and LLM settings. Omitting storagePrefix keeps the
+  // legacy namespace for backward compatibility only.
+  var LEGACY_STORAGE_KEY = "shared-ui:chat-orb:v1";
+  var LEGACY_LLM_KEY     = "shared-ui:chat-orb:llm:v1";
   var DEFAULTS = {
     title:       "AI Assistant",
+    // Product id for localStorage namespacing, e.g. "cluster-manager".
+    storagePrefix: "",
     subtitle:    "Online · ready to act",
     initials:    "AI",
     greeting:    "Hi! Type a question, or `/help` to see what I can do.",
@@ -114,10 +114,20 @@
     mounted:  false,
     open:     false,
     cfg:      Object.assign({}, DEFAULTS),
-    llm:      loadLLM(),
+    storageKeys: { history: LEGACY_STORAGE_KEY, llm: LEGACY_LLM_KEY },
+    llm:      Object.assign({}, LLM_DEFAULTS),
     handlers: Object.create(null),
     history:  []
   };
+
+  function resolveStorageKeys(prefix) {
+    var p = String(prefix || "").trim();
+    if (!p) {
+      return { history: LEGACY_STORAGE_KEY, llm: LEGACY_LLM_KEY };
+    }
+    var base = p.replace(/:+$/, "") + ":";
+    return { history: base + "chat-orb:v1", llm: base + "chat-orb:llm:v1" };
+  }
 
   var ui = { orb: null, panel: null, msgs: null, input: null, send: null,
              close: null, llmBtn: null, llmCard: null, demoBtn: null,
@@ -145,7 +155,7 @@
   // ── Persistence helpers ──────────────────────────────────────────
   function loadLLM() {
     try {
-      var raw = localStorage.getItem(LLM_KEY);
+      var raw = localStorage.getItem(state.storageKeys.llm);
       if (!raw) return Object.assign({}, LLM_DEFAULTS);
       var parsed = JSON.parse(raw);
       return Object.assign({}, LLM_DEFAULTS, parsed);
@@ -153,12 +163,12 @@
   }
 
   function saveLLM() {
-    try { localStorage.setItem(LLM_KEY, JSON.stringify(state.llm)); } catch (e) {}
+    try { localStorage.setItem(state.storageKeys.llm, JSON.stringify(state.llm)); } catch (e) {}
   }
 
   function loadHistory() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(state.storageKeys.history);
       return raw ? JSON.parse(raw).history || [] : [];
     } catch (e) { return []; }
   }
@@ -167,7 +177,7 @@
     try {
       // Cap stored history at 50 messages so localStorage doesn't bloat.
       var trimmed = state.history.slice(-50);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ history: trimmed }));
+      localStorage.setItem(state.storageKeys.history, JSON.stringify({ history: trimmed }));
     } catch (e) {}
   }
 
@@ -573,6 +583,7 @@
     ui.orb.setAttribute("aria-expanded", state.open ? "true" : "false");
     ui.panel.classList.toggle("open", state.open);
     if (state.open) {
+      setBadge("");
       // Render any backlog history if first open.
       if (state.history.length === 0) {
         printSystem(state.cfg.greeting);
@@ -1279,6 +1290,8 @@
   function mount(opts) {
     if (state.mounted) return Promise.resolve(api);
     state.cfg = Object.assign({}, DEFAULTS, opts || {});
+    state.storageKeys = resolveStorageKeys(state.cfg.storagePrefix);
+    state.llm = loadLLM();
 
     // DOM
     ui.orb     = buildOrb();
@@ -1361,6 +1374,7 @@
     clear:       clearLog,
     getLLM:      function () { return Object.assign({}, state.llm); },
     setLLM:      function (cfg) { state.llm = Object.assign({}, state.llm, cfg); saveLLM(); },
+    getHistory:  function () { return state.history.slice(); },
     openDemoCard:   openDemoCard,
     toggleDemoCard: toggleDemoCard
   };
