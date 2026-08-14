@@ -17,6 +17,7 @@
   var serviceOverrides = Object.create(null);
   var eventHandlers = Object.create(null);
   var activeContributions = Object.create(null);
+  var activatedEvents = Object.create(null);
 
   var DEFAULT_SERVICES = {
     chat: true,
@@ -64,6 +65,10 @@
 
   function getErrors() {
     return global.ErrorPopup || global.showError || null;
+  }
+
+  function getPreview() {
+    return global.PreviewHost || serviceOverrides.preview || null;
   }
 
   function normalizeContributions(contributes) {
@@ -117,7 +122,15 @@
     if (hasActivationEvent("onStartup")) fireActivation("onStartup");
   }
 
+  function isLazyActivationEvent(eventName) {
+    return eventName.indexOf("onTab:") === 0;
+  }
+
   function fireActivation(eventName) {
+    if (isLazyActivationEvent(eventName)) {
+      if (activatedEvents[eventName]) return;
+      activatedEvents[eventName] = true;
+    }
     var list = eventHandlers[eventName];
     if (!list) return;
     list.slice().forEach(function (fn) {
@@ -169,15 +182,22 @@
     voice: getVoice(),
     mobile: getMobile(),
     errors: getErrors(),
+    preview: getPreview(),
     contributions: contributionsApi,
 
     /** Replace a platform service facade (swap pattern for demo/voice/etc.). */
     registerService: function (name, impl) {
+      if (!name) {
+        warn("registerService() requires a service name");
+        return;
+      }
       serviceOverrides[name] = impl;
+      platform[name] = impl;
       if (name === "demo") platform.demo = impl;
       if (name === "voice") platform.voice = impl;
       if (name === "chat") platform.chat = impl;
       if (name === "commands") platform.commands = impl;
+      if (name === "preview") platform.preview = impl;
     },
 
     getService: function (name) {
@@ -195,6 +215,7 @@
       platform.voice = getVoice();
       platform.mobile = getMobile();
       platform.errors = getErrors();
+      platform.preview = getPreview();
     },
 
     /**
