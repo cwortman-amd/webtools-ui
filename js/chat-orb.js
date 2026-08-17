@@ -52,6 +52,7 @@
   // legacy namespace for backward compatibility only.
   var LEGACY_STORAGE_KEY = "shared-ui:chat-orb:v1";
   var LEGACY_LLM_KEY     = "shared-ui:chat-orb:llm:v1";
+  var PROMPT_HISTORY_MAX = 50;
   var DEFAULTS = {
     title:       "AI Assistant",
     // Product id for localStorage namespacing, e.g. "cluster-manager".
@@ -114,19 +115,30 @@
     mounted:  false,
     open:     false,
     cfg:      Object.assign({}, DEFAULTS),
-    storageKeys: { history: LEGACY_STORAGE_KEY, llm: LEGACY_LLM_KEY },
+    storageKeys: { history: LEGACY_STORAGE_KEY, llm: LEGACY_LLM_KEY, prompts: LEGACY_STORAGE_KEY + ":prompts" },
     llm:      Object.assign({}, LLM_DEFAULTS),
     handlers: Object.create(null),
-    history:  []
+    history:  [],
+    prompts:  [],
+    promptIndex: -1,
+    promptDraft: ""
   };
 
   function resolveStorageKeys(prefix) {
     var p = String(prefix || "").trim();
     if (!p) {
-      return { history: LEGACY_STORAGE_KEY, llm: LEGACY_LLM_KEY };
+      return {
+        history: LEGACY_STORAGE_KEY,
+        llm: LEGACY_LLM_KEY,
+        prompts: LEGACY_STORAGE_KEY + ":prompts"
+      };
     }
     var base = p.replace(/:+$/, "") + ":";
-    return { history: base + "chat-orb:v1", llm: base + "chat-orb:llm:v1" };
+    return {
+      history: base + "chat-orb:v1",
+      llm: base + "chat-orb:llm:v1",
+      prompts: base + "chat-orb:prompts:v1"
+    };
   }
 
   var ui = { orb: null, panel: null, msgs: null, input: null, send: null,
@@ -179,6 +191,95 @@
       var trimmed = state.history.slice(-50);
       localStorage.setItem(state.storageKeys.history, JSON.stringify({ history: trimmed }));
     } catch (e) {}
+  }
+
+  function loadPromptHistory() {
+    try {
+      var raw = localStorage.getItem(state.storageKeys.prompts);
+      var arr = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(arr)) return [];
+      return arr.filter(function (s) { return typeof s === "string" && s; })
+        .slice(-PROMPT_HISTORY_MAX);
+    } catch (e) { return []; }
+  }
+
+  function savePromptHistory() {
+    try {
+      localStorage.setItem(
+        state.storageKeys.prompts,
+        JSON.stringify(state.prompts.slice(-PROMPT_HISTORY_MAX))
+      );
+    } catch (e) {}
+  }
+
+  function pushPromptHistory(text) {
+    var t = String(text || "").trim();
+    if (!t) return;
+    if (state.prompts[state.prompts.length - 1] === t) {
+      state.promptIndex = -1;
+      state.promptDraft = "";
+      return;
+    }
+    state.prompts.push(t);
+    if (state.prompts.length > PROMPT_HISTORY_MAX) {
+      state.prompts = state.prompts.slice(-PROMPT_HISTORY_MAX);
+    }
+    savePromptHistory();
+    state.promptIndex = -1;
+    state.promptDraft = "";
+  }
+
+  function caretLineIsFirst(el) {
+    var start = el.selectionStart;
+    if (start == null) return true;
+    return el.value.slice(0, start).indexOf("\n") < 0;
+  }
+
+  function caretLineIsLast(el) {
+    var start = el.selectionStart;
+    if (start == null) return true;
+    return el.value.slice(start).indexOf("\n") < 0;
+  }
+
+  function applyPromptHistory(index) {
+    var el = ui.input;
+    if (!el) return;
+    state.promptIndex = index;
+    el.value = index < 0 ? state.promptDraft : (state.prompts[index] || "");
+    var n = el.value.length;
+    try { el.setSelectionRange(n, n); } catch (e) {}
+    if (typeof Event === "function") {
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  /* Readline-style recall. Slash-command palette keeps ArrowUp/Down.
+     In a multiline draft, arrows move the caret unless it is already on
+     the first (Up) or last (Down) line. */
+  function promptHistoryKeydown(e) {
+    if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return false;
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return false;
+    if (paletteOpen()) return false;
+    var el = ui.input;
+    if (!el) return false;
+    if (e.key === "ArrowUp") {
+      if (!caretLineIsFirst(el)) return false;
+      if (!state.prompts.length) return false;
+      if (state.promptIndex < 0) {
+        state.promptDraft = el.value;
+        applyPromptHistory(state.prompts.length - 1);
+      } else if (state.promptIndex > 0) {
+        applyPromptHistory(state.promptIndex - 1);
+      }
+      e.preventDefault();
+      return true;
+    }
+    if (state.promptIndex < 0) return false;
+    if (!caretLineIsLast(el)) return false;
+    if (state.promptIndex >= state.prompts.length - 1) applyPromptHistory(-1);
+    else applyPromptHistory(state.promptIndex + 1);
+    e.preventDefault();
+    return true;
   }
 
   // ── DOM construction ─────────────────────────────────────────────
@@ -277,7 +378,7 @@
       '  <div class="ai-input-wrap">',
       '    <ul id="chatPalette" class="ai-palette" role="listbox" aria-label="Slash commands" hidden></ul>',
       '    <textarea id="chatInput" class="ai-input" rows="1" placeholder="' + escapeAttr(state.cfg.placeholder) + '" maxlength="600"' +
-      ' role="combobox" aria-expanded="false" aria-controls="chatPalette" aria-autocomplete="list"></textarea>',
+      ' role="combobox" aria-expanded="false" aria-controls="chatPalette" aria-autocomplete="list" aria-keyshortcuts="ArrowUp ArrowDown"></textarea>',
       "  </div>",
       (state.cfg.voiceComposer
         ? '  <button type="button" id="chatVoiceBtn" class="ai-voice" aria-controls="chatInput" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>'
@@ -534,6 +635,7 @@
     ui.send.addEventListener("click", submitInput);
     ui.input.addEventListener("keydown", function (e) {
       if (paletteKeydown(e)) return;
+      if (promptHistoryKeydown(e)) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         submitInput();
@@ -1030,6 +1132,7 @@
   function submitInput() {
     var text = (ui.input.value || "").trim();
     if (!text) return;
+    pushPromptHistory(text);
     ui.input.value = "";
     closePalette();
     runCommand(text, { echo: true });
@@ -1349,6 +1452,9 @@
     state.history.slice(-10).forEach(function (m) {
       renderMessage(m.role, m.text, { html: !!m.html });
     });
+    state.prompts = loadPromptHistory();
+    state.promptIndex = -1;
+    state.promptDraft = "";
 
     state.mounted = true;
     return Promise.resolve(api);

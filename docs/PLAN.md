@@ -1233,7 +1233,7 @@ across all 4 repos.
   hero / page so the notch (landscape) and home indicator (portrait)
   zones stay clear without shrinking the desktop layout. Audited every
   `index.html` (root + `pages/`) across cluster-manager, dc-planner,
-  llm-benchmark, vixci-utils, and scaleout-utils to ensure
+  llm-benchmark, and scaleout-utils to ensure
   `viewport-fit=cover` is on the meta viewport.
   **(b) In-orb demo audience picker** — `js/chat-orb.js` gained a
   slide-down `.ai-demo-card` (mirroring `.ai-llm-card` chrome and the
@@ -1298,3 +1298,11 @@ across all 4 repos.
   clicking each Demo entry point: only the in-orb
   `Demo Mode audience picker` region opens (no `.demo-picker__overlay`
   / `dialog.demo-picker` is ever inserted), console clean.
+
+- **ChatOrb composer prompt recall (2026-08-17)** — `js/chat-orb.js`
+  walks prior sent prompts with ArrowUp (caret on the first line) and
+  restores the in-progress draft with ArrowDown. The slash-command
+  palette still owns the arrows while `/` is open. Multiline drafts
+  keep caret motion until the first/last line. History persists under
+  `storagePrefix:chat-orb:prompts:v1`. Consumer coverage: Knowledge
+  Exchange `ORB-012` (sidebar Agent `#agentToggleSide` → `#chatInput`).

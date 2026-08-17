@@ -75,6 +75,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/CSS_HARMONIZATION.md` | Phase 9.8c/9.8d CSS audit + per-bucket dedup tracking |
 | `docs/TESTING_STRATEGY.md` | **Canonical** testing framework for every consumer: runtime/seam model, Tier 0–6 vocabulary, cross-runtime boundary testing, anti-false-positive protocol, UI coverage + combinatorial strategy. Read via `shared/`, never copied; each consumer keeps a short local instance |
 | `docs/FRONTEND_PERFORMANCE.md` | **Canonical** frontend performance + responsiveness framework: metric model (Core Web Vitals at p75, task timings at p50/p95), asset-weight budgets, the wait ladder with delay-threshold/minimum-duration constants, the long-job model, FE/NFR requirement matrices, and the instrumentation contract. Verified through Tier 6 of the testing framework. Read via `shared/`, never copied |
+| `docs/KNOWLEDGE_CHAT.md` | **Canonical** Universal Knowledge Chat PRD: vault registration, Markdown/PDF/Obsidian/OKF ingestion, trust-aware retrieval, citations, optional web research, human-approved writes. Read via `shared/`, never copied; each consumer's `docs/CHAT.md` covers orb UX and backend routing |
 | `docs/PLUGIN_CONTRACT.md` | Community plugin contract: manifest schema, lifecycle, platform API, registered consumers |
 | `plugins.registry.json` | Catalog of known community plugins (sibling repos) |
 | `schemas/shell-module.schema.json` | JSON Schema for `data/shell-modules.json` dashboard tab registry |

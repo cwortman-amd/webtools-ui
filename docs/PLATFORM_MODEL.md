@@ -99,6 +99,7 @@ products fill slots; CI catches drift.
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ T4  PLATFORM SERVICES (cross-cutting, not tabs)                          │
 │     ChatOrb · SlashRouter · DemoEngine · voiceBridge · MobileDrawer      │
+│     Optional corpus backend contract: KNOWLEDGE_CHAT.md (consumer impl)  │
 │     Registered once per product in mount adapter                         │
 └──────────────────────────────────────────────────────────────────────────┘
 ```

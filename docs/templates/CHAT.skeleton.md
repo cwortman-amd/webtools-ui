@@ -160,7 +160,9 @@ The settings card is rendered by `shared/js/chat-orb.js`.
 ## Accessibility · [CANONICAL]
 
 Required: keyboard reachable, ARIA-labeled, screen-reader
-friendly, respects `prefers-reduced-motion`.
+friendly, respects `prefers-reduced-motion`. Composer Up/Down
+recalls prior sent prompts (readline-style; slash palette keeps
+the arrows while `/` is open).
 
 ## Performance targets · [CANONICAL]
 
@@ -188,4 +190,5 @@ Required links:
 - `docs/STYLE.md` — orb visual tokens
 - `shared/js/chat-orb.js` — canonical orb implementation
 - `shared/js/slash-catalog.js` — canonical command surface
+- `shared/docs/KNOWLEDGE_CHAT.md` — corpus-backed Q&A backend (vaults, retrieval, citations, HITL writes)
 - `shared/docs/PLAN.md` — harmonization status log
