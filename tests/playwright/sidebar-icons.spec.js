@@ -1,10 +1,11 @@
 /**
- * webtools-ui/tests/playwright/cross-consumer-shell.spec.js
+ * webtools-ui/tests/playwright/sidebar-icons.spec.js
  *
- * Generic @playwright/test spec (CommonJS for consumer node_modules resolution).
+ * Focused Playwright spec: every visible primary sidebar tab icon is painted
+ * and switches to an active panel / portal view.
  *
  *   WEBTOOLS_UI_CONSUMER_ROOT=$PWD npx playwright test \
- *     shared/tests/playwright/cross-consumer-shell.spec.js \
+ *     shared/tests/playwright/sidebar-icons.spec.js \
  *     --config shared/tests/playwright.config.mjs
  */
 const path = require("path");
@@ -15,7 +16,6 @@ const consumerRoot = process.env.WEBTOOLS_UI_CONSUMER_ROOT
 const consumerRequire = createRequire(path.join(consumerRoot, "package.json"));
 const { test, expect } = consumerRequire("@playwright/test");
 
-// ESM helpers — load via dynamic import (Node 18+).
 let helpersPromise;
 
 function loadHelpers() {
@@ -24,16 +24,11 @@ function loadHelpers() {
       import("../lib/consumer-matrix.mjs"),
       import("../lib/playwright-fixtures.mjs"),
       import("../lib/shell-tab-contract.mjs"),
-      import("../lib/shell-visual-contract.mjs"),
-    ]).then(([matrix, fixtures, tab, visual]) => ({
+    ]).then(([matrix, fixtures, tab]) => ({
       loadConsumerMatrix: matrix.loadConsumerMatrix,
       gotoShellEntry: fixtures.gotoShellEntry,
       gotoWithMode: fixtures.gotoWithMode,
-      assertNoBlankMainArea: tab.assertNoBlankMainArea,
       assertAllSidebarTabsOperational: tab.assertAllSidebarTabsOperational,
-      clickSidebarTab: tab.clickSidebarTab,
-      assertButtonVisualContract: visual.assertButtonVisualContract,
-      DEFAULT_SHELL_BUTTON_TIERS: visual.DEFAULT_SHELL_BUTTON_TIERS,
     }));
   }
   return helpersPromise;
@@ -66,34 +61,12 @@ async function gotoConsumerShell(page, h, def) {
   });
 }
 
-test.describe("shared shell contract", () => {
-  test("initial load paints a visible tab panel", async ({ page }) => {
-    const h = await loadHelpers();
-    const def = consumerDef(h.loadConsumerMatrix);
-    test.skip(def.panelChecks === false, "panel checks disabled in consumer-matrix");
-    await gotoConsumerShell(page, h, def);
-    await h.assertNoBlankMainArea(page, "initial load", expect, {
-      collectOpts: {
-        panelSelector: def.panelSelector ?? ".tab-panel",
-        portalViewAttr: def.portalViewAttr ?? "data-portal-view",
-        profileKey: def.profileKey ?? null,
-      },
-      requirePortalView: def.requirePortalView === true,
-    });
-  });
-
-  test("accent controls meet button visual contract", async ({ page }) => {
-    const h = await loadHelpers();
-    const def = consumerDef(h.loadConsumerMatrix);
-    test.skip(def.buttonVisualContract === false, "disabled in consumer-matrix");
-    await gotoConsumerShell(page, h, def);
-    await h.assertButtonVisualContract(page, h.DEFAULT_SHELL_BUTTON_TIERS, expect);
-  });
-
+test.describe("primary sidebar icons", () => {
   test("every primary sidebar tab icon is operational", async ({ page }) => {
     const h = await loadHelpers();
     const def = consumerDef(h.loadConsumerMatrix);
     test.skip(def.sidebarTabChecks === false, "disabled in consumer-matrix");
+
     const navSelector = def.shellNavSelector ?? ".sidebar-nav .nav-btn";
     await gotoConsumerShell(page, h, def);
     await h.assertAllSidebarTabsOperational(page, expect, {
@@ -104,24 +77,6 @@ test.describe("shared shell contract", () => {
         def.sidebarTabActivation
         ?? (def.requirePortalView ? "portalView" : "panel"),
       settleMs: def.tabSettleMs ?? 400,
-    });
-  });
-
-  test("sidebar tab switch paints a panel", async ({ page }) => {
-    const h = await loadHelpers();
-    const def = consumerDef(h.loadConsumerMatrix);
-    test.skip(def.panelChecks === false, "panel checks disabled in consumer-matrix");
-    const navSelector = def.shellNavSelector ?? ".sidebar-nav .nav-btn";
-    await gotoConsumerShell(page, h, def);
-    const tabId = await page.locator(`${navSelector}[data-tab]`).nth(1).getAttribute("data-tab");
-    test.skip(!tabId, "fewer than 2 tabs");
-    await h.clickSidebarTab(page, tabId, expect, { navSelector });
-    await h.assertNoBlankMainArea(page, `tab → ${tabId}`, expect, {
-      collectOpts: {
-        panelSelector: def.panelSelector ?? ".tab-panel",
-        portalViewAttr: def.portalViewAttr ?? "data-portal-view",
-      },
-      requirePortalView: def.requirePortalView === true,
     });
   });
 });

@@ -8,6 +8,7 @@ import {
   tabDeepLinkUrl,
   DEFAULT_PANEL_SELECTOR,
   MIN_PANEL_HEIGHT_PX,
+  MIN_ICON_SIZE_PX,
 } from "./shell-tab-contract.mjs";
 
 test("tabDeepLinkUrl omits ?tab= for canonical home tab", () => {
@@ -32,4 +33,5 @@ test("tabDeepLinkUrl encodes non-home tabs", () => {
 test("exports stable defaults", () => {
   assert.equal(DEFAULT_PANEL_SELECTOR, ".tab-panel");
   assert.equal(MIN_PANEL_HEIGHT_PX, 20);
+  assert.equal(MIN_ICON_SIZE_PX, 8);
 });

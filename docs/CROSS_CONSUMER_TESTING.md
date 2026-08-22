@@ -1,6 +1,6 @@
 # Cross-Consumer Testing Blueprint
 
-**Status:** 2026-08-10. Canonical layout for shared test infrastructure in `webtools-ui`,
+**Status:** 2026-08-22 (W7). Canonical layout for shared test infrastructure in `webtools-ui`,
 consumed by sibling repos through `shared/` symlinks.
 
 Companion docs:
@@ -61,7 +61,8 @@ webtools-ui/
       playwright-fixtures.mjs         # ✅ gotoWithMode, demo-banner suppression
       playwright-fixtures.test.mjs    # ✅ node --test unit coverage
       consumer-matrix.mjs             # ✅ loads tests/contracts/consumer-matrix.json
-      consumer-matrix.test.mjs        # ✅ node --test unit coverage
+      agent-gateway-act.test.mjs      # ✅ AG-3 act() + WebtoolsMcp.callTool
+      agent-context.test.mjs          # ✅ KE agent_ctx banner decode
     iphone-ui.mjs                     # ✅ cross-consumer live mobile matrix (uses iphone-helpers + matrix)
     mobile-api-contract.mjs           # exists — MobileDrawer + ChatOrb contract
     cross-consumer-shell.mjs          # ✅ tab blank-panel regression across consumers
@@ -87,6 +88,20 @@ webtools-ui/
 | **`mobile-api-contract.mjs`** (exists) | vm contract on `MobileDrawer.install`, ChatOrb source/css patterns | All 5 consumers via `make ci` | Wire into webtools-ui `make ci` + demo-portal `test.sh` (LB/CM/DC already indirect) |
 | **`playwright-fixtures.mjs`** ✅ | `gotoWithMode`, `setupApiMocks`, `suppressDemoBanner` | CM, KE, DC | Used by `cross-consumer-shell.mjs`; consumers adopt incrementally |
 | **`consumer-matrix.mjs`** ✅ | `loadConsumerMatrix`, `resolveReachableConsumers` | `iphone-ui.mjs`, `cross-consumer-shell.mjs` | Single JSON contract at `tests/contracts/consumer-matrix.json` |
+
+### `consumer-matrix.json` optional fields (W6–W7)
+
+| Field | Purpose |
+| --- | --- |
+| `bootstrapUserMode` | Pre-set user mode before shell boot (`expert` exposes all mode-gated sidebar tabs) |
+| `bootMs` | Extra wait after navigation (knowledge-exchange portal bootstrap) |
+| `panelSelector` | Override default `.tab-panel` (KE uses `#panel-browse`) |
+| `panelChecks: false` | Skip blank-panel assertions for catalog portals whose panels use a different visibility model |
+| `sidebarTabActivation` | `"panel"` (default) or `"portalView"` — how tab clicks are verified after icon check |
+| `sidebarTabSkip` | Tab ids to omit from the all-tabs sweep (e.g. developer-only tabs) |
+| `sidebarTabChecks: false` | Disable the all-sidebar-tabs operational sweep |
+
+CI shared mount: `scripts/require_shared_mount.sh` — fail if `shared/css/base.css` missing.
 | **`combinatorial/matrix-runner.mjs`** (planned) | `loadMatrix(path)`, `shardCases(cases, n)` | KE first, then CM tab×mode loops | KE `tests/combinatorial/generate_matrix.py` output → shared runner |
 | **`contracts/perf-budgets.schema.json`** (planned) | JSON Schema for `{ lcp, cls, tbt, weight }` per route | KE, CM, DC | KE `perf.spec.js` reads local budgets file validated against schema |
 | **`run_cross_consumer_smoke.sh`** ✅ | L0 node tests + mobile-api + shell + iphone-ui | `make cross-consumer-smoke` | `--skip-playwright`; `WEBTOOLS_UI_CONSUMERS` env override |

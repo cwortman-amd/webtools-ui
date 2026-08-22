@@ -57,8 +57,11 @@ export async function gotoShellEntry(page, entryPath, opts = {}) {
  */
 export async function gotoWithMode(page, modeKey, mode, opts = {}) {
   const entryPath = opts.entryPath ?? "/pages/index.html";
+  const target = opts.baseURL
+    ? new URL(entryPath, opts.baseURL).href
+    : entryPath;
   await suppressDemoBanner(page, opts.demoBannerKeys ?? []);
-  await page.goto(entryPath, { waitUntil: "domcontentloaded" });
+  await page.goto(target, { waitUntil: "domcontentloaded" });
   await page.evaluate(
     ({ key, val }) => {
       try {
@@ -71,7 +74,7 @@ export async function gotoWithMode(page, modeKey, mode, opts = {}) {
   );
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForSelector(opts.navSelector ?? ".sidebar-nav .nav-btn", { timeout: 15_000 });
-  await page.waitForTimeout(SHELL_BOOT_MS);
+  await page.waitForTimeout(opts.bootMs ?? SHELL_BOOT_MS);
 }
 
 /**

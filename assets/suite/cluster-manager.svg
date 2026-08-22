@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Cluster Manager preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#141820"/>
+      <stop offset="100%" stop-color="#060910"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <rect x="0" y="0" width="72" height="540" fill="#0d1118"/>
+  <rect x="71" y="0" width="1" height="540" fill="rgba(255,255,255,0.08)"/>
+  <rect x="16" y="28" width="40" height="40" rx="10" fill="rgba(193,169,104,0.22)" stroke="rgba(193,169,104,0.45)"/>
+  <rect x="16" y="84" width="40" height="40" rx="10" fill="rgba(255,255,255,0.05)"/>
+  <rect x="16" y="140" width="40" height="40" rx="10" fill="rgba(255,255,255,0.05)"/>
+  <rect x="16" y="196" width="40" height="40" rx="10" fill="rgba(255,255,255,0.05)"/>
+  <rect x="104" y="36" width="220" height="14" rx="7" fill="rgba(255,255,255,0.14)"/>
+  <rect x="104" y="88" width="250" height="110" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="370" y="88" width="250" height="110" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="636" y="88" width="220" height="110" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="104" y="220" width="752" height="250" rx="14" fill="rgba(193,169,104,0.12)" stroke="rgba(193,169,104,0.28)"/>
+  <path d="M140 360h520" stroke="rgba(193,169,104,0.55)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="140" cy="360" r="8" fill="#c1a968"/>
+  <circle cx="380" cy="320" r="8" fill="rgba(193,169,104,0.7)"/>
+  <circle cx="520" cy="390" r="8" fill="rgba(193,169,104,0.7)"/>
+  <circle cx="660" cy="300" r="8" fill="rgba(193,169,104,0.7)"/>
+  <text x="888" y="500" text-anchor="end" fill="rgba(193,169,104,0.35)" font-family="Inter,Segoe UI,sans-serif" font-size="72" font-weight="700">CM</text>
+</svg>

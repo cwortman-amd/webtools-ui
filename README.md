@@ -79,6 +79,12 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/KNOWLEDGE_CHAT.md` | **Canonical** Universal Knowledge Chat PRD: vault registration, Markdown/PDF/Obsidian/OKF ingestion, trust-aware retrieval, citations, optional web research, human-approved writes. Read via `shared/`, never copied; each consumer's `docs/CHAT.md` covers orb UX and backend routing |
 | `docs/PLUGIN_CONTRACT.md` | Community plugin contract: manifest schema, lifecycle, platform API, registered consumers |
 | `plugins.registry.json` | Catalog of known community plugins (sibling repos) |
+| `pages/index.html` | **Tools suite landing** — screenshot banner carousel + translucent tool cards (Open / Overview pills) |
+| `css/suite.css` | Suite layout: fixed 16:9 stage, banner carousel, card grid |
+| `js/suite.js` | Banner + card grid controller; loads `plugins.registry.json` |
+| `assets/suite/screenshots/*-{tab}.png` | Three 16:9 tab captures per tool (`node scripts/capture-suite-screenshots.mjs`) |
+| `assets/suite/*.svg` | Fallback preview art when a PNG is missing |
+| `scripts/capture-suite-screenshots.mjs` | Playwright capture of each consumer dashboard at 1440×810 |
 | `schemas/shell-module.schema.json` | JSON Schema for `data/shell-modules.json` dashboard tab registry |
 | `data/shell-module.example.json` | Example shell module registry (llm-benchmark tabs) |
 | `docs/templates/*.skeleton.md` | Shared H1–H3 outlines for `DEMO`, `AGENT`, `CHAT`, `VOICE`, `PITCH`, `STYLE` (Phase 7) + `TESTING_STRATEGY` and `FRONTEND_PERFORMANCE` (the local-instance outlines for the two frameworks above) |
@@ -95,6 +101,26 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `scripts/vendor-manifest.json` | SHA256 + size manifest used to detect drift between consumer `shared/` mounts and canonical |
 | `scripts/export-pitch-pdf.mjs` | **Canonical** Playwright pitch-deck PDF exporter (1440×810, US Letter landscape). Consumers run `node shared/scripts/export-pitch-pdf.mjs` from their repo root (`--repo`/`--deck`/`--out` optional); Playwright is resolved from the consumer's `node_modules`. Replaces the three former per-repo copies |
 | `scripts/voice_service.py` | Generic on-device (CPU) **TTS (Piper) + STT (whisper.cpp)** engine + framework-agnostic `http_dispatch()` implementing the same-origin `/api/voice/*` contract. Zero-egress / air-gap friendly; degrades to Web Speech when unconfigured. Paired with `js/voice-local.js`. Consumer backends import it and forward requests — no per-project engine code |
+
+---
+
+## Tools suite landing page
+
+A platform-owned showcase at `pages/index.html` — one fixed **16:9** viewport with a **three-up tab screenshot banner** (3 × 16:9 captures per tool) and **9:16 portrait cards** underneath (title top, description middle, Tool / Overview pills bottom).
+
+Refresh screenshots after UI changes:
+
+```bash
+node scripts/capture-suite-screenshots.mjs
+```
+
+```bash
+cd ~/workspace/webtools-ui
+python3 -m http.server 8090
+# → http://127.0.0.1:8090/pages/index.html
+```
+
+Sibling repos must live alongside webtools-ui (`../../cluster-manager/`, etc.) so registry `localUrl` paths resolve. Keyboard: ←/→, Home, End. Deep link a slide with `#cluster-manager` (plugin id hash).
 
 ---
 

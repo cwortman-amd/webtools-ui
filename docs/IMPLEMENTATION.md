@@ -34,6 +34,30 @@ acceptance gates so multiple agents or teams can land work concurrently without 
 
 ---
 
+## Harmonization status (2026-08-22)
+
+**Waves W0–W7 are complete.** All six application plugins use the shared platform mount,
+MCP manifest contract, federated Agent Gateway (learn + act), and cross-consumer CI gates.
+
+| Layer | State |
+| --- | --- |
+| ExtensionHost + bootstrap | ✓ Platform canonical; consumers on `PluginBootstrap.bootstrapFromManifest()` |
+| MCP L1/L2/L3 | ✓ Declared in manifests; `check_mcp_registration.py --strict` |
+| Agent Gateway | ✓ `route()` learn/hybrid/act; `WebtoolsMcp.callTool()` + extension handlers |
+| Handoff packets | ✓ `agent-handoff.js` + `ke-handoff.js` → KE `portal/agent-context.js` |
+| CI pyramid | ✓ `make ci` + L1b extension sidebars + registry `--strict` + cross-consumer shell |
+| Extension pilots | ✓ LB `im-report`, CM `cm-docs`, DC `dc-expert` (MCP metadata + pilot handlers) |
+
+**Operational close-out** (manual, not gated in CI):
+
+1. Live KE smoke — run Knowledge Exchange; set `KE_ASK_URL`; verify learn intent in llm-benchmark orb.
+2. Handoff round-trip — LB agent → handoff card → KE banner with decoded `agent_ctx`.
+3. Full pyramid — `make enhanced-validation` (no `--skip-slow`).
+
+**Optional backlog:** P15 convergence items only (see §P15).
+
+---
+
 ## How to read this plan
 
 | Symbol | Meaning |
@@ -56,10 +80,14 @@ via the **file ownership** table in §File ownership.
 webtools-ui (T1)
 ├── extension-host.js          ← canonical ExtensionHost (from demo-portal + slide-presenter)
 ├── plugin-bootstrap.js        ← manifest-driven mount (replaces split mount adapters)
-├── agent-gateway.js           ← federated routing: KE RAG + product MCP tools
+├── plugin-services.js         ← MCP + Agent Gateway manifest bootstrap
+├── agent-gateway.js           ← federated routing: KE RAG + product MCP tools (learn/act/hybrid)
+├── agent-handoff.js           ← AG-5 structured context packets (?agent_ctx=)
+├── ke-handoff.js              ← reverse handoff cards on dashboard agents
 ├── knowledge-registry.json    ← corpus IDs → endpoints (seed + consumer extensions)
 ├── webtools_mcp/host.py       ← stdio + HTTP proxy (existing; extended)
-└── check_{extensions,mcp,agent}.py
+├── check_{extensions,mcp,agent}.py
+└── require_shared_mount.sh    ← CI fail-fast when consumer shared/ unresolved
 
 Each consumer (T2)
 ├── plugin.manifest.json       ← contributes + registrations (extensions, mcp, knowledge, agent)
@@ -244,20 +272,20 @@ Optional proof packs; do not block other workstreams.
 
 | ID | Task | Owner | Depends |
 | --- | --- | --- | --- |
-| **4-T1** | Add `demo-portal` + `slide-presenter` to `tests/contracts/consumer-matrix.json` | webtools-ui | — |
-| **4-T2** | Extend `check_shell_modules.py` for extension-sourced sidebars | webtools-ui | 0-T1 |
-| **4-T3** | `sync_plugin_registry_snapshot.py` in CI `--strict` | webtools-ui | — |
-| **4-T4** | Require sibling `webtools-ui` checkout in all 6 workflows (no silent skip) | each consumer | — |
-| **4-T5** | Nightly `cross-consumer-shell.mjs` covers 6 entries | webtools-ui | 4-T1 |
-| **4-T6** | iPhone matrix row per new consumer | webtools-ui | 4-T1 |
+| **4-T1** | Add `demo-portal` + `slide-presenter` to `tests/contracts/consumer-matrix.json` | webtools-ui | ✓ Done |
+| **4-T2** | Extend `check_shell_modules.py` for extension-sourced sidebars | webtools-ui | ✓ Done (W7) |
+| **4-T3** | `sync_plugin_registry_snapshot.py` in CI `--strict` | webtools-ui | ✓ Done (W6) |
+| **4-T4** | Require sibling `webtools-ui` checkout in all 6 workflows (no silent skip) | each consumer | ✓ Done (W7 — public clone + `require_shared_mount.sh`) |
+| **4-T5** | Nightly `cross-consumer-shell.mjs` covers 6 entries | webtools-ui | ✓ Done |
+| **4-T6** | iPhone matrix row per new consumer | webtools-ui | ✓ Done |
 
 **Consumer-local parallel work:**
 
 | ID | Repo | Task |
 | --- | --- | --- |
-| **4-C-DP** | demo-portal | Fix registry/doc drift (`catalog-topnav` vs `sidebar-iframe`) |
-| **4-C-SP** | slide-presenter | `make shared-check check-plugins` mandatory in CI |
-| **4-C-KE** | knowledge-exchange | Already in matrix — verify L1b shell-modules + extensions |
+| **4-C-DP** | demo-portal | Fix registry/doc drift (`catalog-topnav` vs `sidebar-iframe`) | ✓ Done (W7 — registry `sidebar-iframe`) |
+| **4-C-SP** | slide-presenter | `make shared-check check-plugins` mandatory in CI | ✓ Done |
+| **4-C-KE** | knowledge-exchange | Already in matrix — verify L1b shell-modules + extensions | ✓ Done; `panelChecks: false` in matrix |
 
 **Gate:** `make enhanced-validation` reports 6/6 plugins at L1+; nightly smoke green.
 
@@ -370,9 +398,10 @@ Rollout order (recommended): **llm-benchmark** → **cluster-manager** → **dem
 
 | ID | Task | Files |
 | --- | --- | --- |
-| **AG-5-T1** | `AgentHandoff.encode/decode` | `js/agent-handoff.js` |
-| **AG-5-T2** | Wire `KeHandoff.install` to attach packet | `js/ke-handoff.js` |
-| **AG-5-T3** | Per-consumer `data/ke-handoffs.json` | CM, DC, LB (parallel) |
+| **AG-5-T1** | `AgentHandoff.encode/decode` | `js/agent-handoff.js` | ✓ Done (W6) |
+| **AG-5-T2** | Wire `KeHandoff.install` to attach packet | `js/ke-handoff.js` | ✓ Done (W6) |
+| **AG-5-T3** | Per-consumer `data/ke-handoffs.json` | CM, DC, LB | ✓ Done |
+| **AG-5-T4** | KE receive banner | `knowledge-exchange/portal/agent-context.js` | ✓ Done (W7) |
 
 **Gate:** Manual test: ask in LB → handoff card → KE opens with cited context summary.
 
@@ -419,14 +448,14 @@ Track per-repo status in PR descriptions; update this table at each wave exit.
 
 | Consumer | P11 ExtHost | P12 MCP manifest | P13 Bootstrap | P14 CI matrix | AG Gateway |
 | --- | --- | --- | --- | --- | --- |
-| llm-benchmark | 1-C-LB optional ✓ | 2-C-LB | 3-C-* | ✓ existing | AG-3-LB ✓ |
-| cluster-manager | 1-C-CM optional ✓ | 2-C-CM | 3-C-CM | ✓ existing | AG-3-CM ✓ |
-| dc-planner | 1-C-DC optional ✓ | 2-C-DC | 3-C-DC | ✓ existing | AG-3-DC ✓ |
-| demo-portal | 1-C-DP | 2-C-DP | 3-C-* | 4-C-DP ✓ | AG-3-DP |
-| knowledge-exchange | 1-C-KE | 2-C-KE | 3-C-* | ✓ existing | native (skip AG-4) |
-| slide-presenter | 1-C-SP ✓ | 2-C-SP ✓ ref | 3-C-* | 4-C-SP ✓ | AG-3-SP |
+| llm-benchmark | 1-C-LB ✓ | 2-C-LB ✓ | 3-C-* ✓ | ✓ | AG-3 ✓ |
+| cluster-manager | 1-C-CM ✓ | 2-C-CM ✓ | 3-C-CM ✓ | ✓ | AG-3 ✓ |
+| dc-planner | 1-C-DC ✓ | 2-C-DC ✓ | 3-C-DC ✓ | ✓ | AG-3 ✓ |
+| demo-portal | 1-C-DP ✓ | 2-C-DP | 3-C-* ✓ | 4-C-DP ✓ | AG-3 |
+| knowledge-exchange | 1-C-KE ✓ | 2-C-KE ✓ | 3-C-* ✓ | ✓ | native |
+| slide-presenter | 1-C-SP ✓ | 2-C-SP ✓ | 3-C-* ✓ | 4-C-SP ✓ | AG-3 ✓ |
 
-Legend: blank = not started; ✓ = done; optional = pilot pack only.
+Legend: ✓ = done; blank = optional backlog; pilot handlers = MCP stubs until product APIs wired.
 
 ---
 
@@ -441,7 +470,7 @@ Legend: blank = not started; ✓ = done; optional = pilot pack only.
 | **L1d** | `check_agent_gateway.py` | Agent manifest ↔ script |
 | **L2** | Consumer self-check / `test_offline.sh` | Product regressions |
 | **L2c** | `cross-consumer-shell.mjs` + `iphone-ui.mjs` | Visual contract 6-wide |
-| **L3** | Agent gateway e2e (new) | Hybrid retrieve+act smoke |
+| **L3** | Agent gateway unit tests | `tests/lib/agent-gateway*.test.mjs`, `agent-handoff.test.mjs`, `agent-context.test.mjs` |
 
 Add targets to `Makefile`:
 
@@ -532,4 +561,7 @@ enhanced-validation: ci check-extensions check-mcp check-agent
 
 | Date | Change |
 | --- | --- |
+| 2026-08-22 | **W7 complete:** AG-3 `act()`, KE `agent-context.js`, L1b extension sidebars, workflow shared-mount gates, pilot MCP handlers |
+| 2026-08-22 | **W6 complete:** `agent-handoff.js`, registry CI `--strict`, ExtensionHost pilot hooks (LB/CM/DC) |
+| 2026-08-22 | **W5 complete:** Agent Gateway in ChatOrb, bootstrap chat-mount, cross-consumer matrix |
 | 2026-08-22 | Initial plan: P11–P15 modular infrastructure + AG-0..5 federated agent; parallel workstreams WS-0..5 |

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" data-skin="amd-gold" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Tools Hub — six applications on a shared platform." />
+  <title>Tools Hub</title>
+  <link rel="icon" href="../assets/suite/favicons/tools-hub.svg" type="image/svg+xml" />
+  <link rel="preload" href="../css/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="../css/material-symbols.css" />
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/skins/amd-gold.css" />
+  <link rel="stylesheet" href="../css/suite.css" />
+</head>
+<body class="suite-page">
+  <div class="suite-backdrop" aria-hidden="true"></div>
+
+  <div class="suite-frame suite-frame--head">
+    <header class="suite-header">
+      <div class="suite-brand">
+        <span class="material-symbols-outlined suite-brand__icon" aria-hidden="true">construction</span>
+        <h1 class="suite-title">Tools Hub</h1>
+      </div>
+    </header>
+  </div>
+
+  <section class="suite-banner" aria-label="Application screenshots">
+    <button type="button" class="suite-nav" id="suite-prev" aria-label="Previous screenshot">
+      <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+    </button>
+
+    <div class="suite-banner-viewport" id="suite-banner-viewport">
+      <div class="suite-banner-track" id="suite-banner-track"></div>
+    </div>
+
+    <button type="button" class="suite-nav" id="suite-next" aria-label="Next screenshot">
+      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+    </button>
+  </section>
+
+  <div class="suite-frame suite-frame--body">
+    <div class="suite-dots" id="suite-dots" role="tablist" aria-label="Screenshot carousel"></div>
+    <section class="suite-grid" id="suite-grid" aria-label="All applications"></section>
+  </div>
+
+  <script src="../js/suite.js"></script>
+</body>
+</html>

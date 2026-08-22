@@ -3,8 +3,8 @@
  * webtools-ui/tests/cross-consumer-shell.mjs
  *
  * Generic Playwright regression for shared shell UI/UX across dashboard
- * consumers: sidebar loads, first tab paints, tab switch recovery, button
- * visual contract, coarse-pointer block on iPhone profiles.
+ * consumers: sidebar loads, every primary tab icon operational, first tab
+ * paints, tab switch recovery, button visual contract, coarse-pointer block
  *
  *   node tests/cross-consumer-shell.mjs
  *   node tests/cross-consumer-shell.mjs --repo dc-planner
@@ -19,6 +19,7 @@ import { loadConsumerMatrix, resolveReachableConsumers } from "./lib/consumer-ma
 import { gotoShellEntry, listSidebarTabIds, gotoWithMode } from "./lib/playwright-fixtures.mjs";
 import {
   assertNoBlankMainArea,
+  assertAllSidebarTabsOperational,
   clickSidebarTab,
   dispatchShellTabChanged,
   forceAllTabPanelsHidden,
@@ -72,6 +73,16 @@ function makeExpect() {
       }
       throw new Error(msg ?? "toBeEnabled requires a Playwright locator");
     },
+    toHaveAttribute: async function (name, expected) {
+      if (actual && typeof actual.getAttribute === "function") {
+        const val = await actual.getAttribute(name);
+        if (val !== expected) {
+          throw new Error(msg ?? `expected attribute ${name}=${expected}, got ${val}`);
+        }
+        return;
+      }
+      throw new Error(msg ?? "toHaveAttribute requires a Playwright locator");
+    },
   });
   const expectFn = (actual, msg) => chain(actual, msg);
   expectFn.soft = expectFn;
@@ -93,6 +104,26 @@ async function runShellChecks(page, def, expect) {
     return;
   }
   pass("sidebar nav present", `${navCount} buttons`);
+
+  if (def.sidebarTabChecks !== false) {
+    try {
+      const tabOpts = {
+        navSelector,
+        skipTabIds: def.sidebarTabSkip ?? [],
+        portalViewAttr: def.requirePortalView ? (def.portalViewAttr ?? "data-portal-view") : undefined,
+        activationMode:
+          def.sidebarTabActivation
+          ?? (def.requirePortalView ? "portalView" : "panel"),
+        settleMs: def.tabSettleMs ?? 400,
+      };
+      const exercised = await assertAllSidebarTabsOperational(page, expect, tabOpts);
+      pass("all sidebar tabs operational", exercised.join(", "));
+    } catch (err) {
+      fail("all sidebar tabs operational", String(err.message || err).slice(0, 240));
+    }
+  } else {
+    skip("all sidebar tabs operational", "disabled in consumer-matrix.json");
+  }
 
   if (def.panelChecks === false) {
     skip("initial tab panel visible", "panel checks disabled for catalog portal");

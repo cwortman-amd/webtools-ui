@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Slide Presenter preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#121010"/>
+      <stop offset="100%" stop-color="#060505"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <rect x="0" y="0" width="72" height="540" fill="#0d0b0b"/>
+  <rect x="71" y="0" width="1" height="540" fill="rgba(255,255,255,0.08)"/>
+  <rect x="16" y="28" width="40" height="40" rx="10" fill="rgba(193,169,104,0.22)" stroke="rgba(193,169,104,0.45)"/>
+  <rect x="16" y="84" width="40" height="40" rx="10" fill="rgba(255,255,255,0.05)"/>
+  <rect x="104" y="36" width="180" height="14" rx="7" fill="rgba(255,255,255,0.14)"/>
+  <rect x="104" y="88" width="752" height="380" rx="16" fill="#0a0a0a" stroke="rgba(193,169,104,0.35)"/>
+  <rect x="140" y="140" width="56" height="4" rx="2" fill="#c1a968"/>
+  <rect x="140" y="170" width="420" height="28" rx="6" fill="rgba(255,255,255,0.12)"/>
+  <rect x="140" y="220" width="520" height="14" rx="4" fill="rgba(255,255,255,0.07)"/>
+  <rect x="140" y="250" width="480" height="14" rx="4" fill="rgba(255,255,255,0.06)"/>
+  <rect x="140" y="310" width="160" height="90" rx="10" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="320" y="310" width="160" height="90" rx="10" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="500" y="310" width="160" height="90" rx="10" fill="rgba(193,169,104,0.15)" stroke="rgba(193,169,104,0.3)"/>
+  <text x="888" y="500" text-anchor="end" fill="rgba(193,169,104,0.35)" font-family="Inter,Segoe UI,sans-serif" font-size="72" font-weight="700">SP</text>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="DC Planner preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#121418"/>
+      <stop offset="100%" stop-color="#060608"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <rect x="0" y="0" width="72" height="540" fill="#0c0d10"/>
+  <rect x="71" y="0" width="1" height="540" fill="rgba(255,255,255,0.08)"/>
+  <rect x="16" y="28" width="40" height="40" rx="10" fill="rgba(255,255,255,0.05)"/>
+  <rect x="16" y="84" width="40" height="40" rx="10" fill="rgba(193,169,104,0.22)" stroke="rgba(193,169,104,0.45)"/>
+  <rect x="16" y="140" width="40" height="40" rx="10" fill="rgba(255,255,255,0.05)"/>
+  <rect x="104" y="36" width="180" height="14" rx="7" fill="rgba(255,255,255,0.14)"/>
+  <rect x="104" y="88" width="180" height="92" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="304" y="88" width="180" height="92" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="504" y="88" width="180" height="92" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="704" y="88" width="152" height="92" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="104" y="210" width="420" height="260" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="548" y="210" width="308" height="120" rx="14" fill="rgba(193,169,104,0.12)" stroke="rgba(193,169,104,0.28)"/>
+  <rect x="548" y="350" width="308" height="120" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="130" y="240" width="360" height="18" rx="4" fill="rgba(255,255,255,0.08)"/>
+  <rect x="130" y="280" width="280" height="12" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <rect x="130" y="310" width="320" height="12" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <text x="888" y="500" text-anchor="end" fill="rgba(193,169,104,0.35)" font-family="Inter,Segoe UI,sans-serif" font-size="72" font-weight="700">DC</text>
+</svg>

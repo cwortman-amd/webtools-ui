@@ -19,6 +19,9 @@ export const DEFAULT_PANEL_SELECTOR = ".tab-panel";
 /** Minimum layout height (px) for a visible tab panel to count as painted. */
 export const MIN_PANEL_HEIGHT_PX = 20;
 
+/** Minimum icon bbox (px) — Material Symbols ligature must paint. */
+export const MIN_ICON_SIZE_PX = 8;
+
 /**
  * Build a tab deep-link URL for pages/index.html-style shells.
  *
@@ -141,6 +144,152 @@ export async function clickSidebarTab(page, tabId, expect, opts = {}) {
   await expect(btn).toBeVisible();
   await expect(btn).toBeEnabled();
   await btn.click();
+  if (opts.settleMs !== 0) {
+    await page.waitForTimeout(opts.settleMs ?? 400);
+  }
+}
+
+/**
+ * List visible primary sidebar tabs with icon paint metrics.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {{ navSelector?: string, skipTabIds?: string[] }} [opts]
+ */
+export async function listOperationalSidebarTabs(page, opts = {}) {
+  const navSelector = opts.navSelector ?? ".sidebar-nav .nav-btn";
+  const skip = new Set(opts.skipTabIds ?? []);
+  return page.$$eval(
+    `${navSelector}[data-tab]`,
+    (btns, skipIds) => {
+      return btns
+        .filter((b) => {
+          if (b.hidden || skipIds.includes(b.getAttribute("data-tab"))) return false;
+          const style = window.getComputedStyle(b);
+          if (style.display === "none" || style.visibility === "hidden") return false;
+          if (b.disabled || b.getAttribute("aria-disabled") === "true") return false;
+          if (b.classList.contains("tab-locked")) return false;
+          return true;
+        })
+        .map((b) => {
+          const icon = b.querySelector(".material-symbols-outlined, .material-icons");
+          const rect = icon ? icon.getBoundingClientRect() : { width: 0, height: 0 };
+          return {
+            tabId: b.getAttribute("data-tab"),
+            iconText: icon ? String(icon.textContent || "").trim() : "",
+            iconHeight: Math.round(rect.height),
+            iconWidth: Math.round(rect.width),
+          };
+        });
+    },
+    [...skip]
+  );
+}
+
+/**
+ * Resolve the panel element id for a sidebar tab (aria-controls, then panel-{tabId}).
+ */
+export async function resolvePanelIdForTab(page, tabId, opts = {}) {
+  const navSelector = opts.navSelector ?? ".sidebar-nav .nav-btn";
+  if (opts.panelId) return opts.panelId;
+
+  return page.evaluate(
+    ({ navSelector, tabId }) => {
+      const candidates = [];
+      const btn = document.querySelector(`${navSelector}[data-tab="${tabId}"]`);
+      if (btn) {
+        const controls = btn.getAttribute("aria-controls");
+        if (controls) candidates.push(controls);
+      }
+      candidates.push(`panel-${tabId}`);
+      candidates.push(`tab${tabId.charAt(0).toUpperCase()}${tabId.slice(1)}`);
+      for (const id of candidates) {
+        if (document.getElementById(id)) return id;
+      }
+      return candidates[0] || `panel-${tabId}`;
+    },
+    { navSelector, tabId }
+  );
+}
+
+/**
+ * Assert the dashboard tab panel for `tabId` is active and painted.
+ */
+export async function assertTabPanelActive(page, tabId, expect, opts = {}) {
+  const minHeight = opts.minPanelHeight ?? MIN_PANEL_HEIGHT_PX;
+  const navSelector = opts.navSelector ?? ".sidebar-nav .nav-btn";
+  const panelId = await resolvePanelIdForTab(page, tabId, opts);
+
+  const btn = page.locator(`${navSelector}[data-tab="${tabId}"]`);
+  await expect(btn).toHaveAttribute("aria-selected", "true");
+
+  const panel = page.locator(`#${panelId}`);
+  const visible = await panel.evaluate((el) => {
+    if (!el) return false;
+    const cs = getComputedStyle(el);
+    if (el.classList.contains("hidden") || cs.display === "none" || cs.visibility === "hidden") {
+      return false;
+    }
+    const r = el.getBoundingClientRect();
+    return r.height > 0 && r.width > 0;
+  });
+  expect(visible, `panel #${panelId} not visible after activating tab ${tabId}`).toBe(true);
+
+  const box = await panel.boundingBox();
+  expect(box, `panel #${panelId} has no layout box`).toBeTruthy();
+  expect(box.height, `panel #${panelId} height after tab ${tabId}`).toBeGreaterThan(minHeight);
+}
+
+/**
+ * Assert KE-style portal view switched to the tab id.
+ */
+export async function assertPortalViewActive(page, tabId, expect, opts = {}) {
+  const attr = opts.portalViewAttr ?? "data-portal-view";
+  const view = await page.evaluate((a) => document.body.getAttribute(a), attr);
+  expect(view, `portal view after tab ${tabId}`).toBe(tabId);
+
+  const btn = page.locator(
+    `${opts.navSelector ?? ".sidebar-nav .nav-btn"}[data-tab="${tabId}"]`
+  );
+  await expect(btn).toHaveAttribute("aria-selected", "true");
+}
+
+/**
+ * Click every visible primary sidebar tab and verify icon + activation.
+ *
+ * @returns {string[]} tab ids exercised
+ */
+export async function assertAllSidebarTabsOperational(page, expect, opts = {}) {
+  const tabs = await listOperationalSidebarTabs(page, opts);
+  expect(tabs.length, "no operational sidebar tabs found").toBeGreaterThan(0);
+
+  const mode = opts.activationMode ?? (opts.portalViewAttr ? "portalView" : "panel");
+  const exercised = [];
+
+  for (const tab of tabs) {
+    expect(
+      tab.iconText.length,
+      `tab ${tab.tabId} missing Material icon glyph`
+    ).toBeGreaterThan(0);
+    expect(
+      tab.iconHeight,
+      `tab ${tab.tabId} icon height (${tab.iconText})`
+    ).toBeGreaterThan(MIN_ICON_SIZE_PX);
+    expect(
+      tab.iconWidth,
+      `tab ${tab.tabId} icon width (${tab.iconText})`
+    ).toBeGreaterThan(MIN_ICON_SIZE_PX);
+
+    await clickSidebarTab(page, tab.tabId, expect, opts);
+
+    if (mode === "portalView") {
+      await assertPortalViewActive(page, tab.tabId, expect, opts);
+    } else {
+      await assertTabPanelActive(page, tab.tabId, expect, opts);
+    }
+    exercised.push(tab.tabId);
+  }
+
+  return exercised;
 }
 
 /** Legacy hash routes must not scroll sidebar tabs off-screen. */
