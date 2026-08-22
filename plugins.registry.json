@@ -99,7 +99,7 @@
       "minWebtoolsVersion": "0.9.0",
       "description": "Live slide deck, speaker notes, and export for AMD Instinct executive presentations.",
       "type": "dashboard",
-      "status": "draft",
+      "status": "active",
       "repository": "https://github.com/cwortman-amd/slide-presenter",
       "manifestPath": "../slide-presenter/plugin.manifest.json",
       "localUrl": "../../slide-presenter/pages/index.html",

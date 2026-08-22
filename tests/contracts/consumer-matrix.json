@@ -39,6 +39,30 @@
       "requiresPlaywright": true
     },
     {
+      "id": "demo-portal",
+      "entryPath": "/pages/index.html",
+      "shellNavSelector": ".sidebar-nav .nav-btn",
+      "panelSelector": ".tab-panel",
+      "demoBannerKeys": [],
+      "userModeKey": "dp-user-mode",
+      "requirePortalView": false,
+      "buttonVisualContract": true,
+      "shellTabChangedRecovery": false,
+      "requiresPlaywright": true
+    },
+    {
+      "id": "slide-presenter",
+      "entryPath": "/pages/index.html",
+      "shellNavSelector": ".sidebar-nav .nav-btn",
+      "panelSelector": ".tab-panel",
+      "demoBannerKeys": [],
+      "userModeKey": "sp-user-mode",
+      "requirePortalView": false,
+      "buttonVisualContract": true,
+      "shellTabChangedRecovery": false,
+      "requiresPlaywright": true
+    },
+    {
       "id": "knowledge-exchange",
       "entryPath": "/pages/index.html",
       "shellNavSelector": ".sidebar-nav .nav-btn",

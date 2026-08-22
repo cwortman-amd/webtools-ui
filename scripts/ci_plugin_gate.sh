@@ -16,6 +16,7 @@ declare -A PROFILE=(
   [llm-benchmark]=dashboard
   [knowledge-exchange]=catalog
   [demo-portal]=hub
+  [slide-presenter]=dashboard
 )
 
 for repo in "${!PROFILE[@]}"; do
@@ -27,5 +28,10 @@ for repo in "${!PROFILE[@]}"; do
   echo "[ci] shared mount ($repo / ${PROFILE[$repo]})"
   python3 scripts/check_shared_mount.py --profile "${PROFILE[$repo]}" --root "$consumer"
 done
+
+echo "[ci] modular infrastructure (L1c)"
+python3 scripts/check_extensions.py --workspace "$WORKSPACE"
+python3 scripts/check_mcp_registration.py --strict --workspace "$WORKSPACE"
+python3 scripts/check_agent_gateway.py --workspace "$WORKSPACE"
 
 echo "[ci] PASS"

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cwortman-amd/webtools-ui/schemas/knowledge-registry.schema.json",
+  "title": "Webtools Knowledge Registry",
+  "type": "object",
+  "required": ["version", "corpora"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "corpora": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["label", "owner", "transport"],
+        "properties": {
+          "label": { "type": "string" },
+          "owner": { "type": "string" },
+          "transport": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "mcpServer": { "type": "string" },
+          "mcpTool": { "type": "string" },
+          "httpAsk": { "type": "string" },
+          "httpMcp": { "type": "string" },
+          "resource": { "type": "string" },
+          "browserBridge": { "type": "string" },
+          "stdio": { "type": "string" },
+          "path": { "type": "string" }
+        }
+      }
+    }
+  }
+}

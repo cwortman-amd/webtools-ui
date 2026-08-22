@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/knowledge-registry.schema.json",
+  "version": 1,
+  "corpora": {
+    "ke-curriculum": {
+      "label": "Knowledge Exchange curriculum",
+      "owner": "knowledge-exchange",
+      "transport": ["mcp", "http"],
+      "mcpServer": "ke-studio",
+      "mcpTool": "portal_catalog_query",
+      "httpAsk": "/api/ask",
+      "resource": "ke://portal/manifest"
+    },
+    "ke-portal-manifest": {
+      "label": "Portal manifest",
+      "owner": "knowledge-exchange",
+      "transport": ["mcp-resource"],
+      "resource": "ke://portal/manifest"
+    },
+    "lb-docs": {
+      "label": "LLM Benchmark docs and agent map",
+      "owner": "llm-benchmark",
+      "transport": ["browser", "http"],
+      "browserBridge": "js/agent-bridge.js",
+      "httpMcp": "/mcp"
+    },
+    "cm-ops": {
+      "label": "Cluster operations catalog",
+      "owner": "cluster-manager",
+      "transport": ["browser", "http", "stdio"],
+      "browserBridge": "js/agent-bridge.js",
+      "httpMcp": "/mcp",
+      "stdio": "scripts/core/mcp_server.py"
+    },
+    "dc-planner-domain": {
+      "label": "DC Planner scenarios and TCO context",
+      "owner": "dc-planner",
+      "transport": ["browser"],
+      "browserBridge": "js/agent-bridge.js"
+    },
+    "demo-catalog": {
+      "label": "Demo Portal manifest",
+      "owner": "demo-portal",
+      "transport": ["local-json"],
+      "path": "data/manifest.json"
+    },
+    "slides-deck": {
+      "label": "Active slide deck and notes",
+      "owner": "slide-presenter",
+      "transport": ["http", "stdio"],
+      "httpMcp": "/mcp",
+      "stdio": "scripts/mcp_stdio_bridge.py"
+    }
+  }
+}

@@ -23,6 +23,8 @@
     chat: true,
     demo: true,
     voice: true,
+    mcp: false,
+    agent: false,
   };
 
   function warn(msg) {
@@ -65,6 +67,14 @@
 
   function getErrors() {
     return global.ErrorPopup || global.showError || null;
+  }
+
+  function getMcp() {
+    return global.WebtoolsMcp || serviceOverrides.mcp || null;
+  }
+
+  function getAgent() {
+    return global.AgentGateway || serviceOverrides.agent || null;
   }
 
   function getPreview() {
@@ -182,6 +192,8 @@
     voice: getVoice(),
     mobile: getMobile(),
     errors: getErrors(),
+    mcp: getMcp(),
+    agent: getAgent(),
     preview: getPreview(),
     contributions: contributionsApi,
 
@@ -215,6 +227,8 @@
       platform.voice = getVoice();
       platform.mobile = getMobile();
       platform.errors = getErrors();
+      platform.mcp = getMcp();
+      platform.agent = getAgent();
       platform.preview = getPreview();
     },
 

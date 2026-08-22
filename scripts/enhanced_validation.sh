@@ -71,8 +71,16 @@ echo "========================================"
 # ── L0: platform ────────────────────────────────────────────────────────────
 run_layer "webtools-ui" "L0 platform ci" "cd '$ROOT' && make ci"
 
+# ── L1c: modular packs + MCP + agent gateway ───────────────────────────────
+run_layer "webtools-ui" "L1c extensions" \
+  "python3 '$ROOT/scripts/check_extensions.py' --workspace '$WORKSPACE'"
+run_layer "webtools-ui" "L1c mcp" \
+  "python3 '$ROOT/scripts/check_mcp_registration.py' --strict --workspace '$WORKSPACE'"
+run_layer "webtools-ui" "L1c agent" \
+  "python3 '$ROOT/scripts/check_agent_gateway.py' --workspace '$WORKSPACE'"
+
 # ── L1: plugin contract (all consumers) ─────────────────────────────────────
-for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-portal; do
+for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-portal slide-presenter; do
   consumer="$WORKSPACE/$repo"
   if [[ ! -d "$consumer" ]]; then
     ((FAIL++))
@@ -84,7 +92,7 @@ for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-por
 done
 
 # ── L1b: shell module registry (dashboard consumers) ────────────────────────
-for repo in cluster-manager dc-planner llm-benchmark demo-portal knowledge-exchange; do
+for repo in cluster-manager dc-planner llm-benchmark demo-portal slide-presenter knowledge-exchange; do
   consumer="$WORKSPACE/$repo"
   if [[ -d "$consumer" ]]; then
     run_layer "$repo" "L1b shell modules" \
@@ -135,6 +143,7 @@ declare -A SYNTAX=(
   ["cluster-manager"]="node --check js/plugin-mount.js && node --check js/shell-tab-controller.js && node --check js/chat-orb-mount.js"
   ["dc-planner"]="node --check js/plugin-mount.js && node --check js/chat-orb-mount.js"
   ["llm-benchmark"]="node --check js/plugin-mount.js && node --check js/chat-orb-mount.js"
+  ["slide-presenter"]="node --check js/plugin-mount.js && node --check js/chat-orb-mount.js"
 )
 
 for repo in "${!SYNTAX[@]}"; do

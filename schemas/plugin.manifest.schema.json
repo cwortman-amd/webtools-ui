@@ -112,8 +112,25 @@
           "description": "Path to data/extensions.json (VS Code-style sidebar packages)."
         },
         "mcp": {
-          "type": "string",
-          "description": "Stdio MCP bridge script (T4 service; tools from extension contributes.mcp)."
+          "oneOf": [
+            { "type": "string", "description": "Stdio MCP bridge script path." },
+            {
+              "type": "object",
+              "properties": {
+                "browserBridge": { "type": "string" },
+                "http": { "type": "string" },
+                "stdio": { "type": "string" },
+                "toolManifest": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "MCP transport registration (T4)."
+        },
+        "knowledge": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Corpus ids from data/knowledge-registry.json for Agent Gateway."
         }
       }
     },
@@ -161,7 +178,23 @@
             "chat": { "$ref": "#/$defs/serviceToggle" },
             "demo": { "$ref": "#/$defs/serviceToggle" },
             "voice": { "$ref": "#/$defs/serviceToggle" },
-            "mcp": { "$ref": "#/$defs/serviceToggle" }
+            "mcp": { "$ref": "#/$defs/serviceToggle" },
+            "agent": {
+              "oneOf": [
+                { "type": "boolean" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": { "type": "boolean", "default": true },
+                    "corpora": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "keAskUrl": { "type": "string" }
+                  }
+                }
+              ]
+            }
           }
         },
         "activationEvents": {
