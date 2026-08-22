@@ -5,17 +5,18 @@ and **common components** (sidebar shell, catalog topnav, buttons, chips, forms,
 chrome). Sibling products mount this repo at `shared/` and compose domain UI from SDK primitives.
 
 Start here: [`docs/SDK.md`](docs/SDK.md) · Design spec: [`docs/DESIGN.md`](docs/DESIGN.md) ·
-Platform: [`docs/PLATFORM_MODEL.md`](docs/PLATFORM_MODEL.md)
+Platform: [`docs/PLATFORM_MODEL.md`](docs/PLATFORM_MODEL.md) · Implementation: [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md)
 
-Five registered **consumer plugins**:
+Six registered **consumer plugins**:
 
 - [`cluster-manager`](https://github.com/cwortman-amd/cluster-manager) — dashboard
 - [`dc-planner`](https://github.com/cwortman-amd/dc-planner) — dashboard
 - [`llm-benchmark`](https://github.com/cwortman-amd/llm-benchmark) — dashboard
 - [`demo-portal`](https://github.com/cwortman-amd/demo-portal) — hub (demo catalog)
 - [`knowledge-exchange`](https://github.com/cwortman-amd/knowledge-exchange) — catalog (learning portal)
+- [`slide-presenter`](https://github.com/cwortman-amd/slide-presenter) — dashboard (draft)
 
-Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is a relative symlink to `~/workspace/webtools-ui/`; the original `git subtree` workflow is retained as a fallback for fresh clones / CI). Each consumer ships `plugin.manifest.json` at its repo root. See [`docs/PLAN.md`](docs/PLAN.md) for the full harmonization history (Phase 0 through Phase 9.8e P9) and rationale.
+Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is a relative symlink to `~/workspace/webtools-ui/`; the original `git subtree` workflow is retained as a fallback for fresh clones / CI). Each consumer ships `plugin.manifest.json` at its repo root and a consumer checklist at `docs/IMPLEMENTATION.md`. See [`docs/PLAN.md`](docs/PLAN.md) for harmonization history (Phase 0 through Phase 9.8e P9) and [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) for active P11+ work.
 
 > **Note**: this repo was renamed from `shared-ui` to `webtools-ui` on 2026-05-04 (Phase 9.8c). Historical phase narratives in `docs/PLAN.md` retain the original "shared-ui" name for traceability; the canonical path going forward is `~/workspace/webtools-ui/`.
 

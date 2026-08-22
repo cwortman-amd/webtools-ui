@@ -328,6 +328,7 @@ layout while sharing the platform bootstrap pattern.
 | **P8** | `contributes` + `plugin-mount.js` on all plugins; demo-portal sidebar shell | Landed |
 | **P9** | Optional dynamic host (hub embeds dashboard iframe) | Future |
 | **P10** | Cross-plugin module import (`provider` + `import`) | Future |
+| **P11–P15 + AG** | Modular ExtensionHost, MCP contract, Agent Gateway | [`IMPLEMENTATION.md`](IMPLEMENTATION.md) |
 
 See [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) for swap/mix recipes and activation events.
 
@@ -355,6 +356,7 @@ modules under `sidebar-iframe` as a second entry or feature-flagged layout.
 ## Related documents
 
 - [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) — VS Code/Obsidian-style contribution points & swapping
+- [`IMPLEMENTATION.md`](IMPLEMENTATION.md) — **P11+ parallel implementation plan** (modular + agent)
 - [`PLUGIN_CONTRACT.md`](PLUGIN_CONTRACT.md) — schema, validation, boundaries
 - [`SHELL_MODULES.md`](SHELL_MODULES.md) — T3 module contract
 - [`DESIGN.md`](DESIGN.md) — visual harmonization
