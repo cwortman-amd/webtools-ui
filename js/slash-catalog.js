@@ -148,7 +148,8 @@
     "dc-planner":      "(see https://github.com/cwortman-amd/dc-planner)",
     "cluster-manager": "(see https://github.com/cwortman-amd/cluster-manager)",
     "demo-portal":     "(see https://github.com/cwortman-amd/demo-portal)",
-    "knowledge-exchange": "(see https://github.com/cwortman-amd/knowledge-exchange)"
+    "knowledge-exchange": "(see https://github.com/cwortman-amd/knowledge-exchange)",
+    "slide-presenter":    "(see https://github.com/cwortman-amd/slide-presenter)"
   };
 
   function listCommands() { return Object.keys(CATALOG).sort(); }

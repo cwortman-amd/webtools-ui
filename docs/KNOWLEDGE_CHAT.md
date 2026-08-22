@@ -1544,8 +1544,10 @@ Source: Perplexity export *What is the impact of a local LLM versus remote subsc
 API LLM* (2026-08-17). Facts only; no product-name lock-in. Remote examples (Gemini, hosted
 OpenAI-compatible) are interchangeable workers behind the same contract. Knowledge Exchange
 today: Dual Mode / `OFFLINE_MODE`, `/llm` local-first, extractive wikiqa with optional local
-Ollama or OpenAI-compatible synthesis, never `cache_answer` on web. Eval: [[TEST_CHAT]]
-`CHAT-035`. Strengths/weaknesses and Pareto context: [[CHAT_ARCHITECTURE]] §4.6 / §9.
+Ollama or OpenAI-compatible synthesis, never `cache_answer` on web. HTTP 429 / outage on
+Azure OpenAI or Copilot trips a 60s circuit breaker to local Ollama/vLLM
+(`ke/llm_gateway.py`). Eval: [[TEST_CHAT]] `CHAT-035`. Strengths/weaknesses and Pareto
+context: [[CHAT_ARCHITECTURE]] §4.6 / §9.
 
 **Answer quality is not model quality.** A stronger remote model can improve decomposition,
 long-context, multimodality, and structured output. It cannot fix poor retrieval, unauthorized
@@ -1590,7 +1592,7 @@ claims with local evidence IDs → local citation check → proposal-only mutati
 | --- | --- | --- | --- | --- |
 | **A Offline sovereign** | none | Local only | Vault + local indexes + preloaded mirrors. No remote embed/rerank/tools | `OFFLINE_MODE`, Dual Mode FAQ/wiki, no web |
 | **B Connected local-first** | up | Local default | Vault RAG; web opt-in / policy; remote escalation for approved classes; minimize egress | Default Ask: extractive + optional local synthesis |
-| **C Connected premium** | up | Remote for approved hard tasks | Local RAG still preferred for private sources; web via §12.3 | `/llm` remote only if policy allows |
+| **C Connected premium** | up | Remote for approved hard tasks | Local RAG still preferred for private sources; web via §12.3 | `/llm` remote only if policy allows; 429/outage → 60s local cascade |
 | **D Restricted connected** | up | Remote allowed | **No** vault export; web queries must be non-sensitive | §16.3 local-only blocks provider send |
 
 Default: **B**. Offline disclosure must not invent “latest” from stale notes:
@@ -1600,7 +1602,7 @@ Fully offline, no mirror     → cannot verify current external information
 Offline, dated local mirror  → based on mirror refreshed [date]
 Connected, cached web        → last verified [time]; refresh in background
 Connected, live verified     → verified against primary sources at [time]
-Remote failure               → local evidence or retry; say verification is reduced
+Remote failure               → 60s circuit open; local Ollama/vLLM; user-visible notice
 ```
 
 #### Gateway inputs and constraints
@@ -1636,7 +1638,9 @@ profiles. Mirror is **dated**, not current.
 
 Remote adapter: concurrency and token budgets, coalescing, exponential backoff with jitter,
 circuit breaker on 429/5xx, **centralized** retries (no per-node retry storms), fallback to
-local quality with user-visible “using local fallback.” Minimize the remote prompt (no whole
+local quality with user-visible “using local fallback.” **KE today:** `GatewayLLM` wraps
+Azure OpenAI / Copilot; cooldown default 60s (`LLM_CIRCUIT_COOLDOWN_S`); notices on
+`llm_gateway` (never mixed into wiki prose). Minimize the remote prompt (no whole
 vaults, unfiltered chunks, or redundant policy text).
 
 Remote model = **untrusted reasoning service**: no filesystem/vault access, no privileged

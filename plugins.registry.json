@@ -93,6 +93,26 @@
       }
     },
     {
+      "id": "slide-presenter",
+      "name": "Slide Presenter",
+      "version": "0.1.0",
+      "minWebtoolsVersion": "0.9.0",
+      "description": "Live slide deck, speaker notes, and export for AMD Instinct executive presentations.",
+      "type": "dashboard",
+      "status": "draft",
+      "repository": "https://github.com/cwortman-amd/slide-presenter",
+      "manifestPath": "../slide-presenter/plugin.manifest.json",
+      "localUrl": "../../slide-presenter/pages/index.html",
+      "entry": { "html": "pages/index.html" },
+      "webtools": {
+        "shellLayout": "sidebar-iframe",
+        "defaultSkin": "amd-gold"
+      },
+      "dependencies": {
+        "webtoolsModules": ["shell", "shell-modules", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      }
+    },
+    {
       "id": "knowledge-exchange",
       "name": "Knowledge Exchange",
       "version": "0.1.0",

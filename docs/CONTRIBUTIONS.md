@@ -62,7 +62,8 @@ Fixed **slots** in harmonized chrome — modules declare which slot they occupy:
 | `catalog.cards` | catalog | `.catalog-grid` | Module card renderer |
 | `services.chat` | all | body overlay | Chat orb |
 | `services.demo` | all | body overlay | Demo walkthrough |
-| `services.voice` | all | global | TTS/STST bridge |
+| `services.voice` | all | global | TTS/STT bridge |
+| `services.mcp` | all | stdio + `POST /mcp` | External agents (Cursor / Claude). Transport is T4; tools come from `contributes.mcp` on sidebar extensions. |
 
 **Rule:** slots are platform-owned DOM regions. Contributions **fill** slots; they do not redefine
 slot layout ([`DESIGN.md`](DESIGN.md)).
@@ -335,6 +336,7 @@ make enhanced-validation-quick   # from webtools-ui root
 ## Related
 
 - [`PLATFORM_MODEL.md`](PLATFORM_MODEL.md) — four-tier architecture
+- [`IMPLEMENTATION.md`](IMPLEMENTATION.md) — P11+ parallel workstreams (ExtensionHost, MCP, Agent Gateway)
 - [`SHELL_MODULES.md`](SHELL_MODULES.md) — module fields + bootstrap
 - [`PLUGIN_CONTRACT.md`](PLUGIN_CONTRACT.md) — manifest + validation
 - [`data/shell-module.example.json`](../data/shell-module.example.json)

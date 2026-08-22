@@ -106,6 +106,14 @@
         "shellModules": {
           "type": "string",
           "description": "Path to data/shell-modules.json (dashboard tab registry)."
+        },
+        "extensions": {
+          "type": "string",
+          "description": "Path to data/extensions.json (VS Code-style sidebar packages)."
+        },
+        "mcp": {
+          "type": "string",
+          "description": "Stdio MCP bridge script (T4 service; tools from extension contributes.mcp)."
         }
       }
     },
@@ -152,7 +160,8 @@
           "properties": {
             "chat": { "$ref": "#/$defs/serviceToggle" },
             "demo": { "$ref": "#/$defs/serviceToggle" },
-            "voice": { "$ref": "#/$defs/serviceToggle" }
+            "voice": { "$ref": "#/$defs/serviceToggle" },
+            "mcp": { "$ref": "#/$defs/serviceToggle" }
           }
         },
         "activationEvents": {
