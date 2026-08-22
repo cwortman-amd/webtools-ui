@@ -107,6 +107,8 @@ Each consumer (T2)
 | **W3** | Consumer adoption (batch 2) | WS-1 ×3, WS-2 ×3, WS-3 platform, WS-5 AG-2 | Remaining consumers migrated |
 | **W4** | Bootstrap + agent | WS-3 all consumers, WS-5 AG-3..4 | Single mount adapter per repo |
 | **W5** | Hardening | WS-4 full matrix, WS-5 AG-5, doc sync | `make enhanced-validation` all 6 plugins |
+| **W6** | CI + handoff + extension depth | Bundles A/B/C | Registry strict CI, `agent_ctx`, pilot ExtensionHost hooks |
+| **W7** | Production close-out | Bundles D/E/F | AG-3 `act()`, KE receive banner, L1b extension sidebars, workflow mounts |
 
 Waves are **logical** — teams may overlap W1–W3 if task dependencies are satisfied.
 
@@ -417,12 +419,12 @@ Track per-repo status in PR descriptions; update this table at each wave exit.
 
 | Consumer | P11 ExtHost | P12 MCP manifest | P13 Bootstrap | P14 CI matrix | AG Gateway |
 | --- | --- | --- | --- | --- | --- |
-| llm-benchmark | 1-C-LB optional | 2-C-LB | 3-C-* | ✓ existing | AG-3-LB first |
-| cluster-manager | 1-C-CM optional | 2-C-CM | 3-C-CM | ✓ existing | AG-3-CM |
-| dc-planner | 1-C-DC optional | 2-C-DC | 3-C-DC | ✓ existing | AG-3-DC |
-| demo-portal | 1-C-DP | 2-C-DP | 3-C-* | 4-C-DP | AG-3-DP |
+| llm-benchmark | 1-C-LB optional ✓ | 2-C-LB | 3-C-* | ✓ existing | AG-3-LB ✓ |
+| cluster-manager | 1-C-CM optional ✓ | 2-C-CM | 3-C-CM | ✓ existing | AG-3-CM ✓ |
+| dc-planner | 1-C-DC optional ✓ | 2-C-DC | 3-C-DC | ✓ existing | AG-3-DC ✓ |
+| demo-portal | 1-C-DP | 2-C-DP | 3-C-* | 4-C-DP ✓ | AG-3-DP |
 | knowledge-exchange | 1-C-KE | 2-C-KE | 3-C-* | ✓ existing | native (skip AG-4) |
-| slide-presenter | 1-C-SP | 2-C-SP ✓ ref | 3-C-* | 4-C-SP | AG-3-SP |
+| slide-presenter | 1-C-SP ✓ | 2-C-SP ✓ ref | 3-C-* | 4-C-SP ✓ | AG-3-SP |
 
 Legend: blank = not started; ✓ = done; optional = pilot pack only.
 

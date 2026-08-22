@@ -84,7 +84,7 @@
       "localUrl": "./index.html",
       "entry": { "html": "pages/index.html" },
       "webtools": {
-        "shellLayout": "catalog-topnav",
+        "shellLayout": "sidebar-iframe",
         "defaultSkin": "amd-gold"
       },
       "aggregates": ["cluster-manager", "dc-planner", "llm-benchmark", "knowledge-exchange"],

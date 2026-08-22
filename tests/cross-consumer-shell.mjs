@@ -94,14 +94,18 @@ async function runShellChecks(page, def, expect) {
   }
   pass("sidebar nav present", `${navCount} buttons`);
 
-  try {
-    await assertNoBlankMainArea(page, "initial load", expect, {
-      collectOpts,
-      requirePortalView,
-    });
-    pass("initial tab panel visible");
-  } catch (err) {
-    fail("initial tab panel visible", String(err.message || err).slice(0, 200));
+  if (def.panelChecks === false) {
+    skip("initial tab panel visible", "panel checks disabled for catalog portal");
+  } else {
+    try {
+      await assertNoBlankMainArea(page, "initial load", expect, {
+        collectOpts,
+        requirePortalView,
+      });
+      pass("initial tab panel visible");
+    } catch (err) {
+      fail("initial tab panel visible", String(err.message || err).slice(0, 200));
+    }
   }
 
   if (def.buttonVisualContract !== false) {
@@ -113,6 +117,12 @@ async function runShellChecks(page, def, expect) {
     }
   } else {
     skip("button visual contract", "disabled for this consumer in consumer-matrix.json");
+  }
+
+  if (def.panelChecks === false) {
+    skip("tab switch paints panel", "panel checks disabled for catalog portal");
+    skip("shell:tabChanged recovery", "panel checks disabled for catalog portal");
+    return;
   }
 
   const tabIds = await listSidebarTabIds(page, navSelector);
@@ -215,12 +225,14 @@ async function main() {
           baseURL,
           demoBannerKeys: def.demoBannerKeys ?? [],
           navSelector: def.shellNavSelector,
+          bootMs: def.bootMs,
         });
       } else {
         await gotoShellEntry(page, def.entryPath, {
           baseURL,
           demoBannerKeys: def.demoBannerKeys ?? [],
           navSelector: def.shellNavSelector,
+          bootMs: def.bootMs,
         });
       }
       await runShellChecks(page, def, expect);

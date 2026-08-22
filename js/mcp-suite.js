@@ -38,6 +38,26 @@
       null;
   }
 
+  function extensionHandler(toolName) {
+    var exts = global.WebtoolsExtensions || {};
+    var keys = Object.keys(exts);
+    for (var i = 0; i < keys.length; i++) {
+      var handlers = exts[keys[i]] && exts[keys[i]].mcpHandlers;
+      if (handlers && typeof handlers[toolName] === "function") {
+        return handlers[toolName];
+      }
+    }
+    return null;
+  }
+
+  function callTool(toolName, params) {
+    var handler = extensionHandler(toolName);
+    if (handler) {
+      return Promise.resolve(handler(params || {}));
+    }
+    return call(toolName, params);
+  }
+
   function listTools() {
     var out = [];
     if (config.extensionTools && config.extensionTools.length) {
@@ -119,6 +139,7 @@
     loadFromManifest: loadFromManifest,
     listTools: listTools,
     call: call,
+    callTool: callTool,
     getConfig: function () {
       return Object.assign({}, config);
     },

@@ -18,6 +18,7 @@
   };
 
   var LEARN_RE = /\b(how|why|what|explain|learn|training|course|wiki|curriculum|module|lesson)\b/i;
+  var ACT_RE = /\b(export|run|open|search|validate|solve|summarize|list|show)\b/i;
 
   function warn(msg) {
     if (global.console && global.console.warn) {
@@ -27,7 +28,10 @@
 
   function classify(text) {
     if (!text) return "act";
-    if (LEARN_RE.test(text)) return "learn";
+    var learn = LEARN_RE.test(text);
+    var actish = ACT_RE.test(text);
+    if (learn && actish) return "hybrid";
+    if (learn) return "learn";
     return "act";
   }
 
@@ -67,6 +71,56 @@
     }).catch(function () {
       return null;
     });
+  }
+
+  function listActTools() {
+    if (global.WebtoolsMcp && typeof global.WebtoolsMcp.listTools === "function") {
+      return global.WebtoolsMcp.listTools();
+    }
+    return [];
+  }
+
+  function pickTool(text, tools) {
+    if (!tools || !tools.length) return null;
+    var lower = String(text || "").toLowerCase();
+    for (var i = 0; i < tools.length; i++) {
+      var name = String(tools[i].name || "");
+      if (!name) continue;
+      var short = name.split(".").pop() || name;
+      if (lower.indexOf(short.toLowerCase()) >= 0 || lower.indexOf(name.toLowerCase()) >= 0) {
+        return name;
+      }
+    }
+    return tools[0] && tools[0].name ? String(tools[0].name) : null;
+  }
+
+  function act(ctx) {
+    ctx = ctx || {};
+    var text = String(ctx.text || "");
+    var tools = listActTools();
+    var toolName = ctx.tool || pickTool(text, tools);
+    if (!toolName) {
+      return Promise.resolve({ intent: "act", handled: false, note: "No MCP tools registered." });
+    }
+    if (global.WebtoolsMcp && typeof global.WebtoolsMcp.callTool === "function") {
+      return global.WebtoolsMcp.callTool(toolName, ctx.params || { query: text }).then(function (result) {
+        return {
+          intent: "act",
+          handled: true,
+          tool: toolName,
+          reply: typeof result === "string" ? result : JSON.stringify(result, null, 2),
+          result: result,
+        };
+      }).catch(function (err) {
+        return {
+          intent: "act",
+          handled: false,
+          tool: toolName,
+          note: err && err.message ? err.message : "MCP call failed",
+        };
+      });
+    }
+    return Promise.resolve({ intent: "act", handled: false, note: "WebtoolsMcp unavailable." });
   }
 
   function configure(opts) {
@@ -113,19 +167,27 @@
     if (!config.enabled) {
       return Promise.resolve({ intent: intent, handled: false });
     }
-    if (intent === "learn" && config.corpora.indexOf("ke-curriculum") >= 0) {
-      return retrieveFromKe(text).then(function (payload) {
-        if (!payload || !payload.answer) {
+    if (intent === "learn" || intent === "hybrid") {
+      if (config.corpora.indexOf("ke-curriculum") >= 0) {
+        return retrieveFromKe(text).then(function (payload) {
+          if (payload && payload.answer) {
+            return {
+              intent: intent,
+              handled: true,
+              reply: payload.answer,
+              sources: payload.sources || payload.citations || [],
+              scope: payload.scope || "curriculum",
+            };
+          }
+          if (intent === "hybrid") {
+            return act(ctx);
+          }
           return { intent: intent, handled: false, note: "KE unavailable — use local agent." };
-        }
-        return {
-          intent: intent,
-          handled: true,
-          reply: payload.answer,
-          sources: payload.sources || payload.citations || [],
-          scope: payload.scope || "curriculum",
-        };
-      });
+        });
+      }
+    }
+    if (intent === "act" || intent === "hybrid") {
+      return act(ctx);
     }
     return Promise.resolve({ intent: intent, handled: false });
   }
@@ -150,6 +212,8 @@
     loadFromManifest: loadFromManifest,
     classify: classify,
     route: route,
+    act: act,
+    listActTools: listActTools,
     installChatInterceptor: installChatInterceptor,
     isEnabled: function () { return !!config.enabled; },
   };
