@@ -1056,10 +1056,7 @@
     return Object.keys(state.handlers).sort();
   }
 
-  function dispatch(input) {
-    var trimmed = String(input || "").trim();
-    if (!trimmed) return Promise.resolve(null);
-
+  function dispatchInner(trimmed) {
     if (trimmed.charAt(0) === "/") {
       var space = trimmed.indexOf(" ");
       var cmd = (space === -1 ? trimmed : trimmed.slice(0, space)).toLowerCase();
@@ -1079,8 +1076,6 @@
       });
     }
 
-    // Free-text — no built-in routing. Consumers can register a handler
-    // for arbitrary text via `ChatOrb.register("*", fn)` if they wish.
     var fallback = state.handlers["*"];
     if (fallback) {
       try {
@@ -1096,6 +1091,25 @@
         : "I don't have a handler for free-text yet. Try `/help` to see available commands.",
       kind:  "system"
     });
+  }
+
+  function dispatch(input) {
+    var trimmed = String(input || "").trim();
+    if (!trimmed) return Promise.resolve(null);
+
+    if (trimmed.charAt(0) !== "/" &&
+        global.AgentGateway &&
+        typeof global.AgentGateway.route === "function" &&
+        global.AgentGateway.isEnabled()) {
+      return global.AgentGateway.route({ text: trimmed }).then(function (result) {
+        if (result && result.handled && result.reply) {
+          return { reply: result.reply, kind: "ai", html: !!result.html };
+        }
+        return dispatchInner(trimmed);
+      });
+    }
+
+    return dispatchInner(trimmed);
   }
 
   // Dispatch `text` and render whatever comes back, exactly as if the user

@@ -359,9 +359,14 @@
       });
     }
 
-    // Honour a deep link on load, and let Back/Forward walk the tab history
-    // instead of leaving the app.
+    // Honour a deep link on load; otherwise activate the first sidebar tab so
+    // the main panel is never blank on cold load (demo-portal, slide-presenter).
     var initial = tabFromUrl();
+    if (!knownTab(initial)) {
+      var activeBtn = document.querySelector(".sidebar-nav .nav-btn.active[data-tab]");
+      var firstBtn = document.querySelector(".sidebar-nav .nav-btn[data-tab]");
+      initial = (activeBtn || firstBtn) ? (activeBtn || firstBtn).getAttribute("data-tab") : null;
+    }
     if (knownTab(initial) && global.Shell && typeof global.Shell.switchTab === "function") {
       global.Shell.switchTab(initial, { updateUrl: false });
     }

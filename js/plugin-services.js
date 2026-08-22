@@ -28,12 +28,6 @@
         });
       }
       return chain.then(function (m) {
-        if (opts.installChatHook !== false &&
-            global.AgentGateway &&
-            typeof global.AgentGateway.installChatInterceptor === "function" &&
-            global.AgentGateway.isEnabled()) {
-          global.AgentGateway.installChatInterceptor();
-        }
         return m;
       });
     });

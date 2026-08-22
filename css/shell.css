@@ -203,6 +203,16 @@ body[data-theme="light"] .util-btn:hover {
   flex-shrink: 0;
 }
 
+body.nav-side .util-btn-agent {
+  background: var(--ui-accent);
+  color: var(--ui-accent-contrast);
+  border-color: color-mix(in srgb, var(--ui-accent) 70%, transparent);
+}
+
+body.nav-side .util-btn-agent:hover {
+  filter: brightness(1.08);
+}
+
 .util-label {
   overflow: hidden;
   text-overflow: ellipsis;

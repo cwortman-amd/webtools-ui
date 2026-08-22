@@ -82,7 +82,14 @@ export async function gotoWithMode(page, modeKey, mode, opts = {}) {
  */
 export async function listSidebarTabIds(page, navSelector = ".sidebar-nav .nav-btn") {
   return page.$$eval(`${navSelector}[data-tab]`, (btns) =>
-    btns.map((b) => b.getAttribute("data-tab")).filter(Boolean)
+    btns
+      .filter((b) => {
+        if (b.hidden) return false;
+        const style = window.getComputedStyle(b);
+        return style.display !== "none" && style.visibility !== "hidden";
+      })
+      .map((b) => b.getAttribute("data-tab"))
+      .filter(Boolean)
   );
 }
 
