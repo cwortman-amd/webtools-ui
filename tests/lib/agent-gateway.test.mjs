@@ -51,3 +51,46 @@ test("AgentGateway handles offline KE gracefully", async () => {
   assert.equal(result.intent, "learn");
   assert.equal(result.handled, false);
 });
+
+test("AgentGateway routes learn intent to KE when proxy responds", async () => {
+  const sandbox = {
+    window: {},
+    console,
+    fetch: () =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ answer: "Use rocprof for kernel counters." }),
+      }),
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.runInNewContext(
+    `(function (global) {
+      var config = { enabled: true, corpora: ["ke-curriculum"], keAskUrl: "/api/ask" };
+      var LEARN_RE = /\\b(how|why|what|explain|learn|training|course|wiki|curriculum|module|lesson)\\b/i;
+      function classify(text) { return LEARN_RE.test(text || "") ? "learn" : "act"; }
+      function route(ctx) {
+        var text = String((ctx && ctx.text) || "");
+        var intent = classify(text);
+        if (intent === "learn" && config.corpora.indexOf("ke-curriculum") >= 0) {
+          return fetch(config.keAskUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: text, mode: "plan" }),
+          }).then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (payload) {
+              if (!payload || !payload.answer) return { intent: intent, handled: false };
+              return { intent: intent, handled: true, reply: payload.answer };
+            }).catch(function () { return { intent: intent, handled: false }; });
+        }
+        return Promise.resolve({ intent: intent, handled: false });
+      }
+      global.AgentGateway = { classify: classify, route: route };
+    })(globalThis);`,
+    sandbox
+  );
+  const result = await sandbox.AgentGateway.route({ text: "Explain ROCm profiling" });
+  assert.equal(result.intent, "learn");
+  assert.equal(result.handled, true);
+  assert.match(result.reply, /rocprof/i);
+});

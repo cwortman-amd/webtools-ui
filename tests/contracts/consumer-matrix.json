@@ -57,6 +57,7 @@
       "panelSelector": ".tab-panel",
       "demoBannerKeys": [],
       "userModeKey": "sp-user-mode",
+      "bootstrapUserMode": "advanced",
       "requirePortalView": false,
       "buttonVisualContract": true,
       "shellTabChangedRecovery": false,

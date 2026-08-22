@@ -41,9 +41,12 @@
     return null;
   }
 
-  function cardHtml(rule) {
+  function cardHtml(rule, packet) {
     if (!rule || !rule.href) return "";
     var href = String(rule.href);
+    if (packet && global.AgentHandoff && typeof global.AgentHandoff.attachToUrl === "function") {
+      href = global.AgentHandoff.attachToUrl(href, packet);
+    }
     var label = String(rule.label || "Open related curriculum in Knowledge Exchange");
     var hint = String(rule.hint || "Wiki-grounded lessons · separate training agent");
     return (
@@ -62,7 +65,16 @@
     if (!result || !result.reply) return result;
     var rule = pick(rules, ctx);
     if (!rule) return result;
-    var card = cardHtml(rule);
+    var packet = null;
+    if (global.AgentHandoff && typeof global.AgentHandoff.buildPacket === "function") {
+      packet = global.AgentHandoff.buildPacket({
+        product: (ctx && ctx.productId) || "",
+        question: ctx && ctx.question,
+        summary: String(result.reply || "").slice(0, 800),
+        intent: "learn",
+      });
+    }
+    var card = cardHtml(rule, packet);
     if (!card) return result;
     if (result.html) {
       result.reply = String(result.reply) + card;
@@ -87,7 +99,11 @@
         var out = fn.apply(this, arguments);
         return Promise.resolve(out).then(function (result) {
           if (!result || skipKinds[result.kind]) return result;
-          return enrich(result, rules, ctx);
+          var context = ctx || {
+            pathname: global.location && global.location.pathname,
+            productId: global.WebtoolsPlatform && global.WebtoolsPlatform.id,
+          };
+          return enrich(result, rules, context);
         });
       };
     }

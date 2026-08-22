@@ -16,7 +16,7 @@
 import path from "node:path";
 import { loadPlaywright, loadStaticServerHelper } from "./lib/playwright-resolve.mjs";
 import { loadConsumerMatrix, resolveReachableConsumers } from "./lib/consumer-matrix.mjs";
-import { gotoShellEntry, listSidebarTabIds } from "./lib/playwright-fixtures.mjs";
+import { gotoShellEntry, listSidebarTabIds, gotoWithMode } from "./lib/playwright-fixtures.mjs";
 import {
   assertNoBlankMainArea,
   clickSidebarTab,
@@ -209,11 +209,20 @@ async function main() {
     const context = await browser.newContext({ baseURL });
     const page = await context.newPage();
     try {
-      await gotoShellEntry(page, def.entryPath, {
-        baseURL,
-        demoBannerKeys: def.demoBannerKeys ?? [],
-        navSelector: def.shellNavSelector,
-      });
+      if (def.bootstrapUserMode && def.userModeKey) {
+        await gotoWithMode(page, def.userModeKey, def.bootstrapUserMode, {
+          entryPath: def.entryPath,
+          baseURL,
+          demoBannerKeys: def.demoBannerKeys ?? [],
+          navSelector: def.shellNavSelector,
+        });
+      } else {
+        await gotoShellEntry(page, def.entryPath, {
+          baseURL,
+          demoBannerKeys: def.demoBannerKeys ?? [],
+          navSelector: def.shellNavSelector,
+        });
+      }
       await runShellChecks(page, def, expect);
     } catch (err) {
       fail("page loaded", String(err.message || err).slice(0, 200));

@@ -10,6 +10,9 @@ cd "$ROOT"
 echo "[ci] plugin manifest registry (--strict)"
 python3 scripts/check_plugin_manifests.py --strict --workspace "$WORKSPACE"
 
+echo "[ci] demo-portal registry snapshot (--strict)"
+python3 scripts/sync_plugin_registry_snapshot.py --strict --workspace "$WORKSPACE"
+
 declare -A PROFILE=(
   [cluster-manager]=dashboard
   [dc-planner]=dashboard
