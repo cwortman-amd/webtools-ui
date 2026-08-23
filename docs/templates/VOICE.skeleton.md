@@ -1,13 +1,13 @@
 ---
-title: "VOICE (canonical skeleton)"
-description: "Shared H1–H3 outline for `docs/VOICE.md` across consumer repos. All 3 consumers already converge on this structure; the skeleton just locks it in."
+type: Template
+title: VOICE (canonical skeleton)
+description: Shared H1–H3 outline for `docs/VOICE.md` across consumer repos. All 3 consumers already converge on this structure; the skeleton just locks it in.
 status: phase-7-canonical
 applies_to:
-  - llm-benchmark/docs/VOICE.md
-  - dc-planner/docs/VOICE.md
-  - cluster-manager/docs/VOICE.md
+- llm-benchmark/docs/VOICE.md
+- dc-planner/docs/VOICE.md
+- cluster-manager/docs/VOICE.md
 ---
-
 # `[[VOICE]]` Voice AI Navigation Layer
 
 > Authoring rules: see top of `DEMO.skeleton.md`.

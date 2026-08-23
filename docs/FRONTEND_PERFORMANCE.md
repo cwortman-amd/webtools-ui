@@ -1,3 +1,8 @@
+---
+type: Reference
+title: Frontend Performance & Responsiveness — Canonical Framework
+description: '**Status:** Canonical, 2026-08-05. Applies to every consumer that mounts this repo at `shared/`.'
+---
 # Frontend Performance & Responsiveness — Canonical Framework
 
 **Status:** Canonical, 2026-08-05. Applies to every consumer that mounts this repo at `shared/`.

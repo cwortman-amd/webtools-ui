@@ -1,3 +1,8 @@
+---
+type: Test Plan
+title: Button visual contract (cross-consumer)
+description: 'Shell consumers (Knowledge Exchange portal, future dashboards) share accent-filled primary controls from `webtools-ui/css/`. Those controls must use readable contrast: **light text on solid accent fills**, driven by the `--ui-accent-contrast` token.'
+---
 # Button visual contract (cross-consumer)
 
 Shell consumers (Knowledge Exchange portal, future dashboards) share accent-filled

@@ -1,13 +1,13 @@
 ---
-title: "DEMO (canonical skeleton)"
-description: "Shared H1–H3 outline for `docs/DEMO.md` across consumer repos. Each consumer's own DEMO.md keeps its product-specific H4+ content, but the H1–H3 spine is identical so a reader can move between sibling docs without re-orienting. See webtools-ui/docs/PLAN.md Phase 7."
+type: Template
+title: DEMO (canonical skeleton)
+description: Shared H1–H3 outline for `docs/DEMO.md` across consumer repos. Each consumer's own DEMO.md keeps its product-specific H4+ content, but the H1–H3 spine is identical so a reader can move between sibling docs without re-orienting. See webtools-ui/docs/PLAN.md Phase 7.
 status: phase-7-canonical
 applies_to:
-  - llm-benchmark/docs/DEMO.md
-  - dc-planner/docs/DEMO.md
-  - cluster-manager/docs/DEMO.md
+- llm-benchmark/docs/DEMO.md
+- dc-planner/docs/DEMO.md
+- cluster-manager/docs/DEMO.md
 ---
-
 # `[[DEMO]]` Demo Mode — Narrated Dashboard Walkthrough
 
 > **Authoring rule:** Sections marked **[CANONICAL]** must be present

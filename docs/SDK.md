@@ -1,12 +1,15 @@
 ---
+type: Reference
 title: webtools-ui SDK
-aliases: [UI SDK, Design System SDK, Webtools SDK]
-updated: 2026-08-09
+description: '**webtools-ui is the UI SDK** for AMD Instinct web tools. It defines **look and feel** (tokens, skins, typography, motion) and ships **common components** (sidebar, topnav, buttons, chips, forms, tables, chat orb, demo chrome) that sibling products consume through a stable mount contract.'
+aliases:
+- UI SDK
+- Design System SDK
+- Webtools SDK
 status: active
+updated: 2026-08-09
 ---
-
 <!-- markdownlint-disable MD025 -->
-
 # webtools-ui SDK
 
 **webtools-ui is the UI SDK** for AMD Instinct web tools. It defines **look and feel** (tokens,

@@ -1,3 +1,8 @@
+---
+type: Reference
+title: webtools-ui
+description: '**UI SDK** for AMD Instinct web tools — canonical **look and feel** (tokens, skins, typography) and **common components** (sidebar shell, catalog topnav, buttons, chips, forms, chat orb, demo chrome). Sibling products mount this repo at `shared/` and compose domain UI from SDK primitives.'
+---
 # webtools-ui
 
 **UI SDK** for AMD Instinct web tools — canonical **look and feel** (tokens, skins, typography)
@@ -290,6 +295,17 @@ Validate manifests: `python3 scripts/check_plugin_manifests.py --strict`
 ---
 
 ## Installation & Setup
+
+**Quick start:** [`docs/INSTALL.md`](docs/INSTALL.md) — one-line curl installers for each consumer on a local node.
+
+```bash
+curl -fsSL https://curt.wortman.ai/tools/install-dc-planner.sh | bash
+# → http://127.0.0.1:8080/pages/index.html
+```
+
+Install scripts live in [`tools/`](tools/) (`install-lib.sh` + `install-<tool>.sh`). Host that directory at `https://curt.wortman.ai/tools/` for the curl URLs above.
+
+**Agent skill (full suite):** [`docs/AGENT_SKILLS.md`](docs/AGENT_SKILLS.md) · `.cursor/skills/webtools-suite-install/SKILL.md`
 
 ### Local Installation (Laptop/Dev Environment)
 

@@ -1,3 +1,8 @@
+---
+type: Implementation Plan
+title: CSS Harmonization Audit — Phases 9.8c (2026-05-04) + 9.8d (2026-05-05)
+description: '**Status:** Phase A + B + partial C shipped 2026-05-04. Phase D.1 (Material Symbols self-host) + D.3 (dc-planner monolith dedup, partial) shipped 2026-05-05. D.2 + D.4 + remaining D.1/D.3 work tracked below.'
+---
 # CSS Harmonization Audit — Phases 9.8c (2026-05-04) + 9.8d (2026-05-05)
 
 **Status:** Phase A + B + partial C shipped 2026-05-04. Phase D.1 (Material Symbols self-host) + D.3 (dc-planner monolith dedup, partial) shipped 2026-05-05. D.2 + D.4 + remaining D.1/D.3 work tracked below.

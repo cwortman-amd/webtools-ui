@@ -1,13 +1,13 @@
 ---
-title: "STYLE (canonical skeleton)"
-description: "Shared H1–H3 outline for `docs/STYLE.md` across consumer repos. All 3 consumers already converge on this numbered structure."
+type: Template
+title: STYLE (canonical skeleton)
+description: Shared H1–H3 outline for `docs/STYLE.md` across consumer repos. All 3 consumers already converge on this numbered structure.
 status: phase-7-canonical
 applies_to:
-  - llm-benchmark/docs/STYLE.md
-  - dc-planner/docs/STYLE.md
-  - cluster-manager/docs/STYLE.md
+- llm-benchmark/docs/STYLE.md
+- dc-planner/docs/STYLE.md
+- cluster-manager/docs/STYLE.md
 ---
-
 # `[[STYLE]]` UI Style Guide
 
 > Authoring rules: see top of `DEMO.skeleton.md`. Section *count* and

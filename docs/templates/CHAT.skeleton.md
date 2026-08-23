@@ -1,13 +1,13 @@
 ---
-title: "CHAT (canonical skeleton)"
-description: "Shared H1–H3 outline for `docs/CHAT.md` across consumer repos. Captures the floating orb PRD format that all 3 consumers already converge on."
+type: Template
+title: CHAT (canonical skeleton)
+description: Shared H1–H3 outline for `docs/CHAT.md` across consumer repos. Captures the floating orb PRD format that all 3 consumers already converge on.
 status: phase-7-canonical
 applies_to:
-  - llm-benchmark/docs/CHAT.md
-  - dc-planner/docs/CHAT.md
-  - cluster-manager/docs/CHAT.md
+- llm-benchmark/docs/CHAT.md
+- dc-planner/docs/CHAT.md
+- cluster-manager/docs/CHAT.md
 ---
-
 # `[[CHAT]]` AI Chat & Floating Orb — Product Requirements Document
 
 > Authoring rules: see top of `DEMO.skeleton.md`.

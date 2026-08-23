@@ -1,3 +1,8 @@
+---
+type: Test Plan
+title: Cross-Consumer Testing Blueprint
+description: '**Status:** 2026-08-22 (W7). Canonical layout for shared test infrastructure in `webtools-ui`, consumed by sibling repos through `shared/` symlinks.'
+---
 # Cross-Consumer Testing Blueprint
 
 **Status:** 2026-08-22 (W7). Canonical layout for shared test infrastructure in `webtools-ui`,

@@ -1,19 +1,37 @@
 ---
+type: Test Plan
 title: Universal Knowledge Chat — Test Program
-aliases: [TEST_KNOWLEDGE_CHAT, Knowledge Chat Test Plan, UKC Test Plan]
+description: Platform ownership pointer for the Universal Knowledge Chat acceptance suite. Working copy with full case catalogs lives in each consumer as docs/TEST_CHAT.md; requirement IDs stay stable.
+aliases:
+- TEST_KNOWLEDGE_CHAT
+- Knowledge Chat Test Plan
+- UKC Test Plan
 domain: platform
-tags: [prd, testing, chat, retrieval, okf, security, citations, platform-service]
+tags:
+- prd
+- testing
+- chat
+- retrieval
+- okf
+- security
+- citations
+- platform-service
 summary: Platform ownership pointer for the Universal Knowledge Chat acceptance suite. Working copy with full case catalogs lives in each consumer as docs/TEST_CHAT.md; requirement IDs stay stable.
 status: proposed
-audience: [qa, security, product, architecture, platform, ai-ml]
+audience:
+- qa
+- security
+- product
+- architecture
+- platform
+- ai-ml
 updated: 2026-08-15
 related:
-  - "[[KNOWLEDGE_CHAT]]"
-  - "[[CHAT_ARCHITECTURE]]"
-  - "templates/CHAT.skeleton.md"
-  - "[[TESTING_STRATEGY]]"
+- '[[KNOWLEDGE_CHAT]]'
+- '[[CHAT_ARCHITECTURE]]'
+- templates/CHAT.skeleton.md
+- '[[TESTING_STRATEGY]]'
 ---
-
 <!-- markdownlint-disable MD025 -->
 
 # Universal Knowledge Chat — Test Program

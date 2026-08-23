@@ -1,3 +1,8 @@
+---
+type: Reference
+title: Shell modules — modular sidebar infrastructure
+description: This document defines how **product functionality snaps onto** the harmonized dashboard shell shared by `cluster-manager`, `dc-planner`, and `llm-benchmark`.
+---
 # Shell modules — modular sidebar infrastructure
 
 This document defines how **product functionality snaps onto** the harmonized dashboard

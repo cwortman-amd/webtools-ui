@@ -1,3 +1,8 @@
+---
+type: Reference
+title: '`pages/index.html` skeleton — canonical template + CI guard'
+description: '**Status**: live (Phase 9.8e P4, 2026-05-05) **Source of truth**: [`templates/index.skeleton.html`](../templates/index.skeleton.html) **CI guard**: [`scripts/check_index_skeleton.py`](../scripts/check_index_skeleton.py) **Adopted by**: `llm-benchmark`, `cluster-manager`, `dc-planner` (dashboard profile); `knowledge-exchange` (catalog profile via [`templates/catalog.skeleton.html`](../templates/catalog.skeleton.html))'
+---
 # `pages/index.html` skeleton — canonical template + CI guard
 
 > **Status**: live (Phase 9.8e P4, 2026-05-05)

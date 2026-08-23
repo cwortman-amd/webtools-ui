@@ -1,3 +1,8 @@
+---
+type: Design System
+title: Design tokens (`css/tokens.css`)
+description: 'Harmonization **T4.1**: neutral defaults for every `--ui-*` custom property before skins override them.'
+---
 # Design tokens (`css/tokens.css`)
 
 Harmonization **T4.1**: neutral defaults for every `--ui-*` custom property before skins

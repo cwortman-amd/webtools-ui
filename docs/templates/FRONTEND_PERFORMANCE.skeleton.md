@@ -1,14 +1,14 @@
 ---
-title: "FRONTEND_PERFORMANCE (canonical skeleton)"
-description: "Shared outline for each consumer's local frontend performance instance. The framework itself is NOT copied — it is read from shared/docs/FRONTEND_PERFORMANCE.md."
+type: Template
+title: FRONTEND_PERFORMANCE (canonical skeleton)
+description: Shared outline for each consumer's local frontend performance instance. The framework itself is NOT copied — it is read from shared/docs/FRONTEND_PERFORMANCE.md.
 status: canonical
 applies_to:
-  - llm-benchmark/docs/FRONTEND_PERFORMANCE.md
-  - dc-planner/docs/FRONTEND_PERFORMANCE.md
-  - cluster-manager/docs/FRONTEND_PERFORMANCE.md
-  - knowledge-exchange/docs/FRONTEND_PERFORMANCE.md
+- llm-benchmark/docs/FRONTEND_PERFORMANCE.md
+- dc-planner/docs/FRONTEND_PERFORMANCE.md
+- cluster-manager/docs/FRONTEND_PERFORMANCE.md
+- knowledge-exchange/docs/FRONTEND_PERFORMANCE.md
 ---
-
 # `[[FRONTEND_PERFORMANCE]]` Local Performance Instance
 
 > **Authoring rule.** This skeleton produces a *short* document. The metric model, wait ladder,

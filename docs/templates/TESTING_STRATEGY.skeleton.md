@@ -1,14 +1,14 @@
 ---
-title: "TESTING_STRATEGY (canonical skeleton)"
-description: "Shared outline for each consumer's local testing instance. The framework itself is NOT copied — it is read from shared/docs/TESTING_STRATEGY.md."
+type: Template
+title: TESTING_STRATEGY (canonical skeleton)
+description: Shared outline for each consumer's local testing instance. The framework itself is NOT copied — it is read from shared/docs/TESTING_STRATEGY.md.
 status: canonical
 applies_to:
-  - llm-benchmark/docs/TESTING_STRATEGY.md
-  - dc-planner/docs/TESTING_STRATEGY.md
-  - cluster-manager/docs/TESTING_STRATEGY.md
-  - knowledge-exchange/docs/TESTING_STRATEGY.md
+- llm-benchmark/docs/TESTING_STRATEGY.md
+- dc-planner/docs/TESTING_STRATEGY.md
+- cluster-manager/docs/TESTING_STRATEGY.md
+- knowledge-exchange/docs/TESTING_STRATEGY.md
 ---
-
 # `[[TESTING_STRATEGY]]` Local Testing Instance
 
 > **Authoring rule.** This skeleton produces a *short* document. The tier model, seam model,

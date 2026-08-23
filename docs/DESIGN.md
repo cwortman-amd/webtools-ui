@@ -1,3 +1,8 @@
+---
+type: Design System
+title: Dashboard shell & portal design
+description: Part of the **webtools-ui SDK**. See [`SDK.md`](SDK.md) for the full component catalog; this doc covers **layout shell** visual rules (sidebar, hero, catalog topnav).
+---
 # Dashboard shell & portal design
 
 Part of the **webtools-ui SDK**. See [`SDK.md`](SDK.md) for the full component catalog; this doc

@@ -1,13 +1,13 @@
 ---
-title: "PITCH (canonical skeleton)"
-description: "Shared H1–H3 outline for `docs/PITCH.md` (the executive deck slide outline) across consumer repos. The slide-by-slide structure already converges across all 3."
+type: Template
+title: PITCH (canonical skeleton)
+description: Shared H1–H3 outline for `docs/PITCH.md` (the executive deck slide outline) across consumer repos. The slide-by-slide structure already converges across all 3.
 status: phase-7-canonical
 applies_to:
-  - llm-benchmark/docs/PITCH.md
-  - dc-planner/docs/PITCH.md
-  - cluster-manager/docs/PITCH.md
+- llm-benchmark/docs/PITCH.md
+- dc-planner/docs/PITCH.md
+- cluster-manager/docs/PITCH.md
 ---
-
 # `[[PITCH]]` Pitch Deck — Slide Outline & Build Guide
 
 > Authoring rules: see top of `DEMO.skeleton.md`. The slide titles

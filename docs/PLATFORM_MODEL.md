@@ -1,12 +1,15 @@
 ---
+type: Reference
 title: Webtools Platform Model
-aliases: [Platform Model, Plugin Architecture, Beyond Obsidian Analogy]
-updated: 2026-08-09
+description: The **webtools-ui SDK** ([`SDK.md`](SDK.md)) supplies look, feel, and common components. This document defines how **product plugins** compose SDK primitives into full applications — standardized like VS Code Extensions and Obsidian plugins, adapted for static sibling deployment.
+aliases:
+- Platform Model
+- Plugin Architecture
+- Beyond Obsidian Analogy
 status: active
+updated: 2026-08-09
 ---
-
 <!-- markdownlint-disable MD025 -->
-
 # Webtools Platform Model
 
 The **webtools-ui SDK** ([`SDK.md`](SDK.md)) supplies look, feel, and common components.

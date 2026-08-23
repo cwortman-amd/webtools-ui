@@ -1,19 +1,22 @@
 ---
+type: Implementation Plan
 title: Harmonization Implementation Plan
-aliases: [Implementation Plan, Parallel Workstreams, P11+ Roadmap]
-updated: 2026-08-22
+description: This document turns the **modular component infrastructure** (ExtensionHost, MCP contract, unified bootstrap, CI parity) and **federated AI agent** (Agent Gateway + KE knowledge plane) recommendations into **parallel workstreams**. Each task lists dependencies, deliverables, and
+aliases:
+- Implementation Plan
+- Parallel Workstreams
+- P11+ Roadmap
 status: active
 owner: platform
+updated: 2026-08-22
 related:
-  - "[[PLATFORM_MODEL]]"
-  - "[[CONTRIBUTIONS]]"
-  - "[[PLUGIN_CONTRACT]]"
-  - "[[KNOWLEDGE_CHAT]]"
-  - "[[CROSS_CONSUMER_TESTING]]"
+- '[[PLATFORM_MODEL]]'
+- '[[CONTRIBUTIONS]]'
+- '[[PLUGIN_CONTRACT]]'
+- '[[KNOWLEDGE_CHAT]]'
+- '[[CROSS_CONSUMER_TESTING]]'
 ---
-
 <!-- markdownlint-disable MD025 -->
-
 # Harmonization Implementation Plan
 
 This document turns the **modular component infrastructure** (ExtensionHost, MCP contract,
@@ -561,6 +564,7 @@ enhanced-validation: ci check-extensions check-mcp check-agent
 
 | Date | Change |
 | --- | --- |
+| 2026-08-22 | **OKF v0.2 doc headers:** all platform + consumer `docs/**/*.md` carry `type`/`title`/`description`; see [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) § OKF headers and `scripts/okf_doc_headers.py` |
 | 2026-08-22 | **W7 complete:** AG-3 `act()`, KE `agent-context.js`, L1b extension sidebars, workflow shared-mount gates, pilot MCP handlers |
 | 2026-08-22 | **W6 complete:** `agent-handoff.js`, registry CI `--strict`, ExtensionHost pilot hooks (LB/CM/DC) |
 | 2026-08-22 | **W5 complete:** Agent Gateway in ChatOrb, bootstrap chat-mount, cross-consumer matrix |

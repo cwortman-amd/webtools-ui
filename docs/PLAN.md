@@ -1,19 +1,19 @@
 ---
-title: "Cross-Repo Harmonization Plan"
-description: "Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE feature surfaces across `llm-benchmark`, `dc-planner`, and `cluster-manager` via the shared `webtools-ui/` library (mounted as `shared/` in each consumer). Historical phase narratives below preserve the original `shared-ui` and `gpu-planner` names that pre-date the 2026-05-03 (gpu-planner→dc-planner) and 2026-05-04 (shared-ui→webtools-ui) renames."
-date: 2026-05-02
-updated: 2026-05-10
-status: complete
-phase: 9.8g
-owner: "Curt Wortman"
-category: architecture
+type: Reference
+title: Cross-Repo Harmonization Plan
+description: Phased plan to harmonize the DEMO, PITCH, AGENT, VOICE, and STYLE feature surfaces across `llm-benchmark`, `dc-planner`, and `cluster-manager` via the shared `webtools-ui/` library (mounted as `shared/` in each consumer). Historical phase narratives below preserve the original `shared-ui` and `gpu-planner` names that pre-date the 2026-05-03 (gpu-planner→dc-planner) and 2026-05-04 (shared-ui→webtools-ui) renames.
 tags:
-  - harmonization
-  - shared-ui
-  - cross-repo
-  - subtree
+- harmonization
+- shared-ui
+- cross-repo
+- subtree
+status: complete
+owner: Curt Wortman
+updated: 2026-05-10
+category: architecture
+date: 2026-05-02
+phase: 9.8g
 ---
-
 # Cross-Repo Harmonization Plan
 
 ## Scope

@@ -1,12 +1,15 @@
 ---
+type: Reference
 title: Webtools UI Community Plugin Contract
-aliases: [Plugin Contract, Community Plugin Spec, Webtools Plugin API]
-updated: 2026-08-09
+description: This document formalizes how **sibling consumer repositories** extend the **webtools-ui SDK** (`shared/` mount). Start with [`SDK.md`](SDK.md) for look, feel, and components.
+aliases:
+- Plugin Contract
+- Community Plugin Spec
+- Webtools Plugin API
 status: active
+updated: 2026-08-09
 ---
-
 <!-- markdownlint-disable MD025 -->
-
 # Webtools UI Community Plugin Contract
 
 ## Purpose

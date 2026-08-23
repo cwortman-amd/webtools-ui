@@ -1,13 +1,13 @@
 ---
-title: "AGENT (canonical skeleton)"
-description: "Shared H1–H3 outline for `docs/AGENT.md` across consumer repos. Each consumer documents its own action verbs and skill registry, but the H1–H3 spine is identical."
+type: Template
+title: AGENT (canonical skeleton)
+description: Shared H1–H3 outline for `docs/AGENT.md` across consumer repos. Each consumer documents its own action verbs and skill registry, but the H1–H3 spine is identical.
 status: phase-7-canonical
 applies_to:
-  - llm-benchmark/docs/AGENT.md
-  - dc-planner/docs/AGENT.md
-  - cluster-manager/docs/AGENT.md
+- llm-benchmark/docs/AGENT.md
+- dc-planner/docs/AGENT.md
+- cluster-manager/docs/AGENT.md
 ---
-
 # `[[AGENT]]` Agent and LLM Architecture
 
 > Authoring rules: see top of `DEMO.skeleton.md`. **[CANONICAL]** sections

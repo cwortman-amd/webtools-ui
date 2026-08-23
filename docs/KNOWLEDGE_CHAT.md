@@ -1,24 +1,44 @@
 ---
+type: Product Requirements
 title: Universal Knowledge Chat — Canonical PRD
-aliases: [Knowledge Chat, Corpus Chat, RAG Chat PRD]
+description: Canonical product requirements for a generic, local-first conversational knowledge system — vault registration, ingestion, trust-aware retrieval, citations, web research, and human-approved writes. Consumed by any webtools-ui sibling via shared/.
+aliases:
+- Knowledge Chat
+- Corpus Chat
+- RAG Chat PRD
 domain: platform
-tags: [prd, chat, retrieval, okf, obsidian, pdf, local-first, grounding, agents, platform-service]
+tags:
+- prd
+- chat
+- retrieval
+- okf
+- obsidian
+- pdf
+- local-first
+- grounding
+- agents
+- platform-service
 summary: Canonical product requirements for a generic, local-first conversational knowledge system — vault registration, ingestion, trust-aware retrieval, citations, web research, and human-approved writes. Consumed by any webtools-ui sibling via shared/.
 status: proposed
-audience: [product, architecture, platform, ai-ml, frontend, security]
+audience:
+- product
+- architecture
+- platform
+- ai-ml
+- frontend
+- security
 updated: 2026-08-17
 related:
-  - "[[PLATFORM_MODEL]]"
-  - "[[CONTRIBUTIONS]]"
-  - "[[SDK]]"
-  - "templates/CHAT.skeleton.md"
-  - "[[TEST_KNOWLEDGE_CHAT]]"
-  - "[[TEST_CHAT]]"
-  - "[[CHAT]]"
-  - "[[CHAT_ARCHITECTURE]]"
-  - "[[CHAT_POSITIONING]]"
+- '[[PLATFORM_MODEL]]'
+- '[[CONTRIBUTIONS]]'
+- '[[SDK]]'
+- templates/CHAT.skeleton.md
+- '[[TEST_KNOWLEDGE_CHAT]]'
+- '[[TEST_CHAT]]'
+- '[[CHAT]]'
+- '[[CHAT_ARCHITECTURE]]'
+- '[[CHAT_POSITIONING]]'
 ---
-
 <!-- markdownlint-disable MD025 -->
 
 # Universal Knowledge Chat — Canonical PRD

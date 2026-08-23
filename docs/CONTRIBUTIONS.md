@@ -1,12 +1,15 @@
 ---
+type: Reference
 title: Contribution Points & Composable Modules
-aliases: [Contributions, VS Code Extension Model, Module Swapping]
-updated: 2026-08-09
+description: This document defines how webtools-ui achieves **VS Code Extension–style standardization** and **Obsidian-style lifecycle hooks** so product teams can **swap, disable, and mix-and-match** functionality without forking shell chrome.
+aliases:
+- Contributions
+- VS Code Extension Model
+- Module Swapping
 status: active
+updated: 2026-08-22
 ---
-
 <!-- markdownlint-disable MD025 -->
-
 # Contribution Points & Composable Modules
 
 This document defines how webtools-ui achieves **VS Code Extension–style standardization** and
@@ -45,6 +48,44 @@ Three concrete outcomes:
 **Deployment difference:** VS Code and Obsidian load extensions at runtime from a marketplace.
 Webtools-ui uses **static sibling repos** + declarative manifests — same *composition model*,
 different *delivery* (symlink `shared/`, CI validates manifests).
+
+---
+
+## OKF v0.2 documentation headers
+
+All platform and consumer project documentation (`docs/**/*.md`, repo `README.md`, and
+`tests/BUTTON-VISUAL-CONTRACT.md`) uses [Open Knowledge Format v0.2](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
+YAML frontmatter. OKF requires exactly one field on every concept document: **`type`**. This repo
+adds **`title`** and **`description`** on every doc for search snippets and agent retrieval.
+
+### Doc `type` values (repo profile)
+
+| `type` | Use for |
+| --- | --- |
+| `Product Requirements` | PRDs (`PRD.md`, `CHAT.md`, `KNOWLEDGE_CHAT.md`, …) |
+| `Reference` | Architecture, API, indexes, glossaries, SDK/platform contracts |
+| `Playbook` | User guides, workflows, install/runbooks, SOPs |
+| `Test Plan` | Testing strategy, test specs, visual/regression contracts |
+| `Design System` | Design, style, tokens, pitch/deck specs |
+| `Implementation Plan` | Harmonization plans, roadmaps, integration proposals |
+| `Template` | `docs/templates/*.skeleton.md` authoring scaffolds |
+
+Existing extension fields (`aliases`, `domain`, `tags`, `summary`, `status`, `related`, …) are
+preserved. When both `summary` and `description` exist, they may carry the same text; agents may
+read either.
+
+### Authoring rules
+
+1. Start every new doc with a frontmatter block; put `type` first.
+2. Keep `<!-- markdownlint-disable MD025 -->` **after** the closing `---`, not inside frontmatter.
+3. Do **not** put `okf_version` on individual docs — that key is reserved for OKF bundle-root
+   `index.md` files (see Knowledge Exchange module FAQ bundles).
+4. Re-run the header linter after bulk edits:
+
+```bash
+python3 scripts/okf_doc_headers.py --dry-run
+python3 scripts/okf_doc_headers.py
+```
 
 ---
 
