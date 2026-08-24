@@ -89,7 +89,20 @@
         }
       }
       return extChain.then(function () {
-        return loadDeferredScripts(manifest, opts).then(function () { return manifest; });
+        var adapters = Promise.resolve();
+        if (global.WebtoolsMcp && typeof global.WebtoolsMcp.loadFromManifest === "function") {
+          adapters = adapters.then(function () {
+            return Promise.resolve(global.WebtoolsMcp.loadFromManifest(manifest));
+          });
+        }
+        if (global.AgentGateway && typeof global.AgentGateway.loadFromManifest === "function") {
+          adapters = adapters.then(function () {
+            return Promise.resolve(global.AgentGateway.loadFromManifest(manifest));
+          });
+        }
+        return adapters.then(function () {
+          return loadDeferredScripts(manifest, opts).then(function () { return manifest; });
+        });
       });
     });
   }

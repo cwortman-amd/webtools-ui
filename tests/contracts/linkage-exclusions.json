@@ -1,0 +1,78 @@
+{
+  "$schema": "linkage-exclusions-v1",
+  "description": "Controls/views intentionally without backend linkage or deferred test coverage.",
+  "exclusions": [
+    {
+      "consumer": "dc-planner",
+      "controlId": "tco.cloudRefresh",
+      "rationale": "Optional Azure retail API fetch; requires network and external service.",
+      "owner": "dc-planner",
+      "risk": "medium",
+      "remediationDate": "2026-09-30",
+      "testTier": "nightly-net"
+    },
+    {
+      "consumer": "dc-planner",
+      "controlId": "pitch.deckNav",
+      "rationale": "Static pitch deck; no planner state or API.",
+      "owner": "dc-planner",
+      "risk": "low",
+      "remediationDate": "2026-10-15",
+      "testTier": "e2e-smoke"
+    },
+    {
+      "consumer": "llm-benchmark",
+      "controlId": "view.loadCsv",
+      "rationale": "View tab reads static benchmark_results.csv; indirect BE via deploy results/generate.",
+      "owner": "llm-benchmark",
+      "risk": "low",
+      "remediationDate": "2026-09-01",
+      "testTier": "integration"
+    },
+    {
+      "consumer": "llm-benchmark",
+      "controlId": "report.present",
+      "rationale": "Present builds slides client-side into localStorage only by design.",
+      "owner": "llm-benchmark",
+      "risk": "low",
+      "remediationDate": "n/a",
+      "testTier": "e2e-localStorage"
+    },
+    {
+      "consumer": "demo-portal",
+      "controlId": "catalog.filters",
+      "rationale": "Static manifest filtering is client-only by design for air-gap hosting.",
+      "owner": "demo-portal",
+      "risk": "low",
+      "remediationDate": "n/a",
+      "testTier": "unit+e2e-url"
+    },
+    {
+      "consumer": "knowledge-exchange",
+      "controlId": "browse.tabs",
+      "rationale": "Browse views render from manifest/localStorage; no REST for catalog grid.",
+      "owner": "knowledge-exchange",
+      "risk": "medium",
+      "remediationDate": "2026-09-15",
+      "testTier": "e2e-render"
+    },
+    {
+      "consumer": "cluster-manager",
+      "controlId": "fabric.standalone",
+      "rationale": "fabric.html reachable via network sub-mode and direct URL; covered in tab-linkage partial.",
+      "owner": "cluster-manager",
+      "risk": "medium",
+      "remediationDate": "2026-09-01",
+      "testTier": "e2e"
+    },
+    {
+      "consumer": "webtools-ui",
+      "controlId": "suite.installModal",
+      "rationale": "Install modal copies curl one-liner only; no server mutation.",
+      "owner": "webtools-ui",
+      "risk": "low",
+      "remediationDate": "2026-10-01",
+      "testTier": "e2e-smoke"
+    }
+  ]
+}

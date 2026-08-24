@@ -17,6 +17,8 @@ description: >-
 ```bash
 curl -fsSL https://curt.wortman.ai/tools/install-webtools-ui.sh | bash
 # → http://127.0.0.1:8090/pages/index.html (Tools Hub; needs sibling repos for card links)
+
+cd ~/workspace/webtools-ui && source ./setup.sh
 ```
 
 ## Connected tools
@@ -46,6 +48,8 @@ python3 scripts/html_consistency_audit.py --workspace ..
 Install scripts: `tools/install-*.sh` · Docs: `docs/INSTALL.md`, `docs/AGENT_SKILLS.md`
 
 For installing **all six consumers**, use skill **webtools-suite-install** or `./tools/install-all.sh` then per-tool `install-<tool>.sh` to start services.
+
+For **documentation-driven test expansion**, use this repo's Cursor command **`/test`** (`.cursor/commands/test.md`) and skill **adversarial-documentation-driven-testing** (`.cursor/skills/adversarial-documentation-driven-testing/SKILL.md`) before executing suites. Shell: `make adversarial-preflight` and `make coverage-snapshot`. Refresh consumer copies with `bash scripts/install_adversarial_workflow.sh`.
 
 ## What agents should not do here
 

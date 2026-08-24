@@ -57,6 +57,10 @@
     return config.registry.corpora[id] || null;
   }
 
+  function retrieve(text) {
+    return retrieveFromKe(text);
+  }
+
   function retrieveFromKe(text) {
     if (!config.keAskUrl || !global.fetch) {
       return Promise.resolve(null);
@@ -211,6 +215,8 @@
     configure: configure,
     loadFromManifest: loadFromManifest,
     classify: classify,
+    retrieve: retrieve,
+    retrieveFromKe: retrieveFromKe,
     route: route,
     act: act,
     listActTools: listActTools,

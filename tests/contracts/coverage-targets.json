@@ -1,0 +1,18 @@
+{
+  "$schema": "coverage-targets-v1",
+  "target": { "statements": 100, "lines": 100, "branches": 100, "conditions": 100 },
+  "loopFloor": 80,
+  "notes": "Condition coverage is approximated as coverage.py / c8 branch coverage (partial branches). True MC/DC is not available without an extra instrumenter.",
+  "coreModules": [
+    { "id": "js.plugin-bootstrap", "paths": ["js/plugin-bootstrap.js"] },
+    { "id": "js.mcp-suite", "paths": ["js/mcp-suite.js"] },
+    { "id": "js.voice-local", "paths": ["js/voice-local.js"] },
+    { "id": "js.agent-gateway", "paths": ["js/agent-gateway.js"] },
+    { "id": "js.shell", "paths": ["js/shell.js"] },
+    { "id": "js.chat-orb", "paths": ["js/chat-orb.js"] },
+    { "id": "js.suite", "paths": ["js/suite.js"] },
+    { "id": "js.extension-host", "paths": ["js/extension-host.js"] },
+    { "id": "python.webtools-mcp", "paths": ["python/webtools_mcp/"] },
+    { "id": "scripts.linkage", "paths": ["scripts/check_linkage_inventory.py", "scripts/adversarial_test_preflight.py"] }
+  ]
+}

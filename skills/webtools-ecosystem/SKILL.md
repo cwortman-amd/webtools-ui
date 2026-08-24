@@ -20,6 +20,8 @@ description: >-
 | Training modules, wiki ask, deck pipeline | **knowledge-exchange** | `.cursor/skills/knowledge-exchange/SKILL.md` |
 | Slide search, virtual decks, present mode | **slide-presenter** | `.cursor/skills/slide-presenter/SKILL.md` |
 | Cross-repo CI, manifests, harmonization | **webtools-ui** | `.cursor/skills/webtools-platform/SKILL.md` |
+| Doc-traceable tests, FE→BE linkage | **this repo** | `skills/adversarial-documentation-driven-testing/SKILL.md` |
+| UI/UX design intelligence | **generic** | `skills/ui-ux-pro-max/SKILL.md` |
 
 ## Layout on disk
 

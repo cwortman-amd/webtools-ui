@@ -1470,6 +1470,15 @@
     state.promptIndex = -1;
     state.promptDraft = "";
 
+    if (state.cfg.agentGateway && global.AgentGateway) {
+      if (typeof global.AgentGateway.configure === "function") {
+        global.AgentGateway.configure({ enabled: true });
+      }
+      if (typeof global.AgentGateway.installChatInterceptor === "function") {
+        global.AgentGateway.installChatInterceptor();
+      }
+    }
+
     state.mounted = true;
     return Promise.resolve(api);
   }

@@ -25,6 +25,7 @@ curl -fsSL https://curt.wortman.ai/tools/install-<tool-id>.sh | bash
 | Ecosystem router | `webtools-ui/.cursor/skills/webtools-ecosystem/SKILL.md` | Pick the right tool |
 | **Suite install (all 6 tools)** | `webtools-ui/.cursor/skills/webtools-suite-install/SKILL.md` | Clone + bootstrap full workspace |
 | Platform | `webtools-ui/.cursor/skills/webtools-platform/SKILL.md` | CI / validation only |
+| Adversarial / `/test` | `<repo>/.cursor/skills/adversarial-documentation-driven-testing/SKILL.md` | Doc→impl→test preflight (every suite repo) |
 | LLM Benchmark | `llm-benchmark/.cursor/skills/llm-benchmark/SKILL.md` | REST queue + MCP + sweeps |
 | DC Planner | `dc-planner/.cursor/skills/dc-planner/SKILL.md` | Read catalogs; mutations need browser |
 | Cluster Manager | `cluster-manager/.cursor/skills/cluster-manager/SKILL.md` | REST jobs + MCP stdio + Ansible |

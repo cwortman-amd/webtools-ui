@@ -121,13 +121,16 @@ if [[ "$SKIP_SLOW" == "0" ]]; then
     "cd '$WORKSPACE/cluster-manager' && bash scripts/self-check.sh --quick"
 
   run_layer "dc-planner" "L2 self-check --quick" \
-    "cd '$WORKSPACE/dc-planner' && SELF_CHECK_SKIP_PLAYWRIGHT=1 bash tests/self-check.sh"
+    "cd '$WORKSPACE/dc-planner' && bash tests/self-check.sh --quick"
 
   run_layer "demo-portal" "L2 test.sh meta" \
     "cd '$WORKSPACE/demo-portal' && ./test.sh --level meta --no-validate"
 
+  run_layer "llm-benchmark" "L2 pytest coverage" \
+    "cd '$WORKSPACE/llm-benchmark' && python3 -m pytest tests/ -q --cov=scripts --cov=sweep_core --cov=benchmark_overlay --cov-report=term --cov-fail-under=25" 1
+
   run_layer "llm-benchmark" "L2 test_offline.sh" \
-    "cd '$WORKSPACE/llm-benchmark' && ./test_offline.sh"
+    "cd '$WORKSPACE/llm-benchmark' && ./test_offline.sh" 1
 else
   ((SKIP+=3))
   RESULTS+=("SKIP|cluster-manager|L2 self-check")
@@ -149,6 +152,10 @@ declare -A SYNTAX=(
 for repo in "${!SYNTAX[@]}"; do
   run_layer "$repo" "L3 JS syntax" "cd '$WORKSPACE/$repo' && ${SYNTAX[$repo]}"
 done
+
+# ── L2d: HTML consistency audit ───────────────────────────────────────────────
+run_layer "webtools-ui" "L2d html consistency" \
+  "python3 '$ROOT/scripts/html_consistency_audit.py' --workspace '$WORKSPACE'" 1
 
 # ── knowledge-exchange compile + pytest (medium weight) ─────────────────────
 if [[ "$SKIP_SLOW" == "0" ]]; then

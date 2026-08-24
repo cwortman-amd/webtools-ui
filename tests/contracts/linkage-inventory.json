@@ -1,0 +1,558 @@
+{
+  "$schema": "linkage-inventory-v1",
+  "description": "Machine-readable FE→BE traceability inventory. Canonical human doc: docs/FE_BE_TRACEABILITY_MATRIX.md",
+  "updated": "2026-08-23",
+  "consumers": [
+    {
+      "id": "webtools-ui",
+      "entryPath": "/pages/index.html",
+      "tabs": [{ "id": "suite", "label": "Tools Hub", "type": "platform" }],
+      "controls": [
+        {
+          "id": "suite.registryLoad",
+          "view": "suite",
+          "label": "Boot load plugins registry",
+          "selector": "#suite-grid",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/plugins.registry.json" },
+          "persistence": null,
+          "uiConfirmation": "#suite-grid .suite-tool-card",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/tools-hub-smoke.mjs#suite-registry-load"] }
+        },
+        {
+          "id": "suite.installModal",
+          "view": "suite",
+          "label": "Install pill opens curl modal",
+          "selector": ".suite-pill--install",
+          "action": "click",
+          "backend": { "type": "none" },
+          "persistence": null,
+          "uiConfirmation": "#suiteInstallCommand",
+          "critical": false,
+          "status": "excluded",
+          "tests": {}
+        }
+      ]
+    },
+    {
+      "id": "llm-benchmark",
+      "entryPath": "/pages/index.html",
+      "tabs": [
+        { "id": "plan", "label": "Plan", "iframe": "plan.html", "mode": "standard" },
+        { "id": "queue", "label": "Deploy", "iframe": "deploy.html", "mode": "standard" },
+        { "id": "view", "label": "View", "iframe": "view.html", "mode": "standard" },
+        { "id": "profile", "label": "Profile", "iframe": "profile.html", "mode": "advanced" },
+        { "id": "report", "label": "Report", "iframe": "report.html", "mode": "expert" }
+      ],
+      "controls": [
+        {
+          "id": "plan.loadCatalog",
+          "view": "plan",
+          "label": "Plan tab boot",
+          "selector": "body",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/api/presets" },
+          "persistence": null,
+          "uiConfirmation": "#scenarioSelect",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#plan-load"] }
+        },
+        {
+          "id": "plan.validate",
+          "view": "plan",
+          "label": "Validate YAML plan",
+          "selector": "button:has-text('Validate')",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/validate/sweep" },
+          "persistence": null,
+          "uiConfirmation": "#yamlValidationResult .val-status-ok, #yamlValidationResult .val-status-warn",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#plan-validate"] }
+        },
+        {
+          "id": "queue.refresh",
+          "view": "queue",
+          "label": "Deploy board refresh",
+          "selector": "#refreshBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "GET", "path": "/api/jobs" },
+          "persistence": null,
+          "uiConfirmation": "#kanbanBoard, .kanban-column",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#queue-refresh"] }
+        },
+        {
+          "id": "queue.enqueue",
+          "view": "queue",
+          "label": "Enqueue / Run job",
+          "selector": "#enqueueBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/jobs" },
+          "persistence": null,
+          "uiConfirmation": "#enqueueResult, .kanban-column",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#queue-enqueue"] }
+        },
+        {
+          "id": "queue.serverCheck",
+          "view": "queue",
+          "label": "Check inference server",
+          "selector": "#checkServerBtn, button:has-text('Check')",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/server/check" },
+          "persistence": null,
+          "uiConfirmation": "#serverStatus, .server-panel",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#queue-server-check"] }
+        },
+        {
+          "id": "profile.refreshJobs",
+          "view": "profile",
+          "label": "Refresh jobs dropdown",
+          "selector": "#refreshJobsBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "GET", "path": "/api/jobs" },
+          "persistence": null,
+          "uiConfirmation": "#jobSelect",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#profile-jobs"] }
+        },
+        {
+          "id": "report.load",
+          "view": "report",
+          "label": "Report tab boot",
+          "selector": "body",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/api/reports" },
+          "persistence": null,
+          "uiConfirmation": "#reportsList, .reports-panel",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#report-load"] }
+        },
+        {
+          "id": "view.loadCsv",
+          "view": "view",
+          "label": "Load results CSV",
+          "selector": "body",
+          "action": "load",
+          "backend": { "type": "static", "method": "GET", "path": "/benchmark_results.csv" },
+          "persistence": null,
+          "uiConfirmation": "#resultsChart, .results-table",
+          "critical": true,
+          "status": "excluded",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#view-csv"] }
+        }
+      ]
+    },
+    {
+      "id": "dc-planner",
+      "entryPath": "/pages/index.html",
+      "tabs": [
+        { "id": "workload", "label": "Workload" },
+        { "id": "gpu", "label": "GPU" },
+        { "id": "tco", "label": "TCO" },
+        { "id": "arch", "label": "Architecture" },
+        { "id": "report-action", "label": "Generate Report", "type": "action" }
+      ],
+      "controls": [
+        {
+          "id": "workload.recalc",
+          "view": "workload",
+          "label": "Workload recalc",
+          "selector": "#wlConcurrentReqs, .workload-input",
+          "action": "change",
+          "backend": { "type": "worker", "method": "POST", "path": "planner-compute-worker:workload" },
+          "persistence": "localStorage:dc-planner-state",
+          "uiConfirmation": "#wlResultTokens, #wlResultReqs",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/19-tab-linkage.spec.js#workload-recalc"] }
+        },
+        {
+          "id": "tco.recalc",
+          "view": "tco",
+          "label": "TCO recalc",
+          "selector": "#tcoHorizonYears",
+          "action": "change",
+          "backend": { "type": "worker", "method": "POST", "path": "planner-compute-worker:tco" },
+          "persistence": "localStorage:dc-planner-state",
+          "uiConfirmation": "#tcoTotalTco",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/19-tab-linkage.spec.js#tco-recalc"] }
+        },
+        {
+          "id": "report.generate",
+          "view": "report-action",
+          "label": "Generate Report button",
+          "selector": "#generateReportBtn",
+          "action": "click",
+          "backend": { "type": "navigation", "method": "GET", "path": "/pages/report.html" },
+          "persistence": "localStorage:dc-planner-state,dc-planner-present",
+          "uiConfirmation": "report.html .report-summary",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/19-tab-linkage.spec.js#report-pipeline"] }
+        },
+        {
+          "id": "agent.validate",
+          "view": "workload",
+          "label": "Agent bridge validate",
+          "selector": "agent-bridge",
+          "action": "mcp",
+          "backend": { "type": "mcp-bridge", "method": "POST", "path": "validate" },
+          "persistence": null,
+          "uiConfirmation": "agent reply",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/15-agent-bridge.spec.js#agent-validate"] }
+        }
+      ]
+    },
+    {
+      "id": "cluster-manager",
+      "entryPath": "/pages/index.html",
+      "tabs": [
+        { "id": "install", "label": "Install" },
+        { "id": "network", "label": "Network" },
+        { "id": "test", "label": "Test" },
+        { "id": "monitor", "label": "Monitor" },
+        { "id": "debug", "label": "Debug" },
+        { "id": "report", "label": "Report" },
+        { "id": "docs", "label": "Docs" }
+      ],
+      "controls": [
+        {
+          "id": "install.versions",
+          "view": "install",
+          "label": "Software versions grid",
+          "selector": "body",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/api/install/versions" },
+          "persistence": null,
+          "uiConfirmation": ".install-versions, #softwareVersions",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["e2e/tests/tab-linkage.spec.js#install-versions"] }
+        },
+        {
+          "id": "report.defaults",
+          "view": "report",
+          "label": "Cluster report battery defaults",
+          "selector": "#clusterReportBatteryCustomer",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/api/report/cluster/defaults" },
+          "persistence": "localStorage:cm-cluster-report-metadata",
+          "uiConfirmation": "#clusterReportBatteryCustomer,#clusterReportBatteryOperator",
+          "critical": true,
+          "status": "fixed",
+          "tests": { "e2e": ["e2e/tests/tab-linkage.spec.js#report-defaults"] }
+        },
+        {
+          "id": "docs.list",
+          "view": "docs",
+          "label": "Docs index load",
+          "selector": "body",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/api/docs/list" },
+          "persistence": null,
+          "uiConfirmation": "#docsList, .docs-sidebar",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["e2e/tests/tab-linkage.spec.js#docs-list"] }
+        },
+        {
+          "id": "network.fabricRun",
+          "view": "network",
+          "label": "Fabric pipeline run",
+          "selector": "button:has-text('Run'), #fabricRunBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/fabric/discover" },
+          "persistence": null,
+          "uiConfirmation": "#fabricStatus, .fabric-report",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["e2e/tests/tab-linkage.spec.js#fabric-run"] }
+        }
+      ]
+    },
+    {
+      "id": "demo-portal",
+      "entryPath": "/pages/index.html",
+      "tabs": [
+        { "id": "catalog", "label": "Catalog" },
+        { "id": "tools", "label": "Tools" },
+        { "id": "info", "label": "Info" }
+      ],
+      "controls": [
+        {
+          "id": "catalog.manifestLoad",
+          "view": "catalog",
+          "label": "Catalog boot",
+          "selector": "#demo-grid",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/data/manifest.json" },
+          "persistence": null,
+          "uiConfirmation": ".demo-card, #stat-demos",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#catalog-manifest"] }
+        },
+        {
+          "id": "catalog.filters",
+          "view": "catalog",
+          "label": "Filter chips",
+          "selector": ".filter-chip",
+          "action": "click",
+          "backend": { "type": "none" },
+          "persistence": "url:searchParams",
+          "uiConfirmation": "#result-count",
+          "critical": true,
+          "status": "excluded",
+          "tests": { "e2e": ["tests/e2e/catalog-state.spec.js"] }
+        },
+        {
+          "id": "tools.registry",
+          "view": "tools",
+          "label": "Plugin hub registry",
+          "selector": "#plugin-grid",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/shared/plugins.registry.json" },
+          "persistence": null,
+          "uiConfirmation": ".plugin-card",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#tools-registry"] }
+        },
+        {
+          "id": "extensions.catalogLoad",
+          "view": "shell",
+          "label": "Extension host catalog",
+          "selector": "body",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/data/extensions.json" },
+          "persistence": null,
+          "uiConfirmation": ".sidebar-nav .nav-btn",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/extension-packs.spec.js#extensions-catalog-load"] }
+        },
+        {
+          "id": "extensions.catalogMount",
+          "view": "catalog",
+          "label": "Demo catalog extension mount",
+          "selector": "#panel-catalog",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/extensions/demo-catalog/panel.html" },
+          "persistence": null,
+          "uiConfirmation": "#catalog-view, #cards",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/extension-packs.spec.js#catalog-extension-mount"] }
+        },
+        {
+          "id": "extensions.toolsMount",
+          "view": "tools",
+          "label": "Plugin hub extension mount",
+          "selector": "#panel-tools",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/extensions/plugin-hub/panel.html" },
+          "persistence": null,
+          "uiConfirmation": "#plugin-hub, #plugin-cards",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/extension-packs.spec.js#tools-extension-mount"] }
+        },
+        {
+          "id": "extensions.agentStartup",
+          "view": "shell",
+          "label": "Agent services startup",
+          "selector": "#agentToggleSide",
+          "action": "click",
+          "backend": { "type": "none" },
+          "persistence": null,
+          "uiConfirmation": "#chatPanel.open",
+          "critical": false,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/extension-packs.spec.js#agent-services-startup"] }
+        },
+        {
+          "id": "module.run",
+          "view": "module",
+          "label": "Run demo script",
+          "selector": "#runBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "http://127.0.0.1:8765/run" },
+          "persistence": null,
+          "uiConfirmation": "#runConsole, .run-output",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/run-console.spec.js#run-console"], "unit": ["tests/test_run_agent_boundary.py#run-agent-post"] }
+        },
+        {
+          "id": "mcp.listDemos",
+          "view": "mcp",
+          "label": "MCP list_demos tool",
+          "selector": "stdio",
+          "action": "mcp",
+          "backend": { "type": "mcp-stdio", "method": "POST", "path": "tools/call list_demos" },
+          "persistence": null,
+          "uiConfirmation": "JSON demos array",
+          "critical": true,
+          "status": "fixed",
+          "tests": { "unit": ["tests/test_mcp_stdio_bridge.py#list_demos"] }
+        },
+        {
+          "id": "mcp.listPlugins",
+          "view": "mcp",
+          "label": "MCP list_plugins tool",
+          "selector": "stdio",
+          "action": "mcp",
+          "backend": { "type": "mcp-stdio", "method": "POST", "path": "tools/call list_plugins" },
+          "persistence": null,
+          "uiConfirmation": "JSON plugins array",
+          "critical": true,
+          "status": "linked",
+          "tests": { "unit": ["tests/test_mcp_stdio_bridge.py#list_plugins"] }
+        }
+      ]
+    },
+    {
+      "id": "knowledge-exchange",
+      "entryPath": "/pages/index.html",
+      "tabs": [
+        { "id": "paths", "label": "Pathways" },
+        { "id": "catalog", "label": "Catalog" },
+        { "id": "resources", "label": "Resources" },
+        { "id": "progress", "label": "Progress" },
+        { "id": "create", "label": "Create", "mode": "developer" }
+      ],
+      "controls": [
+        {
+          "id": "browse.manifest",
+          "view": "catalog",
+          "label": "Portal manifest boot",
+          "selector": "#panel-browse",
+          "action": "load",
+          "backend": { "type": "http", "method": "GET", "path": "/portal/manifest.json" },
+          "persistence": "localStorage:portal-profile",
+          "uiConfirmation": ".module-card, .catalog-grid",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/ui/tab-linkage.spec.js#browse-manifest"] }
+        },
+        {
+          "id": "resources.faqPreview",
+          "view": "resources",
+          "label": "FAQ preview",
+          "selector": ".resource-tile[data-kind='faq']",
+          "action": "click",
+          "backend": { "type": "http", "method": "GET", "path": "/view" },
+          "persistence": null,
+          "uiConfirmation": ".preview-host, .faq-preview",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/ui/resources-tab.spec.js#faq-preview"] }
+        },
+        {
+          "id": "orb.ask",
+          "view": "shell",
+          "label": "Agent orb ask",
+          "selector": "#chatOrbInput",
+          "action": "submit",
+          "backend": { "type": "http", "method": "POST", "path": "/api/ask" },
+          "persistence": null,
+          "uiConfirmation": ".chat-bubble.ai",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/ui/chat-ask.spec.js#orb-ask"], "unit": ["tests/test_wiki_retrieval.py#wiki-ask"] }
+        },
+        {
+          "id": "create.generate",
+          "view": "create",
+          "label": "Create tab generate",
+          "selector": "#devGenerateBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/dev/generate" },
+          "persistence": "localStorage:dev-state",
+          "uiConfirmation": "#devArtifacts, .artifact-list",
+          "critical": true,
+          "status": "linked",
+          "tests": { "unit": ["tests/test_webui_api.py#dev-generate"] }
+        }
+      ]
+    },
+    {
+      "id": "slide-presenter",
+      "entryPath": "/pages/index.html",
+      "tabs": [
+        { "id": "search", "label": "Search", "extension": "search" },
+        { "id": "build", "label": "Build", "extension": "build" },
+        { "id": "present", "label": "Present", "extension": "present" }
+      ],
+      "controls": [
+        {
+          "id": "search.analyze",
+          "view": "search",
+          "label": "Search analyze",
+          "selector": "#searchSubmit, button[type='submit']",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/search/analyze" },
+          "persistence": null,
+          "uiConfirmation": ".search-hit, #searchResults",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/tab-linkage.spec.js#search-analyze"], "unit": ["extensions/search/tests/logic.test.mjs"] }
+        },
+        {
+          "id": "build.createDeck",
+          "view": "build",
+          "label": "Create deck",
+          "selector": "#createDeckBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/decks" },
+          "persistence": "sidecar:index",
+          "uiConfirmation": "#deckList, .deck-row",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/integration.spec.js#create-deck"], "unit": ["tests/api/test_sidecar_api.py#create-deck"] }
+        },
+        {
+          "id": "present.openSlide",
+          "view": "present",
+          "label": "Open slide on stage",
+          "selector": "#spStageImage",
+          "action": "agent",
+          "backend": { "type": "http", "method": "GET", "path": "/api/slides/" },
+          "persistence": "session:present",
+          "uiConfirmation": "#spStageImage[src]",
+          "critical": true,
+          "status": "linked",
+          "tests": { "e2e": ["tests/e2e/presenter.spec.js#open-slide"], "unit": ["tests/api/test_sidecar_api.py#open-slide"] }
+        },
+        {
+          "id": "present.livePreflight",
+          "view": "present",
+          "label": "Live panel preflight",
+          "selector": "#livePreflightBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/sessions" },
+          "persistence": null,
+          "uiConfirmation": ".live-panel, #liveStatus",
+          "critical": true,
+          "status": "linked",
+          "tests": { "unit": ["tests/api/test_live_copilot.py#sessions-post"] }
+        }
+      ]
+    }
+  ]
+}

@@ -25,7 +25,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           ws="$(dirname "$GITHUB_WORKSPACE")"
-          for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-portal; do
+          for repo in cluster-manager dc-planner llm-benchmark knowledge-exchange demo-portal slide-presenter; do
             git clone --depth 1 "https://github.com/${{ github.repository_owner }}/${repo}.git" "${ws}/${repo}"
           done
 

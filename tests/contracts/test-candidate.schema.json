@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "test-candidate.schema.json",
+  "title": "Adversarial test candidate",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "featureId",
+    "sourceClaim",
+    "risk",
+    "coverageTarget",
+    "testLayer",
+    "oracle",
+    "faultModel",
+    "strengthValidation",
+    "promotion"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^TC-" },
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "verified-regression", "extended-resilience", "quarantined", "retired"]
+    },
+    "featureId": { "type": "string" },
+    "sourceClaim": {
+      "type": "object",
+      "required": ["document", "section", "claim"],
+      "properties": {
+        "document": { "type": "string" },
+        "section": { "type": "string" },
+        "claim": { "type": "string" }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["score", "categories"],
+      "properties": {
+        "score": { "type": "number" },
+        "categories": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "changeContext": { "type": "object" },
+    "coverageTarget": { "type": "object" },
+    "testLayer": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "enum": ["unit", "component", "integration", "contract", "e2e", "adversarial"]
+        },
+        "supporting": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "oracle": {
+      "type": "object",
+      "required": ["backend", "observableUi"],
+      "properties": {
+        "backend": { "type": "string" },
+        "observableUi": { "type": "string" }
+      }
+    },
+    "faultModel": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "strengthValidation": {
+      "type": "object",
+      "required": ["baselineMustPass", "requiredFaultsDetected"],
+      "properties": {
+        "baselineMustPass": { "type": "boolean" },
+        "requiredFaultsDetected": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "stability": { "type": "object" },
+    "promotion": {
+      "type": "object",
+      "required": ["requiredChecks"],
+      "properties": {
+        "reviewer": { "type": ["string", "null"] },
+        "requiredChecks": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

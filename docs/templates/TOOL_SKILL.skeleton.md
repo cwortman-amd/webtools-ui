@@ -41,6 +41,10 @@ Registry: `webtools-ui/plugins.registry.json` · Knowledge: `webtools-ui/data/kn
 
 *(numbered steps)*
 
+## Testing
+
+This repo must ship **adversarial-documentation-driven-testing** (`.cursor/skills/adversarial-documentation-driven-testing/SKILL.md`) and **`/test`** (`.cursor/commands/test.md`). Invoke with `/test` or `make adversarial-preflight` from **this** repo. Refresh from webtools-ui: `bash shared/scripts/install_adversarial_workflow.sh --repo .`
+
 ## Safety
 
 *(mutations, confirm tokens, air-gap)*

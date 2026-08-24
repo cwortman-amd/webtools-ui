@@ -94,7 +94,7 @@ webtools-ui (T1)
 
 Each consumer (T2)
 ├── plugin.manifest.json       ← contributes + registrations (extensions, mcp, knowledge, agent)
-├── extensions/*/              ← optional VS Code-style packs (authoring source)
+├── extensions/*/              ← optional VS Code-style packs (code + tests/ travel together)
 ├── data/shell-modules.json    ← compiled snapshot / hooksOnly registry
 └── js/plugin-mount.js         ← thin: bootstrapFromManifest() only
 ```

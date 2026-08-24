@@ -1,0 +1,14 @@
+---
+description: When testing this repo (/test, coverage, FE/BE linkage, documented features), use the project adversarial skill and local /test command.
+alwaysApply: true
+---
+
+# Local test workflow
+
+When the user runs **`/test`**, asks to test this repository, expand coverage, or verify frontend-backend linkage:
+
+1. Read the skill: project `.cursor/skills/adversarial-documentation-driven-testing/SKILL.md` (symlink to master) or `~/.cursor/skills/adversarial-documentation-driven-testing/SKILL.md` (same files).
+2. Follow `.cursor/commands/test.md` in **this project** when present; otherwise `~/.cursor/commands/test.md`.
+3. Phase 2 of `/test` **must** run `/coverage` (`.cursor/commands/coverage.md`) and loop test expansion until statement, branch, and condition coverage are all ≥ 80% on measured modules (or a dated exception exists), then present `artifacts/coverage-report.md`.
+4. Run `make adversarial-preflight` from **this repo root** (not only `../webtools-ui`) before product suites.
+5. Do not skip preflight because a sibling checkout also has the skill.

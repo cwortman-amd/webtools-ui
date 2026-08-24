@@ -1,0 +1,13 @@
+{
+  "name": "webtools-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/lib/*.test.mjs && node tests/mobile-api-contract.mjs",
+    "test:coverage": "c8 --reporter=text --reporter=html --check-coverage --branches 20 --lines 25 node --test tests/lib/*.test.mjs",
+    "test:playwright": "node tests/cross-consumer-shell.mjs && node tests/iphone-ui.mjs"
+  },
+  "devDependencies": {
+    "c8": "^10.1.2"
+  }
+}

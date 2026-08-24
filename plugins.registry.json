@@ -29,6 +29,10 @@
       },
       "dependencies": {
         "webtoolsModules": ["shell", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      },
+      "install": {
+        "script": "install-cluster-manager.sh",
+        "archive": "cluster-manager-source.zip"
       }
     },
     {
@@ -49,6 +53,10 @@
       },
       "dependencies": {
         "webtoolsModules": ["shell", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      },
+      "install": {
+        "script": "install-dc-planner.sh",
+        "archive": "dc-planner-source.zip"
       }
     },
     {
@@ -69,6 +77,10 @@
       },
       "dependencies": {
         "webtoolsModules": ["shell", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      },
+      "install": {
+        "script": "install-llm-benchmark.sh",
+        "archive": "llm-benchmark-source.zip"
       }
     },
     {
@@ -90,6 +102,10 @@
       "aggregates": ["cluster-manager", "dc-planner", "llm-benchmark", "knowledge-exchange"],
       "dependencies": {
         "webtoolsModules": ["chrome", "components", "chat-orb"]
+      },
+      "install": {
+        "script": "install-demo-portal.sh",
+        "archive": "demo-portal-source.zip"
       }
     },
     {
@@ -110,6 +126,10 @@
       },
       "dependencies": {
         "webtoolsModules": ["shell", "shell-modules", "chat-orb", "demo-engine", "voice", "chrome", "mobile-drawer"]
+      },
+      "install": {
+        "script": "install-slide-presenter.sh",
+        "archive": "slide-presenter-source.zip"
       }
     },
     {
@@ -135,7 +155,11 @@
         "Dashboard sidebar shell (Pathways / Catalog / Resources / Progress / Create).",
         "Training deck/video tooling lives in knowledge-exchange/common/ and is NOT part of the webtools-ui plugin surface.",
         "Build pipeline (ke/, scripts/) is a separate layer; see knowledge-exchange/docs/meta/21-webtools-ui-plugin.md."
-      ]
+      ],
+      "install": {
+        "script": "install-knowledge-exchange.sh",
+        "archive": "knowledge-exchange-source.zip"
+      }
     }
   ]
 }

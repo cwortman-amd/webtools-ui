@@ -1,0 +1,60 @@
+id: TC-AUTO-SETTINGS-RETRY-001
+status: candidate # candidate | verified-regression | extended-resilience | quarantined | retired
+featureId: FEAT-SETTINGS-RETRY-POLICY
+sourceClaim:
+  document: docs/user-guide/settings.md
+  section: Retry behavior
+  claim: "Changing retry policy updates retry behavior for background jobs."
+risk:
+  score: 0.91
+  categories:
+    - frontend-backend-linkage
+    - configuration-propagation
+    - asynchronous-workflow
+    - data-integrity
+changeContext:
+  commit: "<commit-sha>"
+  impactedFiles:
+    - frontend/settings/retry-policy.tsx
+    - api/jobs/client.ts
+    - backend/jobs/retry_policy.py
+coverageTarget:
+  type: condition-and-workflow
+  conditions:
+    - retry_enabled
+    - max_attempts_valid
+    - user_authorized
+  workflow:
+    - open settings
+    - set max attempts to 4
+    - save settings
+    - start background job
+    - inject retryable failure
+    - verify exactly 4 attempts
+testLayer:
+  primary: e2e
+  supporting: [unit, contract]
+oracle:
+  backend: "Persisted retry policy equals {enabled: true, maxAttempts: 4}"
+  observableUi: "Job detail displays four attempts and terminal failure state"
+faultModel:
+  - remove maxAttempts from outbound request
+  - force backend default maxAttempts to 3
+  - return settings-save success without persistence
+strengthValidation:
+  baselineMustPass: true
+  requiredFaultsDetected:
+    - remove maxAttempts from outbound request
+    - force backend default maxAttempts to 3
+stability:
+  repetitions: 20
+  randomizedOrder: true
+  maxFlakeRate: 0
+promotion:
+  reviewer: null
+  requiredChecks:
+    - baseline-pass
+    - fault-detected
+    - traceability-linked
+    - non-duplicate
+    - stable

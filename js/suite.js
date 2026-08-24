@@ -3,6 +3,10 @@
   "use strict";
 
   var REGISTRY_URL = "../plugins.registry.json";
+  var INSTALL_TOOLS_BASE = "https://curt.wortman.ai/tools";
+  var INSTALL_ARCHIVES_BASE = "https://curt.wortman.ai/archives";
+
+  var installModal = null;
 
   var APP_META = {
     "cluster-manager": {
@@ -94,6 +98,149 @@
   function faviconSrc(plugin) {
     var meta = metaFor(plugin);
     return meta.favicon || "../assets/suite/favicons/" + plugin.id + ".svg";
+  }
+
+  function isLocalHost() {
+    var host = global.location && global.location.hostname;
+    return !host || host === "127.0.0.1" || host === "localhost";
+  }
+
+  function installScriptName(plugin) {
+    var install = plugin.install || {};
+    return install.script || ("install-" + plugin.id + ".sh");
+  }
+
+  function installOneLiner(plugin) {
+    return "curl -fsSL " + INSTALL_TOOLS_BASE + "/" + installScriptName(plugin) + " | bash";
+  }
+
+  function installArchiveName(plugin) {
+    var install = plugin.install || {};
+    return install.archive || (plugin.id + "-source.zip");
+  }
+
+  function installArchiveUrl(plugin) {
+    var name = installArchiveName(plugin);
+    return isLocalHost() ? "../archives/" + name : INSTALL_ARCHIVES_BASE + "/" + name;
+  }
+
+  function copyText(text) {
+    if (global.navigator && global.navigator.clipboard && global.navigator.clipboard.writeText) {
+      return global.navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy") ? resolve() : reject(new Error("copy failed"));
+      } catch (err) {
+        reject(err);
+      } finally {
+        document.body.removeChild(ta);
+      }
+    });
+  }
+
+  function ensureInstallModal() {
+    if (installModal && installModal.backdrop && document.body.contains(installModal.backdrop)) {
+      return installModal;
+    }
+    var backdrop = document.createElement("div");
+    backdrop.className = "suite-install-backdrop";
+    backdrop.setAttribute("aria-hidden", "true");
+    backdrop.innerHTML =
+      '<div class="suite-install-modal" role="dialog" aria-modal="true" aria-labelledby="suiteInstallTitle">' +
+      '  <header class="suite-install-modal__head">' +
+      '    <div class="suite-install-modal__head-text">' +
+      '      <p class="suite-install-modal__eyebrow">Install</p>' +
+      '      <h2 class="suite-install-modal__title" id="suiteInstallTitle"></h2>' +
+      "    </div>" +
+      '    <button type="button" class="suite-install-modal__close" aria-label="Close install dialog">' +
+      '      <span class="material-symbols-outlined" aria-hidden="true">close</span>' +
+      "    </button>" +
+      "  </header>" +
+      '  <div class="suite-install-modal__body">' +
+      '    <p class="suite-install-modal__lead">Run this one-liner on a Linux node with <code>git</code> and network access:</p>' +
+      '    <div class="suite-install-command">' +
+      '      <pre class="suite-install-command__code" id="suiteInstallCommand"></pre>' +
+      '      <button type="button" class="suite-install-command__copy" id="suiteInstallCopy">Copy</button>' +
+      "    </div>" +
+      '    <p class="suite-install-modal__note">The installer clones <strong>webtools-ui</strong> and this tool as siblings under <code>~/workspace</code>, verifies shared UI assets, then runs <code>./setup.sh</code>.</p>' +
+      "  </div>" +
+      '  <footer class="suite-install-modal__foot">' +
+      '    <a class="suite-install-download" id="suiteInstallDownload" href="#" download>' +
+      '      <span class="material-symbols-outlined" aria-hidden="true">download</span>' +
+      "      Download source archive (.zip)" +
+      "    </a>" +
+      '    <button type="button" class="suite-install-modal__done" id="suiteInstallDone">Done</button>' +
+      "  </footer>" +
+      "</div>";
+    document.body.appendChild(backdrop);
+
+    var closeBtn = backdrop.querySelector(".suite-install-modal__close");
+    var doneBtn = backdrop.querySelector("#suiteInstallDone");
+    var copyBtn = backdrop.querySelector("#suiteInstallCopy");
+
+    function closeModal() {
+      backdrop.classList.remove("is-open");
+      backdrop.setAttribute("aria-hidden", "true");
+      if (installModal && installModal.previousFocus && installModal.previousFocus.focus) {
+        installModal.previousFocus.focus();
+      }
+      document.removeEventListener("keydown", onKeydown);
+    }
+
+    function onKeydown(e) {
+      if (e.key === "Escape") closeModal();
+    }
+
+    backdrop.addEventListener("click", function (e) {
+      if (e.target === backdrop) closeModal();
+    });
+    closeBtn.addEventListener("click", closeModal);
+    doneBtn.addEventListener("click", closeModal);
+    copyBtn.addEventListener("click", function () {
+      var cmd = backdrop.querySelector("#suiteInstallCommand");
+      if (!cmd) return;
+      copyText(cmd.textContent || "").then(function () {
+        copyBtn.textContent = "Copied";
+        setTimeout(function () { copyBtn.textContent = "Copy"; }, 1600);
+      }).catch(function () {
+        copyBtn.textContent = "Select & copy";
+      });
+    });
+
+    installModal = {
+      backdrop: backdrop,
+      titleEl: backdrop.querySelector("#suiteInstallTitle"),
+      commandEl: backdrop.querySelector("#suiteInstallCommand"),
+      downloadEl: backdrop.querySelector("#suiteInstallDownload"),
+      previousFocus: null,
+      open: function (plugin) {
+        this.previousFocus = document.activeElement;
+        this.titleEl.textContent = plugin.name || plugin.id;
+        var cmd = installOneLiner(plugin);
+        this.commandEl.textContent = cmd;
+        var archiveUrl = installArchiveUrl(plugin);
+        this.downloadEl.href = archiveUrl;
+        this.downloadEl.setAttribute("download", installArchiveName(plugin));
+        backdrop.classList.add("is-open");
+        backdrop.setAttribute("aria-hidden", "false");
+        document.addEventListener("keydown", onKeydown);
+        closeBtn.focus();
+      },
+      close: closeModal,
+    };
+    return installModal;
+  }
+
+  function openInstallModal(plugin) {
+    ensureInstallModal().open(plugin);
   }
 
   function taglineFor(plugin) {
@@ -237,8 +384,15 @@
       "</div>" +
       '<p class="suite-tool-card__desc">' + esc(tagline) + "</p>" +
       '<div class="suite-tool-card__pills">' +
-      '<a class="suite-pill suite-pill--tool" href="' + esc(appUrl) + '">Tool</a>' +
-      '<a class="suite-pill suite-pill--overview" href="' + esc(pitchUrl) + '">Overview</a>' +
+      '<a class="suite-pill suite-pill--tool" href="' + esc(appUrl) + '" title="Tool" aria-label="Open tool">' +
+      '<span class="material-symbols-outlined suite-pill__icon" aria-hidden="true">dashboard</span>' +
+      '<span class="suite-pill__tip">Tool</span></a>' +
+      '<a class="suite-pill suite-pill--overview" href="' + esc(pitchUrl) + '" title="Overview" aria-label="Open overview">' +
+      '<span class="material-symbols-outlined suite-pill__icon" aria-hidden="true">slideshow</span>' +
+      '<span class="suite-pill__tip">Overview</span></a>' +
+      '<button type="button" class="suite-pill suite-pill--install" data-install-id="' + esc(plugin.id) + '" title="Install" aria-label="Install">' +
+      '<span class="material-symbols-outlined suite-pill__icon" aria-hidden="true">download</span>' +
+      '<span class="suite-pill__tip">Install</span></button>' +
       "</div></article>"
     );
   }
@@ -291,6 +445,16 @@
         e.preventDefault();
         var href = card.getAttribute("data-app-href");
         if (href) global.location.href = href;
+      });
+    });
+
+    document.querySelectorAll(".suite-pill--install").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var id = btn.getAttribute("data-install-id");
+        var plugin = state.plugins.find(function (p) { return p.id === id; });
+        if (plugin) openInstallModal(plugin);
       });
     });
   }

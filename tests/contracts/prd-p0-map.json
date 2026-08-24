@@ -1,0 +1,95 @@
+{
+  "description": "Maps consumer docs/TEST.md (or DASHBOARD_TESTS.md) P0 claim ids to executable tests. Unmapped P0s must be deferred with EXC-PRD-MATRIX until 2026-09-30. This file does not complete the adversarial program.",
+  "exception": "EXC-PRD-MATRIX",
+  "consumers": {
+    "llm-benchmark": {
+      "testPlan": "docs/TEST.md",
+      "enforce": true,
+      "mapped": [
+        {
+          "id": "DEP-001",
+          "inventoryControl": "queue.refresh",
+          "tests": ["tests/e2e/tab-linkage.spec.js#queue-refresh"]
+        },
+        {
+          "id": "DEP-003",
+          "inventoryControl": "queue.enqueue",
+          "tests": ["tests/e2e/tab-linkage.spec.js#queue-enqueue"]
+        },
+        {
+          "id": "DEP-006",
+          "inventoryControl": "queue.serverCheck",
+          "tests": ["tests/e2e/tab-linkage.spec.js#queue-server-check"]
+        },
+        {
+          "id": "PLN-001",
+          "inventoryControl": "plan.loadCatalog",
+          "tests": ["tests/e2e/tab-linkage.spec.js#plan-load"]
+        },
+        {
+          "id": "RPT-002",
+          "inventoryControl": "report.load",
+          "tests": ["tests/e2e/tab-linkage.spec.js#report-load"]
+        },
+        {
+          "id": "NAV-001",
+          "tests": ["tests/test_dashboard_webapp_contract.py", "tests/e2e/core-journey.spec.js"]
+        },
+        {
+          "id": "API-006",
+          "inventoryControl": "plan.validate",
+          "tests": ["tests/e2e/tab-linkage.spec.js#plan-validate"]
+        }
+      ],
+      "deferred": [
+        { "id": "DEP-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: enqueue field validation not a named inventory control" },
+        { "id": "DEP-004", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: pass/fail badge mapping" },
+        { "id": "DEP-005", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: per-card job actions" },
+        { "id": "PLN-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: scenario cards beyond catalog boot" },
+        { "id": "PLN-003", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: plan deploy-to-queue vs Deploy Run" },
+        { "id": "ANL-001", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: View charts; view.loadCsv is excluded" },
+        { "id": "ANL-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: View filters" },
+        { "id": "ANL-003", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: chart type selector" },
+        { "id": "PRF-001", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: profile job selector completeness" },
+        { "id": "PRF-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: profiling templates" },
+        { "id": "PRF-003", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: profile result cards" },
+        { "id": "RPT-001", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: generate-report POST not inventory-linked" },
+        { "id": "RPT-003", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: executive KPI cards" },
+        { "id": "NAV-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: mode selector dual-shell sync" },
+        { "id": "E2E-001", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: first-run Standard defaults overlap NAV-001" },
+        { "id": "E2E-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: full Install-Plan-Deploy-View journey beyond tab linkage" },
+        { "id": "E2E-003", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: preference persistence" },
+        { "id": "E2E-006", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: live mode switching without reload" },
+        { "id": "X-001", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: tab routing" },
+        { "id": "X-002", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: API error surfacing" },
+        { "id": "X-003", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: loading indicators" },
+        { "id": "X-005", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: mode inheritance" },
+        { "id": "X-007", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: iPhone overflow" },
+        { "id": "X-008", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: iOS input zoom" },
+        { "id": "X-011", "until": "2026-09-30", "reason": "EXC-PRD-MATRIX: mobile navigation drawer" }
+      ]
+    },
+    "dc-planner": {
+      "testPlan": "docs/TEST.md",
+      "enforce": false,
+      "mapped": [
+        {
+          "id": "SH-01",
+          "tests": ["tests/e2e/01-platform-shell.spec.js"]
+        }
+      ],
+      "deferred": []
+    },
+    "cluster-manager": {
+      "testPlan": "docs/DASHBOARD_TESTS.md",
+      "enforce": false,
+      "mapped": [
+        {
+          "id": "IN-10",
+          "tests": ["e2e/tests/install-tab.spec.js"]
+        }
+      ],
+      "deferred": []
+    }
+  }
+}

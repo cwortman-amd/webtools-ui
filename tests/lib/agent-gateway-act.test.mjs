@@ -24,8 +24,10 @@ function loadGatewayAndMcp() {
       },
     },
   };
-  vm.runInNewContext(fs.readFileSync(path.join(root, "js/mcp-suite.js"), "utf8"), sandbox);
-  vm.runInNewContext(fs.readFileSync(path.join(root, "js/agent-gateway.js"), "utf8"), sandbox);
+  const mcpFile = path.join(root, "js/mcp-suite.js");
+  const gwFile = path.join(root, "js/agent-gateway.js");
+  vm.runInNewContext(fs.readFileSync(mcpFile, "utf8"), sandbox, { filename: mcpFile });
+  vm.runInNewContext(fs.readFileSync(gwFile, "utf8"), sandbox, { filename: gwFile });
   sandbox.AgentGateway.configure({ enabled: true, corpora: [], productId: "llm-benchmark" });
   return sandbox;
 }

@@ -1,0 +1,15 @@
+---
+description: When testing any repo, apply the global adversarial-documentation-driven-testing skill; prefer the project /test overlay when present.
+alwaysApply: true
+---
+
+# Global adversarial testing skill
+
+When the user runs **`/test`**, asks to expand tests, or wants FE/BE / docs coverage:
+
+1. Read `~/.cursor/skills/adversarial-documentation-driven-testing/SKILL.md` (symlink to the master skill).
+2. If this workspace has `.cursor/commands/test.md`, follow **that** product overlay.
+3. Otherwise follow `~/.cursor/commands/test.md`.
+4. When `/test` reaches coverage, follow `/coverage` and loop until statement, branch, and condition are ≥ 80% on measured code, then give the user the final coverage report.
+5. Rank **unverified documented behavior** above uncovered line ranges.
+6. Never copy the skill into a repo as a second master; update the master and keep `~/.cursor/skills/…` symlinked to it.

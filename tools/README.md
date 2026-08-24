@@ -8,7 +8,7 @@ curl -fsSL https://curt.wortman.ai/tools/install-<tool>.sh | bash
 
 | Script | Tool |
 |--------|------|
-| `install-webtools-ui.sh` | Tools Hub |
+| `install-webtools-ui.sh` | Tools Hub (`source ./setup.sh` → `:8090`) |
 | `install-dc-planner.sh` | DC Planner |
 | `install-llm-benchmark.sh` | LLM Benchmark |
 | `install-cluster-manager.sh` | Cluster Manager |

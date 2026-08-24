@@ -50,7 +50,8 @@ cd ~/workspace/webtools-ui
 1. **Clone** `webtools-ui` + the consumer repo into `WT_WORKSPACE` (default `~/workspace`).
 2. **Verify** `shared/css/base.css` resolves (prevents an unstyled UI with no error).
 3. **Start** the tool:
-   - **Static** (webtools-ui, dc-planner): `python3 -m http.server` in the background.
+   - **Tools Hub** (webtools-ui): `./setup.sh` (static file server on `:8090`).
+   - **Static** (dc-planner): `python3 -m http.server` in the background.
    - **Everything else**: `./setup.sh` (creates a venv, installs deps, starts the API/sidecar).
 
 Re-running an installer is **idempotent**: existing clones are fetched, not deleted.
@@ -109,7 +110,19 @@ curt.wortman.ai {
     root * /var/www/webtools-ui/tools
     file_server
   }
+  handle_path /archives/* {
+    root * /var/www/webtools-ui/archives
+    file_server
+  }
 }
+```
+
+Build source archives for the Tools Hub install modal:
+
+```bash
+cd ~/workspace/webtools-ui
+./scripts/build-source-archives.sh
+# → archives/<tool>-source.zip
 ```
 
 After deploy, verify:

@@ -92,6 +92,7 @@ WT_CLONE_SIBLINGS=1 curl -fsSL $BASE/install-demo-portal.sh | bash
 3. **Hub only:** `install-webtools-ui.sh` — open `http://127.0.0.1:8090/pages/index.html` (card links need siblings present).
 4. **Start products on demand:** run the matching `install-<tool>.sh` for what the user needs; do not start all APIs at once unless ports are remapped.
 5. **Validate ecosystem:** `cd webtools-ui && make enhanced-validation` (optional, needs deps).
+6. **Local `/test` skill:** `cd webtools-ui && bash scripts/install_adversarial_workflow.sh` so each consumer has `.cursor/skills/adversarial-documentation-driven-testing/` and can run `make adversarial-preflight` from its own root.
 
 ## Open workspace in Cursor
 

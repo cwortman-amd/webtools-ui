@@ -67,6 +67,10 @@ wt_verify_shared() {
     wt_say "shared/ resolves to the sibling webtools-ui checkout"
     return 0
   fi
+  if [ -e "${tool_dir}/css/base.css" ]; then
+    wt_say "platform css/base.css present (webtools-ui root)"
+    return 0
+  fi
   wt_die "shared/ is still dangling after cloning.
   Expected ${WT_WORKSPACE}/webtools-ui/css/base.css via ${tool_dir}/shared/.
   The UI would start but render completely unstyled."
@@ -134,7 +138,7 @@ wt_tool_primary_dir() {
 
 wt_tool_mode() {
   case "$1" in
-    webtools-ui|dc-planner) echo "static" ;;
+    dc-planner) echo "static" ;;
     *) echo "setup" ;;
   esac
 }
@@ -199,7 +203,15 @@ Useful commands:
 EOF
 
   case "$tool" in
-    webtools-ui|dc-planner)
+    webtools-ui)
+      cat <<EOF
+  cd ${tool_dir}
+  source ./setup.sh
+  # server pid: ${tool_dir}/.wt-serve.pid
+  # logs: /tmp/webtools-ui-server.log
+EOF
+      ;;
+    dc-planner)
       cat <<EOF
   cd ${tool_dir}
   # static server pid: ${tool_dir}/.wt-serve.pid
@@ -273,6 +285,10 @@ wt_install() {
 
   if [ "$tool" = "all" ]; then
     wt_say "all repositories cloned. Start each tool with its own one-liner (see docs/INSTALL.md)."
+    _adv="${WT_WORKSPACE}/webtools-ui/scripts/install_adversarial_workflow.sh"
+    if [ -x "$_adv" ]; then
+      "$_adv" --no-user || wt_warn "adversarial workflow install skipped"
+    fi
     return 0
   fi
 
@@ -283,6 +299,11 @@ wt_install() {
   path="$(wt_tool_url_path "$tool")"
 
   wt_verify_shared "$tool_dir"
+
+  _adv="${WT_WORKSPACE}/webtools-ui/scripts/install_adversarial_workflow.sh"
+  if [ -x "$_adv" ]; then
+    "$_adv" --repo "$tool_dir" --no-user || wt_warn "adversarial workflow install skipped"
+  fi
 
   if [ "$WT_NO_SETUP" = "1" ]; then
     wt_say "WT_NO_SETUP=1 — skipping setup/start."

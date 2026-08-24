@@ -55,6 +55,45 @@ class McpHost:
                 raise ValueError(f"duplicate MCP tool: {tool.name}")
             self._tools[tool.name] = tool
 
+    def register_from_manifest(
+        self,
+        manifest: dict[str, Any],
+        handlers: dict[str, Callable[[dict[str, Any]], Any]] | None = None,
+    ) -> list[str]:
+        """Register tools declared in a plugin/tool manifest (P12 2-T3).
+
+        Accepts ``tools``, ``registrations.mcp.tools``, or
+        ``contributes.mcp.tools``. Each spec needs ``name``; ``handlers``
+        maps name → callable. Missing handlers raise on call.
+        """
+        handlers = handlers or {}
+        mcp = (manifest.get("registrations") or {}).get("mcp") or {}
+        contributes = ((manifest.get("contributes") or {}).get("mcp") or {})
+        specs = manifest.get("tools") or mcp.get("tools") or contributes.get("tools") or []
+        added: list[str] = []
+        for spec in specs:
+            if not isinstance(spec, dict):
+                continue
+            name = spec.get("name")
+            if not name:
+                continue
+
+            def _missing(params: dict[str, Any], _n: str = str(name)) -> Any:
+                raise LookupError(f"no handler registered for {_n}")
+
+            tool = McpTool(
+                name=str(name),
+                description=str(spec.get("description") or name),
+                input_schema=spec.get("inputSchema") or spec.get("input_schema") or {},
+                handler=handlers.get(str(name), _missing),
+                extension=str(spec.get("extension") or ""),
+            )
+            if tool.name in self._tools:
+                raise ValueError(f"duplicate MCP tool: {tool.name}")
+            self._tools[tool.name] = tool
+            added.append(tool.name)
+        return added
+
     def tool_names(self) -> list[str]:
         return list(self._tools)
 

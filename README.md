@@ -121,11 +121,11 @@ node scripts/capture-suite-screenshots.mjs
 
 ```bash
 cd ~/workspace/webtools-ui
-python3 -m http.server 8090
+source ./setup.sh
 # → http://127.0.0.1:8090/pages/index.html
 ```
 
-Sibling repos must live alongside webtools-ui (`../../cluster-manager/`, etc.) so registry `localUrl` paths resolve. Keyboard: ←/→, Home, End. Deep link a slide with `#cluster-manager` (plugin id hash).
+Sibling repos must live alongside webtools-ui (`../../cluster-manager/`, etc.) so registry `localUrl` paths resolve. Each tool card exposes **Tool**, **Overview**, and **Install** icon pills; **Install** opens a modal with the curl one-liner and a link to download the source archive (`.zip`). Keyboard: ←/→, Home, End. Deep link a slide with `#cluster-manager` (plugin id hash).
 
 ---
 

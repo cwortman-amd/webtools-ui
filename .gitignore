@@ -1,9 +1,13 @@
+artifacts/
 .DS_Store
 *.swp
 *.swo
 node_modules/
 .env
 *.log
+.wt-serve.pid
+.coverage
+archives/*.zip
 .vscode/
 .idea/
 __pycache__/

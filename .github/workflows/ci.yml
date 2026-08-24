@@ -34,6 +34,14 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install Python test deps
+        working-directory: webtools-ui
+        run: pip install pytest pytest-cov
+
+      - name: Install Node coverage deps
+        working-directory: webtools-ui
+        run: npm install
+
       - name: Install Playwright (dc-planner)
         working-directory: ../dc-planner
         run: |
