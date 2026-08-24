@@ -488,6 +488,22 @@
           "critical": true,
           "status": "linked",
           "tests": { "unit": ["tests/test_webui_api.py#dev-generate"] }
+        },
+        {
+          "id": "create.defineIntake",
+          "view": "create",
+          "label": "Save module definition",
+          "selector": "#dev-panel-intake button",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/dev/intake" },
+          "persistence": "localStorage:dev-intake",
+          "uiConfirmation": "#dev-panel-intake",
+          "critical": true,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/ui/create-define.spec.js#define-intake"],
+            "unit": ["tests/test_webui_api.py#define-intake", "extensions/ke-create-studio/tests/intake.test.mjs"]
+          }
         }
       ]
     },
