@@ -211,7 +211,7 @@ Optional proof packs; do not block other workstreams.
 
 | Layer | Surface | Declared in manifest |
 | --- | --- | --- |
-| **L1 Browser** | `js/agent-bridge.js` | `registrations.mcp.browserBridge` |
+| **L1 Browser** | Consumer `js/agent-bridge.js` (not shipped in this repo) | `registrations.mcp.browserBridge` |
 | **L2 HTTP** | `POST /mcp` on product API | `registrations.mcp.http` |
 | **L3 Stdio** | `scripts/mcp_stdio_bridge.py` | `registrations.mcp.stdio` |
 | **Tools** | JSON Schema list | `registrations.mcp.toolManifest` or extension `contributes.mcp.tools` |
@@ -251,8 +251,8 @@ Optional proof packs; do not block other workstreams.
 
 | ID | Task | Deliverable |
 | --- | --- | --- |
-| **3-T1** | Author `js/plugin-bootstrap.js` with `WebtoolsPlatform.bootstrapFromManifest(url)` | Loads shell modules, extensions, chat/demo/voice/MCP adapters from manifest paths |
-| **3-T2** | Wire `activationEvents` from manifest (`onStartup`, `onTab:*`) | `platform.js` emits events; bootstrap binds handlers |
+| **3-T1** | Author `js/plugin-bootstrap.js` with `WebtoolsPlatform.bootstrapFromManifest(url)` | Loads extensions (`ExtensionHost`), MCP + Agent Gateway (`loadFromManifest`), and deferred slash/voice scripts from manifest paths. Shell module init remains `Shell` / `ShellModules` in the consumer. |
+| **3-T2** | Wire `activationEvents` from manifest (`onStartup`, `onTab:*`) | `platform.js` emits events and binds handlers (`WebtoolsPlatform.register`); bootstrap does not duplicate that wiring. |
 | **3-T3** | Deprecation shim: log once if `chat-orb-mount.js` loaded separately | Console warning + docs |
 
 ### P13-W2 — Consumer collapse (**parallel per repo**)

@@ -12,3 +12,8 @@ archives/*.zip
 .idea/
 __pycache__/
 *.pyc
+.agents/
+.claude/
+.codex/
+.gemini/
+.hermes/

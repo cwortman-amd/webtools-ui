@@ -39,7 +39,7 @@ Knowledge Exchange also has **domain skills** under `knowledge-exchange/agentski
 
 | Layer | Mechanism | When |
 | :--- | :--- | :--- |
-| **L1 Browser** | `js/agent-bridge.js` | Live browser tab open |
+| **L1 Browser** | Consumer `js/agent-bridge.js` | Live browser tab open |
 | **L2 HTTP** | `POST /mcp` on product API | curl, Agent Gateway, remote agents |
 | **L3 Stdio** | MCP bridge in `plugin.manifest.json` | Cursor `.cursor/mcp.json`, Claude Desktop |
 

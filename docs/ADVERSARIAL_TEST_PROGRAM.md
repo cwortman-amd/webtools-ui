@@ -34,7 +34,7 @@ This program applies the skill at `.cursor/skills/adversarial-documentation-driv
 
 ## Current scope (phase 1)
 
-Phase 1 closes **critical FE→BE controls** registered in `linkage-inventory.json` (30 controls across 7 repos). Consumer PRD matrices in each repo's `docs/TEST.md` remain the backlog for phase 2 expansion and are tracked as **EXC-PRD-MATRIX** in [`TEST_COVERAGE_EXCEPTIONS.md`](TEST_COVERAGE_EXCEPTIONS.md) (due 2026-09-30).
+Phase 1 closes **critical FE→BE controls** registered in `linkage-inventory.json` (36 controls across 7 repos). Consumer PRD matrices in each repo's `docs/TEST.md` remain the backlog for phase 2 expansion and are tracked as **EXC-PRD-MATRIX** in [`TEST_COVERAGE_EXCEPTIONS.md`](TEST_COVERAGE_EXCEPTIONS.md) (due 2026-09-30).
 
 ## Completion rule
 

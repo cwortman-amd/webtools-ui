@@ -25,3 +25,6 @@ Test tiers on disk:
 | `tests/contracts/` | Schemas and inventories |
 
 Commands: `make coverage-intelligence`, `make coverage-snapshot`, `make adversarial-preflight`.
+
+Core-module coverage is gated at an **80% loop floor** on **measured** modules (`tests/contracts/coverage-targets.json`). `NO_DATA` (for example `js/shell.js` / `js/chat-orb.js` until a filename-attributed harness exists) is excluded from that floor and is **not** a pass. Stretch remains 100%; do not raise CI `fail-under` to 100 in the same change as new tests.
+
