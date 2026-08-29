@@ -12,6 +12,7 @@ Related:
 
 - Platform model: [`PLATFORM_MODEL.md`](PLATFORM_MODEL.md)
 - Visual spec: [`DESIGN.md`](DESIGN.md)
+- Settings window: [`SETTINGS.md`](SETTINGS.md)
 - Plugin contract: [`PLUGIN_CONTRACT.md`](PLUGIN_CONTRACT.md)
 - Runtime: [`js/shell.js`](../js/shell.js), [`js/shell-modules.js`](../js/shell-modules.js)
 - Schema: [`schemas/shell-module.schema.json`](../schemas/shell-module.schema.json)

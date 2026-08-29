@@ -52,6 +52,7 @@
   // legacy namespace for backward compatibility only.
   var LEGACY_STORAGE_KEY = "shared-ui:chat-orb:v1";
   var LEGACY_LLM_KEY     = "shared-ui:chat-orb:llm:v1";
+  var LEGACY_LAUNCHER_KEY = "shared-ui:chat-orb:launcher:v1";
   var PROMPT_HISTORY_MAX = 50;
   var DEFAULTS = {
     title:       "AI Assistant",
@@ -115,13 +116,20 @@
     mounted:  false,
     open:     false,
     cfg:      Object.assign({}, DEFAULTS),
-    storageKeys: { history: LEGACY_STORAGE_KEY, llm: LEGACY_LLM_KEY, prompts: LEGACY_STORAGE_KEY + ":prompts" },
+    storageKeys: {
+      history: LEGACY_STORAGE_KEY,
+      llm: LEGACY_LLM_KEY,
+      prompts: LEGACY_STORAGE_KEY + ":prompts",
+      launcher: LEGACY_LAUNCHER_KEY
+    },
     llm:      Object.assign({}, LLM_DEFAULTS),
+    orbVisible: false,
     handlers: Object.create(null),
     history:  [],
     prompts:  [],
     promptIndex: -1,
-    promptDraft: ""
+    promptDraft: "",
+    storageBound: false
   };
 
   function resolveStorageKeys(prefix) {
@@ -130,14 +138,16 @@
       return {
         history: LEGACY_STORAGE_KEY,
         llm: LEGACY_LLM_KEY,
-        prompts: LEGACY_STORAGE_KEY + ":prompts"
+        prompts: LEGACY_STORAGE_KEY + ":prompts",
+        launcher: LEGACY_LAUNCHER_KEY
       };
     }
     var base = p.replace(/:+$/, "") + ":";
     return {
       history: base + "chat-orb:v1",
       llm: base + "chat-orb:llm:v1",
-      prompts: base + "chat-orb:prompts:v1"
+      prompts: base + "chat-orb:prompts:v1",
+      launcher: base + "chat-orb:launcher:v1"
     };
   }
 
@@ -176,6 +186,100 @@
 
   function saveLLM() {
     try { localStorage.setItem(state.storageKeys.llm, JSON.stringify(state.llm)); } catch (e) {}
+  }
+
+  function getLLMForm() {
+    return {
+      host: state.llm.host,
+      model: state.llm.model,
+      path: state.llm.path,
+      mode: state.llm.mode,
+      enabled: !!state.llm.enabled,
+      keyConfigured: !!state.llm.key
+    };
+  }
+
+  function setLLM(cfg) {
+    cfg = cfg || {};
+    var next = Object.assign({}, state.llm);
+    if (Object.prototype.hasOwnProperty.call(cfg, "host")) next.host = String(cfg.host || "").trim();
+    if (Object.prototype.hasOwnProperty.call(cfg, "model")) next.model = String(cfg.model || "").trim();
+    if (Object.prototype.hasOwnProperty.call(cfg, "path")) {
+      next.path = String(cfg.path || LLM_DEFAULTS.path).trim() || LLM_DEFAULTS.path;
+    }
+    if (Object.prototype.hasOwnProperty.call(cfg, "key")) next.key = String(cfg.key || "").trim();
+    if (Object.prototype.hasOwnProperty.call(cfg, "mode")) {
+      next.mode = cfg.mode === "primary" ? "primary" : "fallback";
+    }
+    if (Object.prototype.hasOwnProperty.call(cfg, "enabled")) next.enabled = !!cfg.enabled;
+    state.llm = next;
+    saveLLM();
+    try {
+      document.dispatchEvent(new CustomEvent("chat-orb:llmChanged", { detail: getLLMForm() }));
+    } catch (_) {}
+    return Object.assign({}, state.llm);
+  }
+
+  function resetLLM() {
+    return setLLM(Object.assign({}, LLM_DEFAULTS));
+  }
+
+  function syncLLMFromStorage(event) {
+    if (event && event.key && event.key !== state.storageKeys.llm) return;
+    state.llm = loadLLM();
+    try {
+      document.dispatchEvent(new CustomEvent("chat-orb:llmChanged", { detail: getLLMForm() }));
+    } catch (_) {}
+  }
+
+  function loadOrbVisible() {
+    try {
+      var raw = localStorage.getItem(state.storageKeys.launcher);
+      if (!raw) return false;
+      var parsed = JSON.parse(raw);
+      return parsed === true || !!(parsed && parsed.visible);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function applyOrbVisibility() {
+    if (!ui.orb) return;
+    ui.orb.hidden = !state.orbVisible;
+    ui.orb.setAttribute("aria-hidden", state.orbVisible ? "false" : "true");
+  }
+
+  function setOrbVisible(visible) {
+    state.orbVisible = !!visible;
+    try {
+      localStorage.setItem(state.storageKeys.launcher, JSON.stringify({ visible: state.orbVisible }));
+    } catch (_) {}
+    applyOrbVisibility();
+    try {
+      document.dispatchEvent(new CustomEvent("chat-orb:launcherChanged", {
+        detail: { visible: state.orbVisible }
+      }));
+    } catch (_) {}
+    return state.orbVisible;
+  }
+
+  function syncLauncherFromStorage(event) {
+    if (event && event.key && event.key !== state.storageKeys.launcher) return;
+    state.orbVisible = loadOrbVisible();
+    applyOrbVisibility();
+    try {
+      document.dispatchEvent(new CustomEvent("chat-orb:launcherChanged", {
+        detail: { visible: state.orbVisible }
+      }));
+    } catch (_) {}
+  }
+
+  function openAgentSettings(opts) {
+    opts = Object.assign({ pane: "agent" }, opts || {});
+    if (global.Shell && typeof global.Shell.openSettings === "function") {
+      return global.Shell.openSettings(opts);
+    }
+    return false;
   }
 
   function loadHistory() {
@@ -329,7 +433,7 @@
       (state.cfg.showDemoBtn
         ? '    <button type="button" class="ai-btn-icon" id="chatDemoBtn" title="Demo Mode — guided walkthrough" aria-label="Start demo mode"><span class="material-symbols-outlined">play_circle</span></button>'
         : ""),
-      '    <button type="button" class="ai-btn-icon" id="chatLlmBtn" title="LLM settings" aria-label="LLM settings"><span class="material-symbols-outlined">settings</span></button>',
+      '    <button type="button" class="ai-btn-icon" id="chatLlmBtn" title="Agent settings" aria-label="Agent settings"><span class="material-symbols-outlined">settings</span></button>',
       '    <button type="button" class="ai-btn-icon" id="chatClose" title="Close" aria-label="Close chat"><span class="material-symbols-outlined">close</span></button>',
       "  </div>",
       "</div>",
@@ -587,7 +691,9 @@
   function wireEvents() {
     ui.orb.addEventListener("click", toggle);
     ui.close.addEventListener("click", function () { setOpen(false); });
-    ui.llmBtn.addEventListener("click", toggleLlmCard);
+    ui.llmBtn.addEventListener("click", function () {
+      if (!openAgentSettings({ returnFocus: ui.llmBtn })) toggleLlmCard();
+    });
 
     // Demo-launch button (showDemoBtn config flag). Default behavior is to
     // toggle the in-orb `.ai-demo-card` slide-down picker (parallel to how
@@ -656,8 +762,7 @@
 
     // LLM card buttons
     document.getElementById("chatLlmReset").addEventListener("click", function () {
-      state.llm = Object.assign({}, LLM_DEFAULTS);
-      saveLLM();
+      resetLLM();
       hydrateLlmInputs();
       setLlmStatus("Defaults restored.");
     });
@@ -666,13 +771,14 @@
       ui.llmCard.classList.remove("show");
     });
     document.getElementById("chatLlmSave").addEventListener("click", function () {
-      state.llm.host    = (document.getElementById("chatLlmHost").value || "").trim();
-      state.llm.model   = (document.getElementById("chatLlmModel").value || "").trim();
-      state.llm.path    = (document.getElementById("chatLlmPath").value || LLM_DEFAULTS.path).trim();
-      state.llm.key     = (document.getElementById("chatLlmKey").value || "").trim();
-      state.llm.mode    = document.getElementById("chatLlmMode").value;
-      state.llm.enabled = document.getElementById("chatLlmEnabled").checked;
-      saveLLM();
+      setLLM({
+        host: document.getElementById("chatLlmHost").value,
+        model: document.getElementById("chatLlmModel").value,
+        path: document.getElementById("chatLlmPath").value,
+        key: document.getElementById("chatLlmKey").value,
+        mode: document.getElementById("chatLlmMode").value,
+        enabled: document.getElementById("chatLlmEnabled").checked
+      });
       setLlmStatus("Saved.");
       ui.llmCard.classList.remove("show");
     });
@@ -686,11 +792,10 @@
     ui.panel.classList.toggle("open", state.open);
     if (state.open) {
       setBadge("");
-      // Render any backlog history if first open.
       if (state.history.length === 0) {
         printSystem(state.cfg.greeting);
-        renderSuggestions();
       }
+      renderSuggestions();
       // Don't autofocus on touch: it summons the iOS keyboard before the
       // user has asked to type, hiding the message log they just opened.
       if (!isTouch()) setTimeout(function () { ui.input.focus(); }, 80);
@@ -1356,7 +1461,9 @@
   function builtinLlm(args) {
     var token = (args || "").trim().split(/\s+/)[0];
     if (!token || token === "settings" || token === "config" || token === "configure") {
-      // Pop the LLM settings card open and stop here.
+      if (openAgentSettings()) {
+        return { reply: "Opened Agent settings.", kind: "system" };
+      }
       ui.llmCard.classList.add("show");
       hydrateLlmInputs();
       return { reply: "Opened LLM settings panel.", kind: "system" };
@@ -1372,20 +1479,20 @@
         kind: "system" };
     }
     if (token === "on" || token === "enable") {
-      state.llm.enabled = true; saveLLM();
+      setLLM({ enabled: true });
       return { reply: "LLM agent enabled.", kind: "system" };
     }
     if (token === "off" || token === "disable") {
-      state.llm.enabled = false; saveLLM();
+      setLLM({ enabled: false });
       return { reply: "LLM agent disabled.", kind: "system" };
     }
     if (token === "reset" || token === "defaults") {
-      state.llm = Object.assign({}, LLM_DEFAULTS); saveLLM();
+      resetLLM();
       return { reply: "LLM settings reset to defaults.", kind: "system" };
     }
     return { reply:
         "Usage: `/llm [settings | status | on | off | reset]`. " +
-        "Use `/llm settings` to open the configuration card.",
+        "Use `/llm settings` to open the Agent settings pane.",
       kind: "system" };
   }
 
@@ -1409,12 +1516,19 @@
     state.cfg = Object.assign({}, DEFAULTS, opts || {});
     state.storageKeys = resolveStorageKeys(state.cfg.storagePrefix);
     state.llm = loadLLM();
+    state.orbVisible = loadOrbVisible();
+    if (!state.storageBound && global.addEventListener) {
+      global.addEventListener("storage", syncLLMFromStorage);
+      global.addEventListener("storage", syncLauncherFromStorage);
+      state.storageBound = true;
+    }
 
     // DOM
     ui.orb     = buildOrb();
     ui.panel   = buildPanel();
     document.body.appendChild(ui.orb);
     document.body.appendChild(ui.panel);
+    applyOrbVisibility();
 
     ui.msgs    = document.getElementById("chatMsgs");
     ui.input   = document.getElementById("chatInput");
@@ -1502,8 +1616,20 @@
     setTyping:   setTyping,
     clear:       clearLog,
     getLLM:      function () { return Object.assign({}, state.llm); },
-    setLLM:      function (cfg) { state.llm = Object.assign({}, state.llm, cfg); saveLLM(); },
+    getLLMForm:  getLLMForm,
+    getStoragePrefix: function () { return state.cfg.storagePrefix || ""; },
+    isOrbVisible: function () { return state.orbVisible; },
+    setOrbVisible: setOrbVisible,
+    reloadLauncher: syncLauncherFromStorage,
+    setLLM:      setLLM,
+    resetLLM:    resetLLM,
+    reloadLLM:   syncLLMFromStorage,
+    openAgentSettings: openAgentSettings,
     getHistory:  function () { return state.history.slice(); },
+    setSuggestions: function (list) {
+      state.cfg.suggestions = list;
+      if (state.open) renderSuggestions();
+    },
     openDemoCard:   openDemoCard,
     toggleDemoCard: toggleDemoCard
   };

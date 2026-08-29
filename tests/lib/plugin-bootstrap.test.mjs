@@ -164,3 +164,8 @@ test("bootstrapFromManifest falls back to fetch when PluginServices absent", asy
   });
   assert.equal(out.id, "fetched");
 });
+
+test("WebtoolsPlatform re-exports bootstrapFromManifest", () => {
+  const sandbox = loadPluginBootstrap({ WebtoolsPlatform: {} });
+  assert.equal(typeof sandbox.WebtoolsPlatform.bootstrapFromManifest, "function");
+});

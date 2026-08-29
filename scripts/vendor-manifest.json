@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-23T14:51:09Z",
-  "head": "1d9e48e4ebf1763221ca7c85871b9a37b59e684c",
+  "generated_at": "2026-08-29T15:46:47Z",
+  "head": "210623fbdb7e3cb530473d9c49fb88af5af9fafc",
   "files": [
     { "path": ".cursor/skills/webtools-ecosystem/SKILL.md", "sha256": "498a0aded0ae0d55031b7f5d3374cbf1e9db695c253949f3ab55dc92afc4cac0", "size": 3789 },
     { "path": ".cursor/skills/webtools-platform/SKILL.md", "sha256": "4746a75aaa010436c64a7b495e0b59a04951a718049b86cde851dcde6ce13912", "size": 2494 },
@@ -15,6 +15,7 @@
     { "path": "css/fonts/material-symbols-outlined.woff2", "sha256": "b9a28e5c5328940ee287c3d7f6b626e32a9afa92f86b055295cdf6fd5d1c004b", "size": 3555400 },
     { "path": "css/material-symbols.css", "sha256": "f5087064e0f42f9a82f3331924897c3a86a17da6f76b0b3370752ec7c72000f0", "size": 2022 },
     { "path": "css/notes-panel.css", "sha256": "dac97489cdd96d451f14ec6ec17e5309d5b5fe4c1949992b0390a690bee25df8", "size": 9806 },
+    { "path": "css/settings.css", "sha256": "33ba94999d51a55c428dd73cee03fa1ac7b51ad7935f4b87c0bb75871be241f7", "size": 10524 },
     { "path": "css/shell.css", "sha256": "48d9b8975130640443db75ef42fe614924b305d9664fbb05e93f87457d18aa8d", "size": 10572 },
     { "path": "css/shortcuts.css", "sha256": "70ed70f67e53a59dcefbea710d14454726bab1980d8856da98ba0d768e916fb5", "size": 2584 },
     { "path": "css/skins/amd-gold.css", "sha256": "1df6dab84bee8f4d9aa978d2f2d7c1248541e25527a35385f592a5b69921bea4", "size": 7887 },
@@ -77,6 +78,7 @@
     { "path": "js/platform.js", "sha256": "0633beaf01979caaf2b5c7d3f915a8d636db11acca0476e33d0f2ab0115e4d85", "size": 8446 },
     { "path": "js/plugin-bootstrap.js", "sha256": "0a5e1a986861d6932b68b463a6bdb3cf9f95b08733543fb1cd5939cd670dd08f", "size": 3677 },
     { "path": "js/plugin-services.js", "sha256": "157af68431148269105983776c8f243d99e59fa7a5e24613691c83c3f29b0c39", "size": 1294 },
+    { "path": "js/settings.js", "sha256": "c134cdd54708047733a1f1267f8e12f645781edb890b17c9bbef5498f3d7b42c", "size": 29477 },
     { "path": "js/shell-modules.js", "sha256": "444e5eafbd6cc060a7b8ee7236b0ee2119cb74d25d08749bf5652a4bb789e0b9", "size": 13801 },
     { "path": "js/shell.js", "sha256": "3e5986c44d91a132f74257f92ebde80c4b69691894ce9ad6eaf9f257f35f3257", "size": 18167 },
     { "path": "js/shortcuts.js", "sha256": "29840f6cb26d13c61d943868437d8accb1b5316381404032c6c65eb55e8537d6", "size": 7415 },

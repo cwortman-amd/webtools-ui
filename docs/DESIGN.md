@@ -22,12 +22,14 @@ sibling consumers.
 | Icons | `css/material-symbols.css` | Outlined Material Symbols at 18–20 px |
 | Top-bar tools | `css/chrome.css` | Settings/help/profile popovers (demo-portal, KE catalog) |
 | Shell JS | `js/shell.js`, `js/mobile-drawer.js` | Collapse, theme/skin/mode persistence, mobile drawer |
+| Settings (target) | [`SETTINGS.md`](SETTINGS.md) | Modal for theme, appearance, user mode; not the product tab sidebar |
 
 Reference implementations (sibling repos):
 
 - `llm-benchmark/pages/index.html` — sidebar + iframe tabs
 - `dc-planner/pages/index.html` — sidebar + dense planner tabs (+ desktop hero override)
 - `cluster-manager/pages/index.html` — same shell contract
+- `slide-presenter/pages/index.html` — sidebar shell + presentation workflow
 - `knowledge-exchange/pages/index.html` — sidebar + in-page portal tabs
 - `demo-portal/index.html` — catalog topnav variant
 
@@ -38,7 +40,8 @@ Consumers load assets via `../shared/css/...` (symlink to this repo).
 ## Workspace color policy (all projects)
 
 **Scope:** every harmonized consumer that loads `shared/css/*` from this repo —
-**cluster-manager**, **dc-planner**, **llm-benchmark**, **knowledge-exchange**, and **demo-portal**.
+**cluster-manager**, **dc-planner**, **llm-benchmark**, **slide-presenter**,
+**knowledge-exchange**, and **demo-portal**.
 Product-specific design docs extend this policy; they do not replace it.
 
 Intent: calm, documentation-grade surfaces with **minimal decorative color** — thin line icons,
@@ -78,6 +81,7 @@ dashboards:
 | **cluster-manager** | Stat rings, dial arcs, bar fills, health badges | Tab chrome, sidebar util icons |
 | **dc-planner** | Validation/warning badges on workload/TCO | Nav, filter sidebar chrome |
 | **llm-benchmark** | Sweep queue status, pass/fail badges | Dashboard grid chrome |
+| **slide-presenter** | Build/export readiness, presentation state | Sidebar and editor chrome |
 | **knowledge-exchange** | Progress ring, pathway step dots, recall/grade badges, pipeline stages | Collapsed pathway rail preview (`.flow-node__dot`) |
 | **demo-portal** | Demo run status, launch readiness | Catalog card chrome, topnav icons |
 
@@ -179,11 +183,47 @@ Extends [Workspace color policy](#workspace-color-policy-all-projects) with layo
 | Surface | Default skin | Scroll container | Nav pattern |
 | --- | --- | --- | --- |
 | Operational dashboards (CM, LB, DC planner) | `amd-gold` | `.tab-panel` / iframe body | Sidebar `body.nav-side` |
+| Slide Presenter | Product skin | `.tab-panel` / workflow content | Sidebar `body.nav-side` |
 | Knowledge Exchange portal | `matte-dark` | `.tab-panel`, module main | Sidebar + in-page tabs |
 | Demo catalog (legacy topnav) | `matte-dark` | Main grid column | Sticky topnav — **marketing exception** for layered gradients |
 
 **Elevation:** border-led surfaces; avoid heavy drop shadows on nav items. **Body scroll:** disabled
 for app shells — scroll inner panels only.
+
+---
+
+## Workspace pop-up menus (all projects)
+
+**Default: left-justified.** Every pop-up, overlay menu, popover, and modal chrome list is
+left-aligned unless a documented product exception exists. This is a workspace rule, not a
+per-component preference.
+
+Applies to Settings (`css/settings.css`), chrome/help/profile popovers (`css/chrome.css`),
+hero skin/mode menus (`css/base.css`), context menus (`css/components.css`), ChatOrb quick
+menus, Shortcuts sheets, error popups, and any future overlay that lists commands or
+categories.
+
+| Surface | Alignment | Implementation |
+| --- | --- | --- |
+| Group headings (`SHELL`, `TOOLS`, section titles) | Left | `text-align: left` |
+| Menu rows, nav items, options | Left | `text-align: left` and, for flex rows, `justify-content: flex-start` |
+| Search fields inside pop-ups | Left | Placeholder-only; do not show a visible duplicate label next to the input |
+| Icons in a row | Leading (left of the label) | Fixed icon column, then label; do not center the pair in the row |
+
+**Why this is explicit:** consumer `button` / form styles often set `text-align: center` or
+`justify-content: center`. Pop-up menus must **override** those defaults in the shared overlay
+stylesheet. `text-align: left` alone is not enough on flex buttons.
+
+**Do not:**
+
+- Center-align labels, group headings, or icon+label rows in pop-ups.
+- Rely on inherited page `button` alignment for overlay chrome.
+- Show a visible copy of an `sr-only` / visually-hidden label beside a search field or switch
+  (define `.sr-only` in the overlay stylesheet if the host page does not).
+
+Context menus already follow this (`DESIGN.md` § Context menu). Settings sidebar and pane copy
+must as well ([`SETTINGS.md`](SETTINGS.md)). Product `docs/DESIGN.md` files may not opt out
+without an explicit **Known deltas** entry.
 
 ---
 
@@ -215,7 +255,7 @@ product: cluster-manager              # repo id
 
 Recommended outline:
 
-1. **Extends** — link to workspace sections (color, interaction, status, layout, agent).
+1. **Extends** — link to workspace sections (color, interaction, status, layout, pop-up menus, agent).
 2. **Product tokens / widgets** — geometry, grids, domain-specific components.
 3. **Tier-3 examples** — which selectors carry status color in this product.
 4. **Known deltas** — intentional exceptions (dc-planner desktop hero, demo-portal gradients).
@@ -227,6 +267,7 @@ Recommended outline:
 | cluster-manager | `docs/DESIGN.md` (stat tiles, dials, bars) |
 | dc-planner | `docs/DESIGN.md` (planner tabs, validation badges) |
 | llm-benchmark | `docs/DESIGN.md` (sweep queue, regression status) |
+| slide-presenter | `docs/DESIGN.md` (search, build, and presentation workflow) |
 | demo-portal | `docs/DESIGN.md` (readiness badges, catalog cards) |
 
 ---
@@ -329,17 +370,21 @@ Each `.nav-btn` maps to a `data-tab` value; JS toggles `.active` and shows the m
 
 #### Utility rail (`.sidebar-bottom` + `.util-btn`)
 
-Bottom stack separated by top border:
+Bottom stack separated by top border.
 
-- **Agent** — opens chat orb / agent panel (`util-btn-agent`).
-- **Collapse** — toggles `nav-collapsed` on `body`.
-- **Theme** — light/dark (`data-theme` on `html`/`body`).
-- **Settings** — expands inline `.side-nav-skin-list` (skin picker).
-- **User mode** — expands `.side-nav-mode-list` (Standard / Advanced / Expert).
+**Current (shipping):** Agent, Collapse, Theme, Settings (inline skin list), User mode
+(inline mode list). See the markup contract above.
 
-`.util-btn` matches `.nav-btn` density but **0.72 rem** type. Chevron (`expand_more`) indicates expandable lists.
+**Target:** relocate Theme, skin, and User mode into the Settings window and **remove those
+controls from the left sidebar.** Keep Agent and Collapse. Spec:
+[`SETTINGS.md`](SETTINGS.md). Tab navigation in `.sidebar-nav` stays; Settings does not replace
+it.
 
-Inline skin/mode lists use `.side-nav-skin-option` / `.side-nav-mode-option`: 0.72 rem, indented under parent, active option in **`--ui-accent`**.
+`.util-btn` matches `.nav-btn` density but **0.72 rem** type. Chevron (`expand_more`) indicates
+expandable lists **until** the Settings migration lands.
+
+Inline skin/mode lists use `.side-nav-skin-option` / `.side-nav-mode-option`: 0.72 rem, indented
+under parent, active option in **`--ui-accent`**.
 
 ### Hero bar (mobile + optional desktop)
 
@@ -367,11 +412,29 @@ Hero bar spec (`css/base.css`):
 
 #### Skin menu (`.hero-skin-menu`)
 
-Pop-down anchored to settings gear in hero toolbar (when used):
+Pop-down anchored to settings gear in hero toolbar (when used). Follows
+[Workspace pop-up menus](#workspace-pop-up-menus-all-projects) (left-justified by default):
 
-- Section titles: 10 px uppercase, `--ui-muted`.
-- Options: `.hero-skin-option`, `.hero-mode-option` — full-width row buttons.
+- Section titles: 10 px uppercase, `--ui-muted`, left-aligned.
+- Options: `.hero-skin-option`, `.hero-mode-option` — full-width row buttons, `text-align: left`,
+  `justify-content: flex-start`.
 - Active: weight 600 + subtle background wash.
+
+#### Context menu (`.wt-context-menu`)
+
+Shared right-click popups in `components.css` + `js/context-menu.mjs` (Slide Presenter Build, Search Sources, future consumers):
+
+- **API:** `createContextMenu()` for cursor-anchored transients; `createAnchoredMenu()` for trigger-toggled persistent menus (`aria-expanded`, outside click, Escape).
+
+- **Opaque** panel — no glass/blur from `base.css` buttons.
+- **Left-aligned** rows (workspace default for all pop-ups): 28px icon column + label
+  (`.wt-context-menu-item__icon`, `__label`).
+- **Position:** cursor top-left; flip left/up at viewport edge.
+- **Z-index:** `--wt-z-context-menu` (50) — see [`TOKENS.md`](TOKENS.md).
+- **Interaction:** pointer cursor on enabled rows; visible focus ring; 120ms hover fill.
+- **Markup contract:** `role="menu"` / `role="menuitem"`; destructive rows use `.wt-context-menu-item--danger`.
+
+Do not use hero toolbar glass buttons or skin-menu styling for transient context popups.
 
 ### Content shell (`.shell-body` + `.tab-panel`)
 
@@ -557,3 +620,8 @@ existing icon + label spacing; add `mode-*` class if expert-only.
 **Q: Where do product-specific design rules live?**  
 In each repo's `docs/DESIGN.md` using the [Product DESIGN.md template](#product-designmd-template).
 Must extend workspace policy, not replace it.
+
+**Q: How should pop-up menus align text?**  
+**Left-justified by default** — headings, rows, search fields, and icon+label pairs. Override
+consumer `button` centering with `text-align: left` and `justify-content: flex-start`. See
+[Workspace pop-up menus](#workspace-pop-up-menus-all-projects).

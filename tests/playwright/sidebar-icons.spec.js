@@ -8,8 +8,11 @@
  *     shared/tests/playwright/sidebar-icons.spec.js \
  *     --config shared/tests/playwright.config.mjs
  */
-const path = require("path");
-const { createRequire } = require("module");
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const consumerRoot = process.env.WEBTOOLS_UI_CONSUMER_ROOT
   ?? path.resolve(__dirname, "../../..");

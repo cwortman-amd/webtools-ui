@@ -543,6 +543,43 @@
           "tests": { "e2e": ["tests/e2e/integration.spec.js#create-deck"], "unit": ["tests/api/test_sidecar_api.py#create-deck"] }
         },
         {
+          "id": "build.extensionInit",
+          "view": "build",
+          "label": "Build iframe completes init",
+          "selector": "#spBuildSlideSorter",
+          "action": "load",
+          "backend": { "type": "none" },
+          "persistence": null,
+          "uiConfirmation": "#spBuildSlideSorter[data-sorter-events-bound='1']",
+          "critical": true,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/e2e/build-init-smoke.spec.js#extension-init"],
+            "unit": ["extensions/build/tests/view-init-contract.test.mjs#init-imports"]
+          }
+        },
+        {
+          "id": "build.sorterMultiSelect",
+          "view": "build",
+          "label": "Slide sorter multi-select and group ops",
+          "selector": ".sp-build-sorter-thumb-frame",
+          "action": "click",
+          "backend": { "type": "none" },
+          "persistence": "session:build-selection",
+          "uiConfirmation": ".sp-build-sorter-thumb--selected",
+          "critical": true,
+          "status": "linked",
+          "tests": {
+            "e2e": [
+              "tests/e2e/build-sorter-multiselect.spec.js#multi-select-outline",
+              "tests/e2e/build-sorter-multiselect.spec.js#ctrl-after-details",
+              "tests/e2e/build-sorter-multiselect.spec.js#multi-select-delete",
+              "tests/e2e/build-sorter-keyboard.spec.js#group-cut"
+            ],
+            "unit": ["extensions/build/tests/logic.test.mjs", "extensions/build/tests/view-init-contract.test.mjs"]
+          }
+        },
+        {
           "id": "present.openSlide",
           "view": "present",
           "label": "Open slide on stage",
@@ -567,6 +604,86 @@
           "critical": true,
           "status": "linked",
           "tests": { "unit": ["tests/api/test_live_copilot.py#sessions-post"] }
+        },
+        {
+          "id": "search.galleryViewMode",
+          "view": "search",
+          "label": "Gallery view mode",
+          "selector": "#spSearchViewToolbar .sp-search-view-mode",
+          "action": "click",
+          "backend": { "type": "local", "method": null, "path": null },
+          "persistence": "localStorage:spSearchViewMode",
+          "uiConfirmation": ".sp-search-results--gallery, .sp-search-results--museum, .sp-search-results--list",
+          "critical": false,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/e2e/search-gallery.spec.js#gallery-view-mode"],
+            "unit": ["extensions/search/tests/gallery.test.mjs#view-mode"]
+          }
+        },
+        {
+          "id": "search.scoreBreakdown",
+          "view": "search",
+          "label": "Inspector score breakdown",
+          "selector": ".sp-search-score-breakdown",
+          "action": "agent",
+          "backend": { "type": "http", "method": "GET", "path": "/api/slides/{uid}/explain" },
+          "persistence": null,
+          "uiConfirmation": ".sp-search-score-row--hybrid",
+          "critical": false,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/e2e/search-p1-p2.spec.js#score-breakdown"],
+            "unit": ["extensions/search/tests/p1-p2.test.mjs#score-breakdown"]
+          }
+        },
+        {
+          "id": "search.comparePanel",
+          "view": "search",
+          "label": "Inline compare panel",
+          "selector": "[data-action='compare']",
+          "action": "click",
+          "backend": { "type": "http", "method": "GET", "path": "/api/slides/compare" },
+          "persistence": null,
+          "uiConfirmation": ".sp-search-compare-panel",
+          "critical": false,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/e2e/search-p1-p2.spec.js#compare-panel"],
+            "unit": ["extensions/search/tests/p1-p2.test.mjs#compare-panel"]
+          }
+        },
+        {
+          "id": "search.collectionPicker",
+          "view": "search",
+          "label": "Collection picker",
+          "selector": "#spSearchCollection",
+          "action": "change",
+          "backend": { "type": "http", "method": "GET", "path": "/api/collections" },
+          "persistence": null,
+          "uiConfirmation": "#spSearchCollection option",
+          "critical": false,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/e2e/search-p1-p2.spec.js#collection-picker"],
+            "unit": ["extensions/search/tests/p1-p2.test.mjs#collection-picker"]
+          }
+        },
+        {
+          "id": "search.voiceMic",
+          "view": "search",
+          "label": "Voice search mic",
+          "selector": "#spSearchMicBtn",
+          "action": "click",
+          "backend": { "type": "http", "method": "POST", "path": "/api/audio/transcribe" },
+          "persistence": null,
+          "uiConfirmation": "#spSearchInput[value]",
+          "critical": false,
+          "status": "linked",
+          "tests": {
+            "e2e": ["tests/e2e/search-p1-p2.spec.js#voice-search"],
+            "unit": ["extensions/search/tests/p1-p2.test.mjs#voice-search"]
+          }
         }
       ]
     }

@@ -1,14 +1,17 @@
 /**
  * webtools-ui/tests/playwright/cross-consumer-shell.spec.js
  *
- * Generic @playwright/test spec (CommonJS for consumer node_modules resolution).
+ * Generic @playwright/test spec with consumer node_modules resolution.
  *
  *   WEBTOOLS_UI_CONSUMER_ROOT=$PWD npx playwright test \
  *     shared/tests/playwright/cross-consumer-shell.spec.js \
  *     --config shared/tests/playwright.config.mjs
  */
-const path = require("path");
-const { createRequire } = require("module");
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const consumerRoot = process.env.WEBTOOLS_UI_CONSUMER_ROOT
   ?? path.resolve(__dirname, "../../..");
@@ -123,5 +126,72 @@ test.describe("shared shell contract", () => {
       },
       requirePortalView: def.requirePortalView === true,
     });
+  });
+
+  test("shared Settings replaces legacy sidebar expanders", async ({ page }) => {
+    const h = await loadHelpers();
+    const def = consumerDef(h.loadConsumerMatrix);
+    await gotoConsumerShell(page, h, def);
+
+    await expect(page.locator("#themeToggleSide, #skinToggleSide, #modeToggleSide")).toHaveCount(0);
+    const trigger = page.locator("[data-open-settings]:visible, #settingsToggleSide:visible").first();
+    await expect(trigger).toBeVisible();
+    await trigger.click();
+    await expect(page.locator("#settingsModal")).toBeVisible();
+    await expect(page.locator("#pane-appearance")).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#settingsModal")).toBeHidden();
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+," : "Control+,");
+    await expect(page.locator("#settingsModal")).toBeVisible();
+  });
+
+  test("Agent settings preserve the saved key on untouched fields", async ({ page }) => {
+    const h = await loadHelpers();
+    const def = consumerDef(h.loadConsumerMatrix);
+    await gotoConsumerShell(page, h, def);
+
+    const mounted = await page.evaluate(() => Boolean(window.ChatOrb?.getLLMForm && window.Shell?.openSettings));
+    test.skip(!mounted, "ChatOrb settings API is not mounted for this consumer");
+    await page.evaluate(() => {
+      window.ChatOrb.setLLM({ host: "settings-test", key: "keep-me" });
+      window.ChatOrb.setOrbVisible(false);
+      window.Shell.openSettings({ pane: "agent" });
+    });
+    await expect(page.locator("#pane-agent")).toBeVisible();
+    await expect(page.locator("#chatOrb")).toBeHidden();
+    await expect(page.locator("#settingsAgentOrbVisible")).not.toBeChecked();
+    await page.locator("#settingsAgentOrbVisible").check();
+    await expect(page.locator("#chatOrb")).toBeVisible();
+    await expect(page.locator("#settingsAgentKey")).toHaveValue("");
+    await expect(page.locator("#settingsAgentKey")).toHaveAttribute("type", "password");
+    await page.locator("#settingsAgentHost").fill("settings-test-2");
+    await page.locator("#settingsAgentHost").blur();
+    const form = await page.evaluate(() => ({
+      form: window.ChatOrb.getLLMForm(),
+      raw: window.ChatOrb.getLLM(),
+    }));
+    expect(form.form.host).toBe("settings-test-2");
+    expect(form.form.keyConfigured).toBe(true);
+    expect(form.form.key).toBeUndefined();
+    expect(form.raw.key).toBe("keep-me");
+    expect(await page.evaluate(() => {
+      const prefix = window.ChatOrb.getStoragePrefix();
+      const key = prefix ? `${prefix}:chat-orb:launcher:v1` : "shared-ui:chat-orb:launcher:v1";
+      return JSON.parse(localStorage.getItem(key)).visible;
+    })).toBe(true);
+  });
+
+  test("Settings becomes a full-screen mobile surface", async ({ page }) => {
+    const h = await loadHelpers();
+    const def = consumerDef(h.loadConsumerMatrix);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoConsumerShell(page, h, def);
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+," : "Control+,");
+    await page.waitForTimeout(200);
+    const box = await page.locator(".settings-modal").boundingBox();
+    expect(box.width / 390).toBeGreaterThanOrEqual(0.98);
+    expect(box.height / 844).toBeGreaterThanOrEqual(0.99);
+    await expect(page.locator(".settings-modal")).toHaveCSS("border-radius", "0px");
   });
 });

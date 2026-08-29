@@ -138,6 +138,68 @@
     syncSideSkinList();
   }
 
+  var DEFAULT_SETTINGS = {
+    skin: "amd-gold",
+    theme: "dark",
+    userMode: "standard",
+    navCollapsed: false
+  };
+  var settingsAdapter = null;
+
+  function defaultReadSetting(key) {
+    if (key === "skin") return document.body.getAttribute("data-skin") || readPref("skin", DEFAULT_SETTINGS.skin);
+    if (key === "theme") return document.body.getAttribute("data-theme") || readPref("theme", DEFAULT_SETTINGS.theme);
+    if (key === "user-mode") return document.body.getAttribute("data-user-mode") || readPref("user-mode", DEFAULT_SETTINGS.userMode);
+    if (key === "nav-collapsed") {
+      return document.body.classList.contains("nav-collapsed") ||
+        readPref("nav-collapsed", DEFAULT_SETTINGS.navCollapsed ? "1" : "0") === "1";
+    }
+    return null;
+  }
+
+  function defaultApplySetting(key, value) {
+    if (key === "skin") setSkin(value);
+    else if (key === "theme") setTheme(value);
+    else if (key === "user-mode") setUserMode(value);
+    else if (key === "nav-collapsed") setCollapsed(value === true || value === "1");
+    document.dispatchEvent(new CustomEvent("shell:settingChanged", {
+      detail: { key: key, value: value }
+    }));
+  }
+
+  function configureSettings(adapter) {
+    adapter = adapter || {};
+    var defaults = Object.assign({}, DEFAULT_SETTINGS, adapter.defaults || {});
+    settingsAdapter = {
+      defaults: defaults,
+      read: typeof adapter.read === "function" ? adapter.read : defaultReadSetting,
+      apply: typeof adapter.apply === "function" ? adapter.apply : defaultApplySetting,
+      reset: typeof adapter.reset === "function" ? adapter.reset : function () {
+        defaultApplySetting("skin", defaults.skin);
+        defaultApplySetting("theme", defaults.theme);
+        defaultApplySetting("user-mode", defaults.userMode);
+        defaultApplySetting("nav-collapsed", defaults.navCollapsed);
+      }
+    };
+    return settingsAdapter;
+  }
+
+  function getSettingsAdapter() {
+    return settingsAdapter || configureSettings();
+  }
+
+  function openSettings(opts) {
+    if (!global.WebtoolsSettings || typeof global.WebtoolsSettings.open !== "function") return false;
+    global.WebtoolsSettings.open(opts || {});
+    return true;
+  }
+
+  function closeSettings() {
+    if (!global.WebtoolsSettings || typeof global.WebtoolsSettings.close !== "function") return false;
+    global.WebtoolsSettings.close();
+    return true;
+  }
+
   /* ── Tab switching (sidebar-only after Phase 9.8e P10, 2026-05-12) ──
    * Selector kept inclusive of `.hero-tabs .tab-btn` so any pre-P10
    * markup (or other consumers that still ship the strip) stays in
@@ -414,8 +476,13 @@
   }
 
   global.Shell = {
+    configure: configureSettings,
+    getSettingsAdapter: getSettingsAdapter,
+    openSettings: openSettings,
+    closeSettings: closeSettings,
     setSkin: setSkin,
     setTheme: setTheme,
+    toggleTheme: toggleTheme,
     setUserMode: setUserMode,
     setLayout: setLayout,
     setCollapsed: setCollapsed,

@@ -22,4 +22,9 @@
   --ui-link: var(--ui-accent);
   --ui-link-hover: color-mix(in srgb, var(--ui-accent) 82%, white);
   --ui-warning-text: #f5c842;
+  /* Layered z-index scale (app chrome → overlay → modal) */
+  --wt-z-panel: 20;
+  --wt-z-context-menu: 50;
+  --wt-z-popover: 40;
+  --wt-z-modal: 100;
 }

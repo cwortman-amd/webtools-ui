@@ -14,7 +14,33 @@
   var modules = [];
   var byId = Object.create(null);
   var activeTabId = null;
-  var opts = { hooksOnly: false, features: Object.create(null), skipModeVisibility: false };
+  var opts = { hooksOnly: false, preserveDom: false, features: Object.create(null), skipModeVisibility: false };
+
+  var LEGACY_PANEL_IDS = {
+    workload: "tabWorkload",
+    gpu: "tabGpu",
+    nic: "tabNic",
+    switch: "tabSwitch",
+    config: "tabConfig",
+    bom: "tabBom",
+    arch: "tabArch",
+    rack: "tabRack",
+    net: "tabNet",
+    dc: "tabDc",
+    power: "tabPower",
+    tco: "tabTco"
+  };
+
+  function legacyPanelId(tabId) {
+    return LEGACY_PANEL_IDS[tabId] || ("panel-" + tabId);
+  }
+
+  function resolvePanelElement(tabId) {
+    if (!global.document) return null;
+    var canonical = document.getElementById("panel-" + tabId);
+    if (canonical) return canonical;
+    return document.getElementById(legacyPanelId(tabId));
+  }
 
   function warn(msg) {
     if (global.console && global.console.warn) {
@@ -150,6 +176,10 @@
 
   function render(options) {
     options = options || {};
+    if (opts.preserveDom || opts.hooksOnly) {
+      wireNavClicks();
+      return false;
+    }
     var navRoot = options.nav || document.querySelector(".sidebar-nav");
     var bottomRoot = options.bottom || document.querySelector(".sidebar-bottom");
     var panelsRoot = options.panels || document.querySelector(".shell-body");
@@ -168,8 +198,10 @@
           utilWrap.className = "shell-modules-bottom-nav";
           bottomRoot.insertBefore(utilWrap, bottomRoot.firstChild);
         }
-        utilWrap.appendChild(createNavButton(mod, mod.id === opts.defaultTab));
-      } else {
+        if (!mod.navHidden) {
+          utilWrap.appendChild(createNavButton(mod, mod.id === opts.defaultTab));
+        }
+      } else if (!mod.navHidden) {
         navRoot.appendChild(createNavButton(mod, mod.id === opts.defaultTab));
       }
       panelsRoot.appendChild(createPanel(mod));
@@ -195,8 +227,9 @@
 
   function deactivateModule(tabId) {
     var mod = byId[tabId];
+    var panel = resolvePanelElement(tabId);
+    if (panel) cleanupPanel(panel);
     if (!mod || typeof mod.onDeactivate !== "function") return;
-    var panel = document.getElementById("panel-" + tabId);
     try {
       mod.onDeactivate(panel, buildContext(tabId));
     } catch (err) {
@@ -207,7 +240,7 @@
   function activateModule(tabId) {
     var mod = byId[tabId];
     if (!mod) return;
-    var panel = document.getElementById("panel-" + tabId);
+    var panel = resolvePanelElement(tabId);
     if (mod.panel && mod.panel.type === "mount") mountPanelModule(mod, panel);
     if (typeof mod.onActivate === "function") {
       try {
@@ -248,12 +281,16 @@
   }
 
   function removeModuleDom(id) {
+    if (opts.preserveDom || opts.hooksOnly) {
+      cleanupPanel(resolvePanelElement(id));
+      return;
+    }
     var btn = document.querySelector(navSelector(id));
     if (btn) btn.remove();
-    var panel = document.getElementById("panel-" + id);
+    var panel = resolvePanelElement(id);
     if (panel) {
       cleanupPanel(panel);
-      panel.remove();
+      if (panel.id && panel.id.indexOf("panel-") === 0) panel.remove();
     }
   }
 
@@ -292,6 +329,7 @@
       order: def.order || 0,
       title: def.title || "",
       placement: def.placement || "nav",
+      navHidden: def.navHidden === true,
       enabled: def.enabled !== false,
       provider: def.provider || "",
       replaces: def.replaces || "",
@@ -377,6 +415,7 @@
   function init(initOpts) {
     initOpts = initOpts || {};
     opts.hooksOnly = !!initOpts.hooksOnly;
+    opts.preserveDom = !!initOpts.preserveDom || !!initOpts.hooksOnly;
     opts.skipModeVisibility = !!initOpts.skipModeVisibility;
     opts.render = initOpts.render === true ? {} : (initOpts.render || null);
     opts.features = initOpts.features || opts.features;
@@ -419,6 +458,9 @@
     render: render,
     init: init,
     resolveTabId: resolveTabId,
+    resolvePanelElement: resolvePanelElement,
+    legacyPanelId: legacyPanelId,
+    cleanupPanel: cleanupPanel,
     isModuleVisible: function (id) {
       var mod = byId[id];
       return mod ? isModuleVisible(mod, buildContext(id)) : true;

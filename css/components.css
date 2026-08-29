@@ -11,6 +11,27 @@
   --component-link-hover: var(--portal-link-hover, var(--ui-link-hover, var(--component-accent)));
   --component-radius-sm: var(--portal-radius-sm, 6px);
   --component-radius-md: var(--portal-radius-md, 10px);
+  /* Opaque right-click context menus (Windows-style) */
+  --wt-context-menu-bg: #2d2d30;
+  --wt-context-menu-border: #454545;
+  --wt-context-menu-hover: #3e3e42;
+  --wt-context-menu-shadow: 0 6px 20px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.35);
+  --wt-context-menu-text: rgba(255, 255, 255, 0.95);
+  --wt-context-menu-text-disabled: rgba(255, 255, 255, 0.38);
+  --wt-context-menu-icon: rgba(255, 255, 255, 0.72);
+  --wt-context-menu-danger: #ff453a;
+}
+
+html[data-theme="light"],
+body[data-theme="light"] {
+  --wt-context-menu-bg: #ffffff;
+  --wt-context-menu-border: #c8c8c8;
+  --wt-context-menu-hover: #ececec;
+  --wt-context-menu-shadow: 0 4px 16px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --wt-context-menu-text: rgba(0, 0, 0, 0.9);
+  --wt-context-menu-text-disabled: rgba(0, 0, 0, 0.35);
+  --wt-context-menu-icon: rgba(0, 0, 0, 0.62);
+  --wt-context-menu-danger: #d13438;
 }
 
 /* Stat cards
@@ -119,6 +140,168 @@
 
 .active-chip:hover { color: var(--ui-header); }
 .active-chip .material-symbols-outlined { font-size: 13px; }
+
+/* Context menus — opaque Windows-style right-click popups */
+.wt-context-menu {
+  position: fixed;
+  z-index: var(--wt-z-context-menu, 50);
+  box-sizing: border-box;
+  display: block;
+  min-width: 220px;
+  max-width: 360px;
+  padding: 4px 0;
+  margin: 0;
+  border: 1px solid var(--wt-context-menu-border);
+  border-radius: 4px;
+  background-color: var(--wt-context-menu-bg);
+  box-shadow: var(--wt-context-menu-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: var(--wt-context-menu-text);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  user-select: none;
+  direction: ltr;
+  text-align: left;
+  overflow: hidden;
+}
+
+.wt-context-menu .wt-context-menu-item,
+.wt-context-menu button {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  width: 100%;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 12px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: none;
+  transform: none;
+  opacity: 1;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background-color 120ms ease;
+}
+
+.wt-context-menu--anchored {
+  position: absolute;
+  z-index: var(--wt-z-context-menu, 50);
+}
+
+.wt-context-menu-item[aria-selected="true"],
+.wt-context-menu-item[aria-checked="true"],
+.wt-context-menu-item.wt-context-menu-item--active {
+  background-color: var(--wt-context-menu-hover);
+}
+
+.wt-context-menu .wt-context-menu-item__icon,
+.wt-context-menu .wt-context-menu-item .material-symbols-outlined,
+.wt-context-menu button .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-width: 28px;
+  flex: 0 0 28px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--wt-context-menu-icon);
+  pointer-events: none;
+}
+
+.wt-context-menu .wt-context-menu-item__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+.wt-context-menu .wt-context-menu-item:hover:not(:disabled),
+.wt-context-menu button:hover:not(:disabled) {
+  background-color: var(--wt-context-menu-hover);
+  transform: none;
+  box-shadow: none;
+  opacity: 1;
+}
+
+.wt-context-menu .wt-context-menu-item:active:not(:disabled),
+.wt-context-menu button:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  background-color: color-mix(in srgb, var(--wt-context-menu-hover) 88%, var(--wt-context-menu-text) 12%);
+}
+
+.wt-context-menu .wt-context-menu-item:disabled,
+.wt-context-menu button:disabled {
+  color: var(--wt-context-menu-text-disabled);
+  cursor: default;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.wt-context-menu .wt-context-menu-item:disabled .material-symbols-outlined,
+.wt-context-menu button:disabled .material-symbols-outlined {
+  color: var(--wt-context-menu-text-disabled);
+}
+
+.wt-context-menu .wt-context-menu-item--danger,
+.wt-context-menu .wt-context-menu-item--danger .wt-context-menu-item__label {
+  color: var(--wt-context-menu-danger);
+}
+
+.wt-context-menu .wt-context-menu-item--danger .material-symbols-outlined,
+.wt-context-menu .wt-context-menu-item--danger .wt-context-menu-item__icon {
+  color: var(--wt-context-menu-danger);
+}
+
+.wt-context-menu-sep {
+  display: block;
+  height: 1px;
+  margin: 4px 0;
+  padding: 0;
+  border: 0;
+  background-color: var(--wt-context-menu-border);
+}
+
+.wt-context-menu .wt-context-menu-item:focus-visible,
+.wt-context-menu button:focus-visible {
+  outline: 2px solid var(--component-accent);
+  outline-offset: -2px;
+}
+
+/* Text-only rows (Search sources menu) */
+.wt-context-menu button:not(:has(.material-symbols-outlined)) {
+  display: block;
+  padding: 0 12px;
+  min-height: 32px;
+  line-height: 32px;
+  text-align: left;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .wt-context-menu {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
 
 /* Code and copy affordances */
 .code-wrapper {

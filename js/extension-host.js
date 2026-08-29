@@ -11,11 +11,180 @@
   var packs = [];
   var panelHtmlById = Object.create(null);
   var activatedStartup = false;
+  var services = Object.create(null);
+  var commands = Object.create(null);
+  var contexts = Object.create(null);
+  var failed = Object.create(null);
 
   function warn(msg) {
     if (global.console && global.console.warn) {
       global.console.warn("[ExtensionHost] " + msg);
     }
+  }
+
+  function DisposableStore() {
+    this._items = [];
+    this._disposed = false;
+  }
+  DisposableStore.prototype.push = function (item) {
+    if (this._disposed) {
+      tryDispose(item);
+      return item;
+    }
+    this._items.push(item);
+    return item;
+  };
+  DisposableStore.prototype.dispose = function () {
+    if (this._disposed) return;
+    this._disposed = true;
+    this._items.splice(0).forEach(tryDispose);
+  };
+
+  function tryDispose(item) {
+    try {
+      if (typeof item === "function") item();
+      else if (item && typeof item.dispose === "function") item.dispose();
+    } catch (err) {
+      warn("dispose failed: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  function namespacedStorage(extId, area) {
+    var prefix = "ext:" + extId + ":" + area + ":";
+    function store() {
+      try { return global.localStorage; } catch (_) { return null; }
+    }
+    return {
+      get: function (key) {
+        var ls = store();
+        if (!ls) return null;
+        try { return JSON.parse(ls.getItem(prefix + key)); } catch (_) { return ls.getItem(prefix + key); }
+      },
+      set: function (key, value) {
+        var ls = store();
+        if (!ls) return;
+        ls.setItem(prefix + key, JSON.stringify(value));
+      },
+      remove: function (key) {
+        var ls = store();
+        if (ls) ls.removeItem(prefix + key);
+      }
+    };
+  }
+
+  function createContext(pack) {
+    var store = new DisposableStore();
+    var extId = pack.id;
+    var ctx = {
+      extensionId: extId,
+      subscriptions: store,
+      storage: {
+        workspace: namespacedStorage(extId, "workspace"),
+        global: namespacedStorage(extId, "global")
+      },
+      commands: {
+        register: function (id, handler) {
+          commands[id] = handler;
+          return store.push(function () {
+            if (commands[id] === handler) delete commands[id];
+          });
+        }
+      },
+      views: {
+        register: function (viewId, mountFn) {
+          return store.push(function () { /* view unmount owned by ShellModules */ });
+        }
+      },
+      events: {
+        on: function (name, handler) {
+          if (!global.document) return store.push(function () {});
+          var wrapped = function (ev) { handler(ev.detail, ev); };
+          global.document.addEventListener(name, wrapped);
+          return store.push(function () {
+            global.document.removeEventListener(name, wrapped);
+          });
+        }
+      },
+      services: {
+        get: function (id) {
+          if (!services[id]) throw new Error("unknown service " + id);
+          return services[id];
+        },
+        register: function (id, api) {
+          services[id] = api;
+          return store.push(function () {
+            if (services[id] === api) delete services[id];
+          });
+        },
+        tryGet: function (id) { return services[id] || null; }
+      }
+    };
+    contexts[extId] = ctx;
+    return ctx;
+  }
+
+  function semverSatisfies(version, range) {
+    if (!range || range === "*" ) return true;
+    var v = String(version || "0.0.0").replace(/^v/, "").split(".").map(Number);
+    var m = String(range).match(/^\^?(\d+)\.(\d+)\.(\d+)/);
+    if (!m) return true;
+    if (range.charAt(0) === "^") return v[0] === Number(m[1]) && !(v[0] === Number(m[1]) && v[1] < Number(m[2]));
+    return v[0] === Number(m[1]) && v[1] === Number(m[2]) && v[2] === Number(m[3]);
+  }
+
+  function validateManifest(manifest, options) {
+    options = options || {};
+    var errors = [];
+    if (!manifest || !manifest.id) errors.push("missing id");
+    if (!manifest.apiVersion && !options.legacyOk) errors.push("missing apiVersion");
+    if (manifest.engines && manifest.engines.webtools && options.hostVersion) {
+      if (!semverSatisfies(options.hostVersion, manifest.engines.webtools)) {
+        errors.push("incompatible engines.webtools");
+      }
+    }
+    var deps = (manifest.extensionDependencies && typeof manifest.extensionDependencies === "object")
+      ? Object.keys(manifest.extensionDependencies)
+      : [];
+    return { ok: errors.length === 0, errors: errors, dependencies: deps };
+  }
+
+  function detectCycles(loaded) {
+    var graph = Object.create(null);
+    loaded.forEach(function (pack) {
+      var deps = (pack.manifest && pack.manifest.extensionDependencies) || {};
+      graph[pack.id] = Object.keys(deps);
+    });
+    var visiting = Object.create(null);
+    var visited = Object.create(null);
+    var cyclic = [];
+    function dfs(id) {
+      if (visiting[id]) { cyclic.push(id); return; }
+      if (visited[id]) return;
+      visiting[id] = true;
+      (graph[id] || []).forEach(dfs);
+      visiting[id] = false;
+      visited[id] = true;
+    }
+    Object.keys(graph).forEach(dfs);
+    return cyclic;
+  }
+
+  function topoOrder(loaded) {
+    var byId = Object.create(null);
+    loaded.forEach(function (p) { byId[p.id] = p; });
+    var ordered = [];
+    var seen = Object.create(null);
+    function visit(pack) {
+      if (!pack || seen[pack.id]) return;
+      seen[pack.id] = true;
+      var deps = (pack.manifest && pack.manifest.extensionDependencies) || {};
+      Object.keys(deps).forEach(function (depId) {
+        visit(byId[depId]);
+      });
+      ordered.push(pack);
+    }
+    loaded.forEach(visit);
+    return ordered;
   }
 
   function resolveUrl(base, rel) {
@@ -97,7 +266,10 @@
 
   function shellModuleId(pack) {
     var c = pack.manifest && pack.manifest.contributes;
-    if (c && c.shellModule) return c.shellModule;
+    if (c && c.shellModule) {
+      if (typeof c.shellModule === "string") return c.shellModule;
+      if (typeof c.shellModule === "object" && c.shellModule.id) return c.shellModule.id;
+    }
     var sidebar = c && c.views && c.views.sidebar;
     if (sidebar && sidebar.id) return sidebar.id;
     return pack.id;
@@ -107,6 +279,14 @@
     var c = manifest && manifest.contributes;
     var sidebar = c && c.views && c.views.sidebar;
     if (!sidebar || typeof sidebar !== "object" || !sidebar.id) return null;
+    var panel = sidebar.panel || {
+      type: "iframe",
+      src: "../extensions/" + manifest.id + "/view.html",
+      lazy: true,
+    };
+    if (sidebar.mount && !panel.mount) {
+      panel = { type: "mount", mount: sidebar.mount };
+    }
     return {
       id: sidebar.id || manifest.id,
       label: sidebar.label || manifest.displayName || manifest.name || manifest.id,
@@ -115,11 +295,7 @@
       order: sidebar.order || 0,
       title: sidebar.title || "",
       provider: manifest.id,
-      panel: sidebar.panel || {
-        type: "iframe",
-        src: "../extensions/" + manifest.id + "/view.html",
-        lazy: true,
-      },
+      panel: panel,
     };
   }
 
@@ -147,6 +323,12 @@
         return r.json();
       })
       .then(function (manifest) {
+        var check = validateManifest(manifest, { legacyOk: true, hostVersion: "1.0.0" });
+        if (!check.ok) {
+          warn("manifest rejected for " + (manifest.id || href) + ": " + check.errors.join(", "));
+          failed[manifest.id || href] = check.errors;
+          return null;
+        }
         var base = manifestBaseUrl(href);
         return {
           id: entry.id || manifest.id,
@@ -177,8 +359,13 @@
     document.querySelectorAll(".sidebar-nav .nav-btn[data-tab]").forEach(function (btn) {
       var tab = btn.getAttribute("data-tab");
       if (!tab) return;
-      btn.id = "tab-" + tab;
-      btn.setAttribute("aria-controls", "panel-" + tab);
+      if (!btn.id) btn.id = "tab-" + tab;
+      if (!btn.getAttribute("aria-controls")) {
+        var legacy = global.ShellModules && global.ShellModules.legacyPanelId
+          ? global.ShellModules.legacyPanelId(tab)
+          : "panel-" + tab;
+        btn.setAttribute("aria-controls", legacy);
+      }
     });
     document.querySelectorAll(".tab-panel[role='tabpanel']").forEach(function (panel) {
       var tab = panel.id && panel.id.indexOf("panel-") === 0 ? panel.id.slice(6) : "";
@@ -219,20 +406,43 @@
     });
   }
 
+  function activatePack(pack) {
+    if (failed[pack.id]) return;
+    var api = global.WebtoolsExtensions && global.WebtoolsExtensions[pack.id];
+    if (!api || typeof api.activate !== "function") return;
+    try {
+      var ctx = contexts[pack.id] || createContext(pack);
+      api.activate(ctx);
+    } catch (err) {
+      failed[pack.id] = [String(err && err.message ? err.message : err)];
+      warn("activate failed for " + pack.id + ": " + failed[pack.id][0]);
+    }
+  }
+
+  function deactivatePack(id) {
+    var ctx = contexts[id];
+    if (ctx && ctx.subscriptions) ctx.subscriptions.dispose();
+    var api = global.WebtoolsExtensions && global.WebtoolsExtensions[id];
+    if (api && typeof api.deactivate === "function") {
+      try { api.deactivate(); } catch (err) {
+        warn("deactivate failed for " + id + ": " + (err && err.message ? err.message : err));
+      }
+    }
+    delete contexts[id];
+  }
+
   function runStartupActivations() {
     if (activatedStartup) return;
     activatedStartup = true;
-    packs.forEach(function (pack) {
+    var cyclic = detectCycles(packs);
+    if (cyclic.length) {
+      warn("cyclic extensionDependencies: " + cyclic.join(", "));
+      cyclic.forEach(function (id) { failed[id] = ["cyclic dependency"]; });
+    }
+    topoOrder(packs).forEach(function (pack) {
       var events = (pack.manifest && pack.manifest.activationEvents) || [];
-      if (events.indexOf("onStartup") === -1) return;
-      var api = global.WebtoolsExtensions && global.WebtoolsExtensions[pack.id];
-      if (api && typeof api.activate === "function") {
-        try {
-          api.activate();
-        } catch (err) {
-          warn("onStartup failed for " + pack.id + ": " + (err && err.message ? err.message : err));
-        }
-      }
+      if (events.indexOf("onStartup") === -1 && events.length) return;
+      activatePack(pack);
     });
   }
 
@@ -244,7 +454,13 @@
       })
       .then(function (data) {
         var entries = (data && data.extensions) || [];
+        var seen = Object.create(null);
         return Promise.all(entries.map(function (entry) {
+          if (entry.id && seen[entry.id]) {
+            warn("duplicate extension id " + entry.id);
+            return Promise.resolve(null);
+          }
+          if (entry.id) seen[entry.id] = true;
           return loadManifestEntry(entry, source);
         })).then(function (loaded) {
           return { loaded: loaded.filter(Boolean), defaultTab: data.defaultTab };
@@ -299,6 +515,7 @@
           defaultTab: opts.defaultTab || result.defaultTab || (modules[0] && modules[0].id),
           render: opts.render !== false,
           hooksOnly: opts.render === false,
+          preserveDom: opts.preserveDom,
         }).then(function () {
           if (opts.render !== false) {
             attachShellModuleHooks();
@@ -324,6 +541,9 @@
     init: init,
     boot: boot,
     toShellModule: toShellModule,
+    validateManifest: validateManifest,
+    DisposableStore: DisposableStore,
+    createContext: createContext,
     list: function () { return packs.slice(); },
     get: function (id) {
       for (var i = 0; i < packs.length; i++) {
@@ -334,6 +554,13 @@
     getPanelHtml: function (id) {
       return panelHtmlById[id] || "";
     },
+    executeCommand: function (id, args) {
+      if (!commands[id]) return { error: "unknown command " + id };
+      return commands[id](args);
+    },
+    getService: function (id) { return services[id] || null; },
+    failedExtensions: function () { return Object.assign({}, failed); },
+    deactivate: deactivatePack,
     attachShellModuleHooks: attachShellModuleHooks,
     afterShellModulesRender: afterShellModulesRender,
   };

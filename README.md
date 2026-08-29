@@ -43,7 +43,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `css/shell.css` | Sidebar / top-nav shell chrome, nav + utility buttons, skin & mode pickers |
 | `css/tokens.css` | Neutral `--ui-*` defaults before skin overrides (see [`docs/TOKENS.md`](docs/TOKENS.md)) |
 | `css/chrome.css` | Top-nav action bar, tool popovers, segmented controls, tool action buttons |
-| `css/components.css` | Shared filter chips, active-filter chips, code blocks + copy button |
+| `css/components.css` | Shared filter chips, active-filter chips, code blocks + copy button, context menus |
 
 ### JavaScript
 
@@ -65,6 +65,7 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `js/shell.js` | `window.Shell` — sidebar/top-nav layout, skin + theme + user-mode persistence. Reads its `localStorage` namespace from `window.SHELL_PREFIX`, which must be set before `Shell.init()` |
 | `js/shell-modules.js` | `window.ShellModules` — declarative sidebar tab registry; lifecycle hooks snap product views onto `Shell` |
 | `js/chrome.js` | `window.Chrome` — configurable top-bar tools: skin/mode switchers, info link, optional browser-local secret/profile panel |
+| `js/context-menu.js` / `js/context-menu.mjs` | `window.WebtoolsContextMenu` / `createContextMenu` — opaque Windows-style right-click menus |
 | `js/platform.js` | `window.WebtoolsPlatform` — formal App object for community plugins; wraps Shell, ChatOrb, SlashRouter, demo, voice (see [`docs/PLUGIN_CONTRACT.md`](docs/PLUGIN_CONTRACT.md)) |
 
 ### Docs + tooling

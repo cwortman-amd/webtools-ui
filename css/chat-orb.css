@@ -90,6 +90,10 @@
      is unaffected by this rule. */
 }
 
+.ai-orb[hidden] {
+  display: none !important;
+}
+
 /* Single flat layer. The orb used to stack a spinning conic ring (::before,
    inset -3px) behind a body inset 2px inside it; the 5px of ring left showing
    between the two read as a bright ring around the orb. The body now fills the

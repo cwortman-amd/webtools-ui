@@ -17,7 +17,7 @@ This document defines how webtools-ui achieves **VS Code Extension–style stand
 functionality without forking shell chrome.
 
 Primary architecture: [`PLATFORM_MODEL.md`](PLATFORM_MODEL.md) · Module contract:
-[`SHELL_MODULES.md`](SHELL_MODULES.md)
+[`SHELL_MODULES.md`](SHELL_MODULES.md) · Settings chrome: [`SETTINGS.md`](SETTINGS.md)
 
 ---
 

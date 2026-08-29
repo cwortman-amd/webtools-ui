@@ -57,9 +57,28 @@ test("ExtensionHost.toShellModule returns null without sidebar view", () => {
   assert.equal(ExtensionHost.toShellModule({ id: "x", contributes: {} }), null);
 });
 
+test("ExtensionHost.validateManifest rejects missing id", () => {
+  const { ExtensionHost } = loadExtensionHost();
+  const result = ExtensionHost.validateManifest({});
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.includes("missing id"));
+});
+
 test("ExtensionHost.boot warns and resolves empty when ShellModules is absent", async () => {
   const sandbox = loadExtensionHost();
   const packs = await sandbox.ExtensionHost.boot({ catalog: "../data/extensions.json" });
   assert.ok(Array.isArray(packs));
   assert.equal(packs.length, 0);
 });
+
+test("ExtensionHost.DisposableStore disposes once", () => {
+  const { ExtensionHost } = loadExtensionHost();
+  let n = 0;
+  const store = new ExtensionHost.DisposableStore();
+  store.push(() => { n += 1; });
+  store.dispose();
+  store.dispose();
+  assert.equal(n, 1);
+});
+
+

@@ -11,11 +11,13 @@
     var reg = manifest.registrations || {};
     var ext = reg.extensions;
     if (typeof ext === "string") {
-      return ext.indexOf("/") >= 0 ? ext : "../data/" + ext;
+      if (ext.indexOf("../") === 0 || ext.charAt(0) === "/") return ext;
+      return "../" + ext.replace(/^\/+/, "");
     }
     var contrib = (manifest.contributes || {}).extensions;
     if (typeof contrib === "string") {
-      return contrib.indexOf("/") >= 0 ? contrib : "../data/" + contrib;
+      if (contrib.indexOf("../") === 0 || contrib.charAt(0) === "/") return contrib;
+      return "../" + contrib.replace(/^\/+/, "");
     }
     if (Array.isArray(contrib) && contrib.length === 1 && typeof contrib[0] === "string") {
       return contrib[0];

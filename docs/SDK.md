@@ -23,6 +23,7 @@ Related:
 
 - Visual spec: [`DESIGN.md`](DESIGN.md)
 - Tokens: [`TOKENS.md`](TOKENS.md)
+- Settings: [`SETTINGS.md`](SETTINGS.md)
 - Platform / plugins: [`PLATFORM_MODEL.md`](PLATFORM_MODEL.md)
 - Contribution points: [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md)
 
@@ -51,7 +52,9 @@ Related:
 | Sidebar, tabs, hero | `shell.css` + `base.css` | `.nav-btn`, `.sidebar` forks |
 | Catalog top bar | `chrome.css` | `.topnav` forks |
 | Filter chips, stat cards | `components.css` | One-off chip styles |
+| Context menus | `components.css`, `js/context-menu.mjs` | `.wt-context-menu*` popups; `createContextMenu()` / `createAnchoredMenu()` |
 | Agent, demo, voice | `js/*` services | Copy-paste orb CSS |
+| Settings window | `settings.css` + `settings.js` | Product-specific appearance popovers |
 
 ---
 
@@ -75,6 +78,7 @@ Declare consumption in `plugin.manifest.json` (`webtools.css`, `webtools.js`, `c
 <link id="skinStylesheet" rel="stylesheet" href="../shared/css/skins/amd-gold.css" />
 <link rel="stylesheet" href="../shared/css/shell.css" />
 <link rel="stylesheet" href="../shared/css/components.css" />
+<link rel="stylesheet" href="../shared/css/settings.css" />
 <!-- product overrides last -->
 <link rel="stylesheet" href="../css/product-overrides.css" />
 ```
@@ -82,6 +86,7 @@ Declare consumption in `plugin.manifest.json` (`webtools.css`, `webtools.js`, `c
 ```html
 <script src="../shared/js/mobile-drawer.js" defer></script>
 <script src="../shared/js/shell.js"></script>
+<script src="../shared/js/settings.js"></script>
 <script src="../shared/js/shell-modules.js"></script>
 <script src="../shared/js/platform.js"></script>
 <script src="../js/plugin-mount.js"></script>
@@ -142,6 +147,15 @@ Two harmonized app shells — pick one per product entry:
 Shell components are **infrastructure**. Product features snap on via
 [`ShellModules`](SHELL_MODULES.md) (dashboard) or catalog-specific JS (cards, filters).
 
+### Settings API
+
+- `Shell.openSettings({ pane, returnFocus })` and `Shell.closeSettings()` control the window.
+- `Shell.configure({ defaults, read, apply, reset })` adapts legacy product preference keys.
+- `WebtoolsSettings.registerPane({ id, title, description, icon, render })` adds a
+  product-specific pane without forking the modal.
+- Agent values use `ChatOrb.getLLMForm()` and `ChatOrb.setLLM()`; the form API
+  reports only `keyConfigured`, never the stored API key.
+
 ---
 
 ## Component catalog
@@ -156,7 +170,7 @@ component systems.
 | Sidebar | `.sidebar`, `#sideNavDrawer` | Fixed left column |
 | Brand row | `.sidebar-brand` | 40px, icon + `h1` |
 | Tab button | `.nav-btn`, `.nav-label` | `data-tab`, `role="tab"` |
-| Utility button | `.util-btn`, `.sidebar-bottom` | Agent, collapse, theme |
+| Utility button | `.util-btn`, `.sidebar-bottom` | Agent, Settings, collapse |
 | Content area | `.shell-body`, `.tab-panel`, `.tab-frame` | iframe panels |
 | Mobile backdrop | `.nav-backdrop` | Drawer dim |
 
@@ -166,7 +180,7 @@ component systems.
 | --- | --- | --- |
 | Hero bar | `.hero`, `.hero-main` | 40px; mobile hamburger |
 | Toolbar | `.hero-toolbar`, `.hero-icon-btn` | 28×28 flat icons |
-| Skin menu | `.hero-skin-menu`, `.hero-skin-option` | Pop-down picker |
+| Settings trigger | `[data-open-settings]` | Opens the shared two-pane Settings window |
 | Mobile menu | `.hero-mobile-menu` | Opens drawer ≤640px |
 
 ### Catalog chrome (`chrome.css`)
@@ -203,12 +217,13 @@ component systems.
 | Active filter | `.active-filters`, `.active-chip` | Removable tags |
 | Code block | `.code-wrapper`, `.code-block` | Monospace + scroll |
 | Copy button | `.copy-btn`, `.is-copied` | Overlay on code |
+| Context menu | `.wt-context-menu`, `.wt-context-menu-item`, `.wt-context-menu-sep` | Opaque Windows-style right-click popup; **left-justified** rows ([`DESIGN.md`](DESIGN.md#workspace-pop-up-menus-all-projects)) |
 
 ### Agent & demo (feature CSS + JS)
 
 | Component | CSS | JS API |
 | --- | --- | --- |
-| Chat orb | `chat-orb.css` | `ChatOrb.mount({…})` |
+| Chat orb | `chat-orb.css` | `ChatOrb.mount({…})`; `ChatOrb.setSuggestions(list)` updates chips while open |
 | Demo player | `demo-mode.css` | `DemoEngine`, `DashboardTutor` |
 | Notes drawer | `notes-panel.css` | Pitch deck speaker notes |
 | Error modal | — | `ErrorPopup.show()` |
@@ -367,6 +382,7 @@ their `type` (`dashboard` vs `catalog`).
 ## Related documents
 
 - [`DESIGN.md`](DESIGN.md) — sidebar & catalog visual spec
+- [`SETTINGS.md`](SETTINGS.md) — Settings window (theme, appearance, user mode)
 - [`TOKENS.md`](TOKENS.md) — token layer
 - [`PLATFORM_MODEL.md`](PLATFORM_MODEL.md) — plugin architecture
 - [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) — swap/mix modules

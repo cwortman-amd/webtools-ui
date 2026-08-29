@@ -145,7 +145,7 @@
         "webtoolsModules": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Logical module names: shell, chat-orb, demo-engine, voice, chrome, mobile-drawer."
+          "description": "Logical module names: shell, settings, chat-orb, demo-engine, voice, chrome, mobile-drawer."
         }
       }
     },

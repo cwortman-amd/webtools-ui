@@ -62,7 +62,10 @@ def check_consumer(consumer_id: str) -> list[str]:
 
     repo = CONSUMER_ROOTS.get(consumer_id)
     if repo is None or not repo.is_dir():
-        return [f"{consumer_id}: repo root missing"]
+        # Consumer CI clones only this repo + webtools-ui. Skip siblings that
+        # are not on disk instead of failing the whole preflight.
+        print(f"WARN: {consumer_id}: repo root missing; skipping P0 map", file=sys.stderr)
+        return []
 
     plan_rel = entry.get("testPlan") or entry.get("testPlan") or "docs/TEST.md"
     plan = repo / plan_rel

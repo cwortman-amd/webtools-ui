@@ -34,3 +34,12 @@ def test_extract_p0_ids_uses_priority_column_not_row_count():
 def test_llm_benchmark_p0_rows_are_accounted_in_map():
     errors = checker.check_consumer("llm-benchmark")
     assert errors == [], errors
+
+
+def test_missing_consumer_repo_is_skipped():
+    previous = checker.CONSUMER_ROOTS["llm-benchmark"]
+    checker.CONSUMER_ROOTS["llm-benchmark"] = Path("/nonexistent/llm-benchmark")
+    try:
+        assert checker.check_consumer("llm-benchmark") == []
+    finally:
+        checker.CONSUMER_ROOTS["llm-benchmark"] = previous

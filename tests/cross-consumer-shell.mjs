@@ -150,6 +150,24 @@ async function runShellChecks(page, def, expect) {
     skip("button visual contract", "disabled for this consumer in consumer-matrix.json");
   }
 
+  try {
+    const legacyCount = await page.locator(
+      "#themeToggleSide, #skinToggleSide, #modeToggleSide, #sideNavSkinList, #sideNavModeList",
+    ).count();
+    if (legacyCount !== 0) throw new Error(`${legacyCount} legacy settings controls remain`);
+    const trigger = page.locator("[data-open-settings]:visible, #settingsToggleSide:visible").first();
+    if (!(await trigger.count())) throw new Error("Settings trigger missing");
+    await trigger.click();
+    const modal = page.locator("#settingsModal");
+    if (!(await modal.isVisible())) throw new Error("Settings modal did not open");
+    const pane = page.locator("#pane-appearance");
+    if (!(await pane.isVisible())) throw new Error("Appearance pane not visible");
+    await page.keyboard.press("Escape");
+    pass("shared Settings operational");
+  } catch (err) {
+    fail("shared Settings operational", String(err.message || err).slice(0, 220));
+  }
+
   if (def.panelChecks === false) {
     skip("tab switch paints panel", "panel checks disabled for catalog portal");
     skip("shell:tabChanged recovery", "panel checks disabled for catalog portal");

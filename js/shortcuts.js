@@ -67,6 +67,20 @@
     return GROUPS[group] || [];
   }
 
+  function list() {
+    return ORDER.map(function (group) {
+      return {
+        group: group,
+        rows: rowsFor(group).map(function (row) {
+          return {
+            keys: row.spec || row.keys,
+            label: row.label
+          };
+        })
+      };
+    }).filter(function (entry) { return entry.rows.length; });
+  }
+
   function buildSheet() {
     var backdrop = document.createElement("div");
     backdrop.className = "ks-backdrop";
@@ -192,6 +206,7 @@
     register: register,
     registerProvider: registerProvider,
     clearGroup: clearGroup,
+    list: list,
     open: show,
     close: hide,
     toggle: toggle,
