@@ -30,7 +30,7 @@ cd ~/workspace/webtools-ui
 | :--- | :--- | :--- |
 | `WT_WORKSPACE` | `~/workspace` | Clone destination |
 | `WT_ORG` | `cwortman-amd` | GitHub org |
-| `WT_PROTO` | `ssh` | `ssh` or `https` |
+| `WT_PROTO` | `ssh` (cluster-manager: `https`) | `ssh` or `https` |
 | `WT_REF` | *(default branch)* | Optional branch/tag |
 | `INSTALL_BASE` | `https://curt.wortman.ai/tools` | Remote install-lib URL |
 
@@ -66,6 +66,8 @@ curl -fsSL $BASE/install-webtools-ui.sh       | bash   # :8090 Tools Hub
 curl -fsSL $BASE/install-dc-planner.sh        | bash   # :8080 static
 curl -fsSL $BASE/install-llm-benchmark.sh       | bash   # :8787 API
 curl -fsSL $BASE/install-cluster-manager.sh   | bash   # :8686 API
+# CPU/GPU tune only (no dashboard):
+SETUP_PROFILE=tune curl -fsSL $BASE/install-cluster-manager.sh | bash
 curl -fsSL $BASE/install-demo-portal.sh       | bash   # :8080 portal (+ :8765 agent)
 curl -fsSL $BASE/install-knowledge-exchange.sh | bash  # :8765 ke serve
 curl -fsSL $BASE/install-slide-presenter.sh   | bash   # :8788 sidecar
@@ -77,6 +79,7 @@ curl -fsSL $BASE/install-slide-presenter.sh   | bash   # :8788 sidecar
 
 ```bash
 SETUP_FAST=1 curl -fsSL $BASE/install-cluster-manager.sh | bash
+SETUP_PROFILE=tune curl -fsSL $BASE/install-cluster-manager.sh | bash
 ```
 
 **Demo Portal Tools tab (links to sibling dashboards):**

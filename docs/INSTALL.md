@@ -23,7 +23,7 @@ Replace `<tool>` with one of:
 | **Tools Hub** | `curl -fsSL https://curt.wortman.ai/tools/install-webtools-ui.sh \| bash` | http://127.0.0.1:8090/pages/index.html |
 | **DC Planner** | `curl -fsSL https://curt.wortman.ai/tools/install-dc-planner.sh \| bash` | http://127.0.0.1:8080/pages/index.html |
 | **LLM Benchmark** | `curl -fsSL https://curt.wortman.ai/tools/install-llm-benchmark.sh \| bash` | http://127.0.0.1:8787/dashboard |
-| **Cluster Manager** | `curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.sh \| bash` | http://127.0.0.1:8686/dashboard |
+| **Cluster Manager** | `curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.sh \| bash` | http://127.0.0.1:8686/dashboard (`SETUP_PROFILE=tune` skips the dashboard) |
 | **Demo Portal** | `curl -fsSL https://curt.wortman.ai/tools/install-demo-portal.sh \| bash` | http://127.0.0.1:8080/pages/index.html?tab=catalog |
 | **Knowledge Exchange** | `curl -fsSL https://curt.wortman.ai/tools/install-knowledge-exchange.sh \| bash` | http://127.0.0.1:8765/pages/index.html |
 | **Slide Presenter** | `curl -fsSL https://curt.wortman.ai/tools/install-slide-presenter.sh \| bash` | http://127.0.0.1:8788/pages/index.html |
@@ -62,12 +62,13 @@ Re-running an installer is **idempotent**: existing clones are fetched, not dele
 |----------|---------|---------|
 | `WT_WORKSPACE` | `~/workspace` | Where repos are cloned |
 | `WT_ORG` | `cwortman-amd` | GitHub org |
-| `WT_PROTO` | `ssh` | `ssh` or `https` clone URL |
+| `WT_PROTO` | `ssh` (cluster-manager: `https` via `wt_resolve_proto`) | `ssh` or `https` clone URL |
 | `WT_REF` | *(default branch)* | Optional branch or tag |
 | `WT_NO_SETUP` | `0` | `1` = clone only, skip setup/start |
 | `WT_HOST` | `127.0.0.1` | Bind address for static servers |
 | `WT_CLONE_SIBLINGS` | `0` | `1` on demo-portal also clones other dashboards for the Tools tab |
 | `SETUP_FAST` | `0` | Passed to `./setup.sh` — skip apt/playwright on air-gapped nodes |
+| `SETUP_PROFILE` | `control-host` | Cluster Manager: `tune` = Python + PATH wrappers, no dashboard |
 | `INSTALL_BASE` | `https://curt.wortman.ai/tools` | Where `install-lib.sh` is fetched when not run locally |
 
 **Cluster Manager** also accepts legacy `CM_*` names (`CM_WORKSPACE`, `CM_PROTO`, `CM_NO_SETUP`, …).
@@ -84,6 +85,9 @@ WT_NO_SETUP=1 curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.s
 
 # Air-gapped: skip apt/playwright in setup.sh
 SETUP_FAST=1 curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.sh | bash
+
+# Cluster Manager: CPU/GPU tune only (no dashboard)
+SETUP_PROFILE=tune curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.sh | bash
 
 # Demo portal with sibling dashboards for the Tools tab
 WT_CLONE_SIBLINGS=1 curl -fsSL https://curt.wortman.ai/tools/install-demo-portal.sh | bash

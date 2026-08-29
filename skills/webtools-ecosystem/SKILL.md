@@ -13,6 +13,8 @@ description: >-
 
 | User intent | Tool | Skill |
 | :--- | :--- | :--- |
+| Install / bootstrap Cluster Manager, PATH wrappers, tune vs dashboard | **cluster-manager** | `.cursor/skills/cluster-manager-install/SKILL.md` |
+| Node CPU/GPU status and remaining tuning recs | **cluster-manager** | `.cursor/skills/cluster-manager-node-status/SKILL.md` (`cm tune --no-pdf`) |
 | GPU benchmark sweeps, queue, InferenceX | **llm-benchmark** | `.cursor/skills/llm-benchmark/SKILL.md` |
 | DC/GPU BOM, TCO, rack, workload sizing | **dc-planner** | `.cursor/skills/dc-planner/SKILL.md` |
 | Cluster install, fabric, remediation, Ansible | **cluster-manager** | `.cursor/skills/cluster-manager/SKILL.md` |

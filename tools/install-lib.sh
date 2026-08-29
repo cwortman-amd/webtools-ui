@@ -9,7 +9,7 @@ set -euo pipefail
 
 WT_ORG="${WT_ORG:-${CM_ORG:-cwortman-amd}}"
 WT_WORKSPACE="${WT_WORKSPACE:-${CM_WORKSPACE:-${HOME}/workspace}}"
-WT_PROTO="${WT_PROTO:-${CM_PROTO:-ssh}}"
+# WT_PROTO is resolved in wt_resolve_proto (per-tool). Do not freeze it here.
 WT_REF="${WT_REF:-${CM_REF:-}}"
 WT_NO_SETUP="${WT_NO_SETUP:-${CM_NO_SETUP:-0}}"
 WT_HOST="${WT_HOST:-127.0.0.1}"
@@ -23,6 +23,25 @@ C_OFF=$'\033[0m'
 wt_say()  { echo "${C_OK}==>${C_OFF} $*"; }
 wt_warn() { echo "${C_WARN}!${C_OFF} $*"; }
 wt_die()  { echo "${C_ERR}x${C_OFF} $*" >&2; exit 1; }
+
+wt_resolve_proto() {
+  # Honor explicit WT_PROTO, then CM_PROTO, then per-tool default.
+  # cluster-manager defaults to https so a first-time curl install works
+  # without an SSH key; other tools keep the historic ssh default.
+  local tool="${1:-}"
+  if [ -n "${WT_PROTO:-}" ]; then
+    return 0
+  fi
+  if [ -n "${CM_PROTO:-}" ]; then
+    WT_PROTO="$CM_PROTO"
+    return 0
+  fi
+  if [ "$tool" = "cluster-manager" ]; then
+    WT_PROTO=https
+  else
+    WT_PROTO=ssh
+  fi
+}
 
 wt_repo_url() {
   case "$WT_PROTO" in
@@ -110,7 +129,11 @@ wt_run_setup() {
   [ -f setup.sh ] || wt_die "setup.sh not found in ${tool_dir}"
   wt_say "handing off to ./setup.sh"
   echo
-  ./setup.sh
+  if [ -n "${SETUP_PROFILE:-}" ]; then
+    ./setup.sh --profile "$SETUP_PROFILE"
+  else
+    ./setup.sh
+  fi
 }
 
 wt_tool_repos() {
@@ -197,10 +220,23 @@ Bootstrap complete: $(wt_tool_title "$tool")
   Workspace: ${WT_WORKSPACE}
   Directory: ${tool_dir}
 
+EOF
+
+  if [ "$tool" = "cluster-manager" ] && [ "${SETUP_PROFILE:-control-host}" = "tune" ]; then
+    cat <<EOF
+  CPU/GPU tune profile — dashboard was not started.
+  cm tune --no-pdf
+  cm tune --json --no-pdf
+  cm tune --no-pdf --benchmark
+
+EOF
+  else
+    cat <<EOF
   Open: ${url}
 
 Useful commands:
 EOF
+  fi
 
   case "$tool" in
     webtools-ui)
@@ -219,12 +255,20 @@ EOF
 EOF
       ;;
     cluster-manager)
-      cat <<EOF
+      if [ "${SETUP_PROFILE:-control-host}" = "tune" ]; then
+        cat <<EOF
+  cd ${tool_dir}
+  # cm is installed to ~/.local/bin when setup.sh finishes (tune → cm tune)
+EOF
+      else
+        cat <<EOF
   cd ${tool_dir}
   source .cluster-manager-venv/bin/activate
   \$EDITOR config/inventory.ini    # add cluster hosts
   ansible node_servers -m ping
+  cm version                       # on PATH if ~/.local/bin is configured
 EOF
+      fi
       ;;
     llm-benchmark)
       cat <<EOF
@@ -263,6 +307,7 @@ wt_install() {
   local repos primary mode tool_dir port path repo
 
   wt_require_git
+  wt_resolve_proto "$tool"
 
   echo "========================================"
   echo "Install: $(wt_tool_title "$tool")"

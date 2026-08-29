@@ -2,9 +2,12 @@
 # install-cluster-manager.sh — Cluster Manager — Ansible dashboard
 #
 #   curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.sh | bash
+#   SETUP_PROFILE=tune curl -fsSL https://curt.wortman.ai/tools/install-cluster-manager.sh | bash
 #
 # Environment: WT_WORKSPACE WT_ORG WT_PROTO WT_REF WT_NO_SETUP WT_HOST WT_CLONE_SIBLINGS
-#              SETUP_FAST=1  CM_* aliases work on cluster-manager
+#              SETUP_FAST=1 SETUP_PROFILE=tune|control-host
+#              CM_* aliases work on cluster-manager
+# Clone protocol: install-lib defaults cluster-manager to HTTPS (WT_PROTO=ssh to override).
 set -euo pipefail
 WT_TOOL=cluster-manager
 INSTALL_BASE="${INSTALL_BASE:-https://curt.wortman.ai/tools}"
