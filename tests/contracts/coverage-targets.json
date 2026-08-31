@@ -4,6 +4,7 @@
   "loopFloor": 80,
   "notes": "Condition coverage is approximated as coverage.py / c8 branch coverage (partial branches). True MC/DC is not available without an extra instrumenter.",
   "coreModules": [
+    { "id": "js.temporal-advisory", "paths": ["js/temporal-advisory.js"] },
     { "id": "js.plugin-bootstrap", "paths": ["js/plugin-bootstrap.js"] },
     { "id": "js.mcp-suite", "paths": ["js/mcp-suite.js"] },
     { "id": "js.voice-local", "paths": ["js/voice-local.js"] },

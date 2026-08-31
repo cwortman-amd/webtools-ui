@@ -318,9 +318,11 @@ def _merge_c8_maps(base: dict, extra: dict) -> dict:
 
 
 def _node_test_files() -> list[str]:
-    return sorted(
+    files = sorted(
         str(p.relative_to(ROOT)) for p in (ROOT / "tests" / "lib").glob("*.test.mjs")
     )
+    files += sorted(str(p.relative_to(ROOT)) for p in (ROOT / "js").glob("*.test.mjs"))
+    return files
 
 
 def run_node_coverage() -> dict:
