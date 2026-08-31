@@ -1483,3 +1483,42 @@
   white-space: normal;
   line-height: 1.45;
 }
+
+/* Intelligence-layer policy / temporal grading chrome (CHAT_INTELLIGENCE) */
+.ke-orb-policy-deny {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, #f87171 55%, transparent);
+  background: color-mix(in srgb, #ef4444 14%, transparent);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.ke-orb-policy-deny__tag {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fecaca;
+}
+
+.ke-orb-policy-deny__codes {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: color-mix(in srgb, #fecaca 85%, white);
+}
+
+.ke-orb-temporal-warn {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, #fbbf24 50%, transparent);
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  font-size: 12px;
+  line-height: 1.35;
+  color: #fde68a;
+}

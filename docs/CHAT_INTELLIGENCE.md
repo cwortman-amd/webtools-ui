@@ -230,7 +230,7 @@ Each layer has a specific authority:
 | --- | --- | --- | --- |
 | L1 Interaction/context | §7.1 | `ke/studio/tutor/intent.py`, `conversation.py` | Partial |
 | L2 Grounded retrieval | §7.2, [`KNOWLEDGE_CHAT.md`](KNOWLEDGE_CHAT.md) §10 | `ke/studio/tutor/wikiqa.py`, `ke/studio/wiki/corpus.py` | Shipped (vault + web) |
-| L3 Temporal intelligence | §7.3 | `temporal_engine.py`, `try_temporal_answer`, `try_temporal_vault_answer` | Shipped v1.3 (birthday recurrence, cross-TZ, nth-weekday, ISO/fiscal membership, INT-T-GOLD) |
+| L3 Temporal intelligence | §7.3 | `temporal_engine.py`, `try_temporal_answer`, `try_temporal_vault_answer` | Shipped v1.4 (elapsed duration, business-before-quarter, contract renewal policy, INT-T-GOLD 51 active) |
 | L4 Structured knowledge | §7.4 | Wiki links, `knowledge_graph.py`, graph metrics | Partial (multi-hop; predicate topology planned) |
 | L5 Logic/policy | §7.5 | `policy_engine.py`, `policy_rules.py`, `policy_facts.py`, evidence API | Partial (grounding gates + typed DGLC policy facts v1; full policy AST planned) |
 | L6 Constraint/verification | §7.6 | `solver_engine.py`, `placement_solver.py`, `POST /api/v1/solver/check` | Partial (GPU memory, business deadline, placement/v1; CP-SAT planned) |
@@ -832,7 +832,7 @@ The assistant must not collapse `unknown` or `conflicted` into a helpful-soundin
 
 | Archetype | Required mechanism | Implementation status |
 | --- | --- | --- |
-| Quantifier / scope traps | Datalog or FOL subset; explicit `unknown` | Planned (`dglc.yaml`) |
+| Quantifier / scope traps | Datalog or FOL subset; explicit `unknown` | Partial (`deduction_engine.py` v1; full FOL planned) |
 | Negation / policy precedence | Policy AST, deny-overrides-permit | Partial (`policy_facts.py` v1 + `policy_engine.py`; full AST planned) |
 | Globally satisfiable, locally infeasible | CP-SAT / MILP with binding constraint receipt | Partial (`placement_solver.py` v1; CP-SAT planned) |
 | Hard + soft objectives | Ranked feasible plans only | Planned |
@@ -843,7 +843,7 @@ The assistant must not collapse `unknown` or `conflicted` into a helpful-soundin
 | Conflicting authoritative sources | Bitemporal model + conflict lattice | Planned |
 | Non-monotonic multi-turn state | Event-sourced entity ledger | Planned |
 | Recursive / fixed-point rules | Cycle-aware policy evaluation | Planned |
-| Minimal-change repair | MUS / minimal relaxations from solver | Planned |
+| Minimal-change repair | MUS / minimal relaxations from solver | Partial (`placement_solver.py` minimal_relaxations receipt) |
 | Cross-domain unit traps | Unit-aware calculator + assumption ledger | Planned |
 | Prompt injection in evidence | Instruction/data separation | Shipped (L9) |
 | Meta-consistency across paraphrases | Shared policy service + paraphrase battery | Planned |
@@ -859,7 +859,7 @@ executable gold lives in Knowledge Exchange:
 
 - `tests/fixtures/chat/golden_questions/temporal.yaml` — INT-T-GOLD (shipped)
 - `tests/fixtures/chat/golden_questions/mechanism.yaml` — route/evidence (shipped)
-- `tests/fixtures/chat/golden_questions/dglc.yaml` — INT-DGLC (11 active: policy, placement, compose)
+- `tests/fixtures/chat/golden_questions/dglc.yaml` — INT-DGLC (15 active: policy, placement, deduction, compose)
 
 Each DGLC case stores: typed `facts`, `expected` receipts, `binding_constraints`, `distractors`,
 `prohibited_claims`, and paraphrase variants for robustness grading.
@@ -1384,27 +1384,25 @@ UX and audit views planned.
   `coverage_chat_intelligence.py` ≥80% branch/condition per module,
   `temporal_eval.py --check`, `dglc_eval.py --check`).
 
-**Status:** Benchmark, coverage, INT-E, INT-T-GOLD, and INT-DGLC gates wired into `make ci`.
+**Status:** Benchmark, coverage, INT-E, INT-T-GOLD (51 active), and INT-DGLC (15 active) gates wired into `make ci`.
 Boss-battle regressions and online telemetry remain planned.
 
 ### Phase 6: Deterministic Grounded Latent Composition (DGLC)
 
 **Shipped (v1):**
 
-- Three-valued outcome contract for policy and placement engines.
-- `dglc.yaml` — 11 active cases (policy deny/permit/unknown, power-domain placement, compose merge).
-- `policy_facts.py` — typed facts, deny-overrides-permit, nested deny rules.
-- `placement_solver.py` — binding-constraint receipts for infeasible placement.
-- `dglc_engine.py` — receipt merge under precedence (deny short-circuits placement).
+- Three-valued outcome contract for policy, deduction, and placement engines.
+- `dglc.yaml` — 15 active cases (policy, quantifier deduction, placement + minimal relaxation, boss battle compose).
+- `policy_facts.py`, `deduction_engine.py`, `placement_solver.py`, `dglc_engine.py` (v2 merge).
 - Gate: `make dglc-eval` in `make ci`.
 
 **Planned:**
 
-- Quantifier traps, ADR supersession, boss battles in `dglc.yaml`.
-- CP-SAT placement solver with minimal-relaxation (MUS) receipts.
+- Full CP-SAT/OR-Tools solver with MUS extraction (beyond heuristic minimal_relaxations).
+- ADR supersession graph, paraphrase battery, multi-turn fact ledger.
 - Full receipt composition layer before LLM synthesis.
 
-**Status:** INT-DGLC v1 shipped in CI; extensions above remain planned.
+**Status:** INT-DGLC v2 shipped in CI (15/15 active); CP-SAT and boss-battle extensions above remain planned.
 
 ---
 

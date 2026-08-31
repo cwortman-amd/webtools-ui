@@ -60,8 +60,8 @@ related:
 | INT-T11 | L3 Client | Advisory parser + backend reconciliation | `js/temporal-advisory.test.mjs`, `tests/ui/chat-intelligence-temporal.spec.js` | Active |
 | INT-T12 | L3 Temporal | DST, leap-year, `reference_instant` anchors | `test_temporal_int_t12.py` | Active |
 | INT-T13 | L3 Temporal | Retrieval compiler execution (vault + graph) | `test_chat_intelligence_tiers.py` | Active |
-| INT-T-GOLD | L3 Temporal | Golden corpus — birthday, leap, duration, adversarial | `tests/fixtures/chat/golden_questions/temporal.yaml`, `test_temporal_golden.py` | Active (47 active / 10 planned) |
-| INT-DGLC | L5–L6 DGLC | Policy facts, placement infeasibility, compose merge | `tests/fixtures/chat/golden_questions/dglc.yaml`, `test_dglc_golden.py` | Active (11 active / 2 planned) |
+| INT-T-GOLD | L3 Temporal | Golden corpus — birthday, leap, duration, adversarial | `tests/fixtures/chat/golden_questions/temporal.yaml`, `test_temporal_golden.py` | Active (51 active / 6 planned) |
+| INT-DGLC | L5–L6 DGLC | Policy facts, quantifier deduction, placement, compose | `tests/fixtures/chat/golden_questions/dglc.yaml`, `test_dglc_golden.py` | Active (15 active) |
 | INT-V01 | L5 Solver | GPU memory feasibility | `test_chat_intelligence_tiers.py` | Active |
 | INT-W01 | L4 Workflow | Research handoff workflow receipt | `test_workflow_engine.py`, `ask.py` | Active |
 | INT-G01 | L10 Grading | Temporal consistency grader | `test_temporal_engine.py` | Active |
@@ -103,7 +103,7 @@ make coverage-chat-intelligence  # ≥80% branch/condition per module
 | Phase 3 | Graph + policy + solvers | INT-G02, INT-P01 active; evidence API; INT-V* planned |
 | Phase 4 | Durable workflows + approvals | INT-W01 workflow scaffold; full UX planned |
 | Phase 5 | Continuous eval regression | INT-E01–E19, INT-T-GOLD in `make ci` |
-| Phase 6 | DGLC composition | INT-DGLC (11 active) + `placement_solver`, `policy_facts`, `dglc_engine` in CI |
+| Phase 6 | DGLC composition | INT-DGLC (15 active) + deduction, minimal relaxation, boss compose |
 
 ## Temporal golden corpus (INT-T-GOLD)
 
@@ -137,13 +137,14 @@ fiscal-quarter membership on a named date, quarter countdown, explicit `needs_cl
 
 Deterministic Grounded Latent Composition cases live in `tests/fixtures/chat/golden_questions/dglc.yaml`
 (see CHAT_INTELLIGENCE §7.11). Each case specifies typed `facts`, expected engine receipts, and
-`binding_constraints`. **Shipped archetypes (v1):**
+`binding_constraints`. **Shipped archetypes (v2):**
 
 - Nested policy deny-overrides-permit → `deny` + stable reason codes (`policy_facts.py`)
-- Power-domain placement → `infeasible` + binding constraint receipt (`placement_solver.py`)
-- Compose merge → deny short-circuits placement; `unknown` poisons feasibility (`dglc_engine.py`)
+- Quantifier ∀ traps → `entailed` / `contradicted` / `unknown` (`deduction_engine.py`)
+- Power-domain placement → `infeasible` + binding constraint + `minimal_relaxations` (`placement_solver.py`)
+- Compose merge → deny short-circuits downstream engines (`dglc_engine.py` v2)
 
-**Planned:** quantifier traps, CP-SAT minimal relaxation, boss battles, paraphrase battery.
+**Planned:** CP-SAT MUS, ADR supersession, multi-turn ledger, paraphrase battery.
 
 ## Property-based targets (§15.4)
 
