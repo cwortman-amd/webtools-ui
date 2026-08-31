@@ -232,8 +232,8 @@ Each layer has a specific authority:
 | L2 Grounded retrieval | §7.2, [`KNOWLEDGE_CHAT.md`](KNOWLEDGE_CHAT.md) §10 | `ke/studio/tutor/wikiqa.py`, `ke/studio/wiki/corpus.py` | Shipped (vault + web) |
 | L3 Temporal intelligence | §7.3 | `temporal_engine.py`, `try_temporal_answer`, `try_temporal_vault_answer` | Shipped v1.3 (birthday recurrence, cross-TZ, nth-weekday, ISO/fiscal membership, INT-T-GOLD) |
 | L4 Structured knowledge | §7.4 | Wiki links, `knowledge_graph.py`, graph metrics | Partial (multi-hop; predicate topology planned) |
-| L5 Logic/policy | §7.5 | `policy_engine.py`, `policy_rules.py`, evidence API | Partial (grounding gates; nested policy AST planned) |
-| L6 Constraint/verification | §7.6 | `solver_engine.py`, `POST /api/v1/solver/check` | Partial (GPU memory, business deadline; placement CP-SAT planned) |
+| L5 Logic/policy | §7.5 | `policy_engine.py`, `policy_rules.py`, `policy_facts.py`, evidence API | Partial (grounding gates + typed DGLC policy facts v1; full policy AST planned) |
+| L6 Constraint/verification | §7.6 | `solver_engine.py`, `placement_solver.py`, `POST /api/v1/solver/check` | Partial (GPU memory, business deadline, placement/v1; CP-SAT planned) |
 | L7 Workflow/action | §7.7 | `ke/studio/tutor/research_task.py`, `patch_proposal.py` | Partial |
 | L8 Memory | §7.8 | Session state in `intent.py`, conversation context | Partial |
 | L9 Safety | §7.9 | Evidence fencing, untrusted-data prompts, scope ACL | Shipped (core) |
@@ -833,8 +833,8 @@ The assistant must not collapse `unknown` or `conflicted` into a helpful-soundin
 | Archetype | Required mechanism | Implementation status |
 | --- | --- | --- |
 | Quantifier / scope traps | Datalog or FOL subset; explicit `unknown` | Planned (`dglc.yaml`) |
-| Negation / policy precedence | Policy AST, deny-overrides-permit | Partial (`policy_engine.py` v1) |
-| Globally satisfiable, locally infeasible | CP-SAT / MILP with binding constraint receipt | Partial (`solver_engine.py` scaffold) |
+| Negation / policy precedence | Policy AST, deny-overrides-permit | Partial (`policy_facts.py` v1 + `policy_engine.py`; full AST planned) |
+| Globally satisfiable, locally infeasible | CP-SAT / MILP with binding constraint receipt | Partial (`placement_solver.py` v1; CP-SAT planned) |
 | Hard + soft objectives | Ranked feasible plans only | Planned |
 | Constrained graph reachability | Predicate traversal (encrypted, maintenance, alarms) | Partial (wikilink graph) |
 | Version / supersession / scope | Directed version graph + applicability | Partial (vault metadata) |
@@ -859,7 +859,7 @@ executable gold lives in Knowledge Exchange:
 
 - `tests/fixtures/chat/golden_questions/temporal.yaml` — INT-T-GOLD (shipped)
 - `tests/fixtures/chat/golden_questions/mechanism.yaml` — route/evidence (shipped)
-- `tests/fixtures/chat/golden_questions/dglc.yaml` — deduction, policy, placement (planned)
+- `tests/fixtures/chat/golden_questions/dglc.yaml` — INT-DGLC (11 active: policy, placement, compose)
 
 Each DGLC case stores: typed `facts`, `expected` receipts, `binding_constraints`, `distractors`,
 `prohibited_claims`, and paraphrase variants for robustness grading.
@@ -1278,10 +1278,12 @@ Initial targets should be calibrated per domain, but the platform must measure:
 - `tests/test_wiki_retrieval.py` — `test_w6l`–`test_w6o` freshness-intent and answerability cases
 - `tests/test_temporal_golden.py` + `golden_questions/temporal.yaml` — INT-T-GOLD deterministic temporal corpus
 - `ke/studio/tutor/temporal_eval.py` — YAML receipt grader for temporal gold cases
+- `tests/test_dglc_golden.py` + `golden_questions/dglc.yaml` — INT-DGLC policy, placement, compose corpus
+- `ke/studio/tutor/dglc_eval.py`, `placement_solver.py`, `policy_facts.py`, `dglc_engine.py`
 
-**Planned (DGLC — §7.11):**
+**Planned (DGLC — §7.11 extensions):**
 
-- `golden_questions/dglc.yaml` — policy, placement, deduction, boss-battle cases with typed facts and receipt grading
+- Quantifier traps, CP-SAT MUS, boss battles, paraphrase battery in `dglc.yaml`
 
 ### 15.2 Integration tests
 
@@ -1361,7 +1363,8 @@ tenant policy rules, solver API scaffold, telemetry, domain packs.
 - Typed tool invocation and deterministic validation — solvers planned (INT-V*).
 
 **Status:** v1 shipped — one-hop/multi-hop graph expansion, grounding policy v1,
-evidence evaluation API. OPA/Rego and solver-backed feasibility remain planned.
+evidence evaluation API, GPU memory / business deadline / replica placement solvers (INT-V* partial).
+OPA/Rego and CP-SAT placement remain planned.
 
 ### Phase 4: Durable agent workflows
 
@@ -1376,24 +1379,32 @@ UX and audit views planned.
 
 - Curated failure corpus (`scripts/chat_intelligence_eval.py` — INT-E01–E19).
 - Temporal golden corpus (`scripts/temporal_eval.py`, `temporal.yaml` — INT-T-GOLD).
+- DGLC golden corpus (`scripts/dglc_eval.py`, `dglc.yaml` — INT-DGLC).
 - Automated regression gates (`benchmark_chat_intelligence.py --check`,
-  `coverage_chat_intelligence.py` ≥80% branch/condition, `temporal_eval.py --check`).
+  `coverage_chat_intelligence.py` ≥80% branch/condition per module,
+  `temporal_eval.py --check`, `dglc_eval.py --check`).
 
-**Status:** Benchmark, coverage, INT-E, and INT-T-GOLD gates wired into `make ci`.
-DGLC golden corpus (`dglc.yaml`) and placement/policy boss-battle regressions planned.
-Online telemetry and A/B experiments remain planned.
+**Status:** Benchmark, coverage, INT-E, INT-T-GOLD, and INT-DGLC gates wired into `make ci`.
+Boss-battle regressions and online telemetry remain planned.
 
 ### Phase 6: Deterministic Grounded Latent Composition (DGLC)
 
-- Three-valued outcome contract across policy, solver, and deduction engines.
-- `dglc.yaml` executable corpus (quantifier traps, nested policy, power-domain placement,
-  ADR supersession, boss battles).
-- Policy AST v2 with deny-overrides-permit and typed facts.
-- CP-SAT placement solver with binding-constraint and minimal-relaxation receipts.
-- Receipt composition layer before LLM synthesis.
+**Shipped (v1):**
 
-**Status:** Architecture specified in §7.11; temporal `unknown`/`needs_clarification` pattern
-established; full DGLC pipeline planned.
+- Three-valued outcome contract for policy and placement engines.
+- `dglc.yaml` — 11 active cases (policy deny/permit/unknown, power-domain placement, compose merge).
+- `policy_facts.py` — typed facts, deny-overrides-permit, nested deny rules.
+- `placement_solver.py` — binding-constraint receipts for infeasible placement.
+- `dglc_engine.py` — receipt merge under precedence (deny short-circuits placement).
+- Gate: `make dglc-eval` in `make ci`.
+
+**Planned:**
+
+- Quantifier traps, ADR supersession, boss battles in `dglc.yaml`.
+- CP-SAT placement solver with minimal-relaxation (MUS) receipts.
+- Full receipt composition layer before LLM synthesis.
+
+**Status:** INT-DGLC v1 shipped in CI; extensions above remain planned.
 
 ---
 

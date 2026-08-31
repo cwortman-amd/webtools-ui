@@ -61,7 +61,7 @@ related:
 | INT-T12 | L3 Temporal | DST, leap-year, `reference_instant` anchors | `test_temporal_int_t12.py` | Active |
 | INT-T13 | L3 Temporal | Retrieval compiler execution (vault + graph) | `test_chat_intelligence_tiers.py` | Active |
 | INT-T-GOLD | L3 Temporal | Golden corpus — birthday, leap, duration, adversarial | `tests/fixtures/chat/golden_questions/temporal.yaml`, `test_temporal_golden.py` | Active (47 active / 10 planned) |
-| INT-DGLC | L5–L6 DGLC | Deduction, policy precedence, placement infeasibility | `golden_questions/dglc.yaml` (planned) | Planned |
+| INT-DGLC | L5–L6 DGLC | Policy facts, placement infeasibility, compose merge | `tests/fixtures/chat/golden_questions/dglc.yaml`, `test_dglc_golden.py` | Active (11 active / 2 planned) |
 | INT-V01 | L5 Solver | GPU memory feasibility | `test_chat_intelligence_tiers.py` | Active |
 | INT-W01 | L4 Workflow | Research handoff workflow receipt | `test_workflow_engine.py`, `ask.py` | Active |
 | INT-G01 | L10 Grading | Temporal consistency grader | `test_temporal_engine.py` | Active |
@@ -91,7 +91,9 @@ node --test tests/lib/chat-intelligence-contract.test.mjs
 cd knowledge-exchange
 python3 -m pytest tests/test_temporal_golden.py -v
 make temporal-eval   # INT-T-GOLD golden corpus (--check for CI)
+make dglc-eval       # INT-DGLC golden corpus (--check for CI)
 make chat-intelligence-eval  # INT-E01–E19 continuous eval
+make coverage-chat-intelligence  # ≥80% branch/condition per module
 ```
 
 ## Phased gates (not yet active)
@@ -101,7 +103,7 @@ make chat-intelligence-eval  # INT-E01–E19 continuous eval
 | Phase 3 | Graph + policy + solvers | INT-G02, INT-P01 active; evidence API; INT-V* planned |
 | Phase 4 | Durable workflows + approvals | INT-W01 workflow scaffold; full UX planned |
 | Phase 5 | Continuous eval regression | INT-E01–E19, INT-T-GOLD in `make ci` |
-| Phase 6 | DGLC composition | INT-DGLC corpus + policy/placement solvers (planned) |
+| Phase 6 | DGLC composition | INT-DGLC (11 active) + `placement_solver`, `policy_facts`, `dglc_engine` in CI |
 
 ## Temporal golden corpus (INT-T-GOLD)
 
@@ -131,20 +133,17 @@ calendar-month “last month” (not trailing 30 days), yesterday vault interval
 fiscal-quarter membership on a named date, quarter countdown, explicit `needs_clarification` and
 `invalid_date` outcomes.
 
-## DGLC evaluation corpus (INT-DGLC — planned)
+## DGLC evaluation corpus (INT-DGLC)
 
 Deterministic Grounded Latent Composition cases live in `tests/fixtures/chat/golden_questions/dglc.yaml`
-(see CHAT_INTELLIGENCE §7.11). Each case specifies typed `facts`, expected engine receipts,
-`binding_constraints`, `distractors`, and `prohibited_claims`. Initial archetypes:
+(see CHAT_INTELLIGENCE §7.11). Each case specifies typed `facts`, expected engine receipts, and
+`binding_constraints`. **Shipped archetypes (v1):**
 
-- Quantifier / scope traps → `unknown` when open-world
-- Nested policy deny-overrides-permit → `deny` + reason codes
-- Power-domain placement → `infeasible` + binding constraint (not aggregate GPU count)
-- ADR supersession chain → governing protocol by scope
-- Boss battles combining policy + graph + capacity + state
+- Nested policy deny-overrides-permit → `deny` + stable reason codes (`policy_facts.py`)
+- Power-domain placement → `infeasible` + binding constraint receipt (`placement_solver.py`)
+- Compose merge → deny short-circuits placement; `unknown` poisons feasibility (`dglc_engine.py`)
 
-Grader dimensions: final outcome, entity grounding, distractor isolation, constraint coverage,
-intermediate receipt validity, calibration, cross-paraphrase consistency.
+**Planned:** quantifier traps, CP-SAT minimal relaxation, boss battles, paraphrase battery.
 
 ## Property-based targets (§15.4)
 
