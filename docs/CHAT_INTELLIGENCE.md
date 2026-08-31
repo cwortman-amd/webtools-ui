@@ -230,10 +230,10 @@ Each layer has a specific authority:
 | --- | --- | --- | --- |
 | L1 Interaction/context | §7.1 | `ke/studio/tutor/intent.py`, `conversation.py` | Partial |
 | L2 Grounded retrieval | §7.2, [`KNOWLEDGE_CHAT.md`](KNOWLEDGE_CHAT.md) §10 | `ke/studio/tutor/wikiqa.py`, `ke/studio/wiki/corpus.py` | Shipped (vault + web) |
-| L3 Temporal intelligence | §7.3 | `temporal_engine.py`, `try_temporal_answer`, `try_temporal_vault_answer` | Partial (offsets, weekdays, intervals, quarters, countdown, vault filter) |
-| L4 Structured knowledge | §7.4 | Wiki links, resource registries; graph DB planned | Partial |
-| L5 Logic/policy | §7.5 | Scope gates, grounding policy in `wikiqa.py` | Partial |
-| L6 Constraint/verification | §7.6 | `wikiqa.nli_grade`, synthesis faithfulness gates | Partial |
+| L3 Temporal intelligence | §7.3 | `temporal_engine.py`, `try_temporal_answer`, `try_temporal_vault_answer` | Shipped v1.3 (birthday recurrence, cross-TZ, nth-weekday, ISO/fiscal membership, INT-T-GOLD) |
+| L4 Structured knowledge | §7.4 | Wiki links, `knowledge_graph.py`, graph metrics | Partial (multi-hop; predicate topology planned) |
+| L5 Logic/policy | §7.5 | `policy_engine.py`, `policy_rules.py`, evidence API | Partial (grounding gates; nested policy AST planned) |
+| L6 Constraint/verification | §7.6 | `solver_engine.py`, `POST /api/v1/solver/check` | Partial (GPU memory, business deadline; placement CP-SAT planned) |
 | L7 Workflow/action | §7.7 | `ke/studio/tutor/research_task.py`, `patch_proposal.py` | Partial |
 | L8 Memory | §7.8 | Session state in `intent.py`, conversation context | Partial |
 | L9 Safety | §7.9 | Evidence fencing, untrusted-data prompts, scope ACL | Shipped (core) |
@@ -779,6 +779,101 @@ of the following are true:
 
 ---
 
+### 7.11 Deterministic Grounded Latent Composition (DGLC)
+
+**Purpose:** Handle question classes where natural-language understanding is necessary but
+insufficient. The system must resolve **latent state** (policies, topology, version chains,
+reservations), ignore decoys, apply non-negotiable constraints, reconcile conflicts, and emit
+results that can be **independently verified**—not merely fluent prose.
+
+DGLC is the compositional pattern that binds Layers 3–6 and 10: each sub-problem is routed to
+the authoritative engine; outcomes are merged from **receipts**, not re-inferred by the LLM.
+
+**Composition pipeline**
+
+```text
+NL query
+  → Task classification (deduction | policy | feasibility | graph | temporal | evidence)
+  → Fact extraction → typed facts (not free-text premises)
+  → Latent state materialization (graph snapshot, policy facts, inventory, version chain)
+  → Deterministic engines (parallel where independent)
+  → Receipt merge under precedence (deny-overrides-permit; unknown poisons feasibility claims)
+  → Calibrated outcome + audit trail
+  → LLM synthesis (optional; must not add facts absent from receipts)
+```
+
+**Three-valued and multi-valued outcomes**
+
+Enterprise reasoning requires more than binary yes/no:
+
+| Domain | Outcomes |
+| --- | --- |
+| Deduction / policy | `entailed`, `contradicted`, `unknown` |
+| Feasibility | `feasible`, `infeasible`, `unknown` (missing facts) |
+| Evidence | `supported`, `unsupported`, `conflicted` |
+| Operational state | `verified`, `pending`, `conflicted`, `stale_observation` |
+
+The assistant must not collapse `unknown` or `conflicted` into a helpful-sounding definite answer.
+
+**Engine receipt contract (merge input)**
+
+```json
+{
+  "engine": "policy/v2",
+  "outcome": "deny",
+  "confidence": "entailed",
+  "reason_codes": ["DENY_RESTRICTED_PII_CISO_APPROVAL_REQUIRED"],
+  "derivation": ["Policy C applies; no CISO approval fact present"],
+  "inputs_hash": "sha256:..."
+}
+```
+
+**Representative hard archetypes (evaluation targets)**
+
+| Archetype | Required mechanism | Implementation status |
+| --- | --- | --- |
+| Quantifier / scope traps | Datalog or FOL subset; explicit `unknown` | Planned (`dglc.yaml`) |
+| Negation / policy precedence | Policy AST, deny-overrides-permit | Partial (`policy_engine.py` v1) |
+| Globally satisfiable, locally infeasible | CP-SAT / MILP with binding constraint receipt | Partial (`solver_engine.py` scaffold) |
+| Hard + soft objectives | Ranked feasible plans only | Planned |
+| Constrained graph reachability | Predicate traversal (encrypted, maintenance, alarms) | Partial (wikilink graph) |
+| Version / supersession / scope | Directed version graph + applicability | Partial (vault metadata) |
+| Counterfactual causality | Hypothesis ledger; intervention evidence types | Planned |
+| Partial observability | Formal health contract; coverage scoring | Emerging (`needs_clarification` in temporal) |
+| Conflicting authoritative sources | Bitemporal model + conflict lattice | Planned |
+| Non-monotonic multi-turn state | Event-sourced entity ledger | Planned |
+| Recursive / fixed-point rules | Cycle-aware policy evaluation | Planned |
+| Minimal-change repair | MUS / minimal relaxations from solver | Planned |
+| Cross-domain unit traps | Unit-aware calculator + assumption ledger | Planned |
+| Prompt injection in evidence | Instruction/data separation | Shipped (L9) |
+| Meta-consistency across paraphrases | Shared policy service + paraphrase battery | Planned |
+
+**Boss-battle prompts** combine multiple traps (policy + graph + capacity + state). They are the
+highest-value private regression cases and must grade intermediate receipts independently—not only
+final prose.
+
+**Benchmark portfolio (layered)**
+
+Public references (RuleTaker, FOLIO, ProofWriter, CausalBench, GRS-QA, GAIA) inform design;
+executable gold lives in Knowledge Exchange:
+
+- `tests/fixtures/chat/golden_questions/temporal.yaml` — INT-T-GOLD (shipped)
+- `tests/fixtures/chat/golden_questions/mechanism.yaml` — route/evidence (shipped)
+- `tests/fixtures/chat/golden_questions/dglc.yaml` — deduction, policy, placement (planned)
+
+Each DGLC case stores: typed `facts`, `expected` receipts, `binding_constraints`, `distractors`,
+`prohibited_claims`, and paraphrase variants for robustness grading.
+
+**Acceptance criteria**
+
+- High-risk conclusions require at least one deterministic receipt from the authoritative layer.
+- Feasibility claims include binding-constraint identification when infeasible.
+- Policy denials include stable reason codes; permits never override explicit denies without precedence rules.
+- Source conflicts surface as `conflicted` with per-source state—not a merged hallucination.
+- Graders score outcome, grounding, distractor isolation, constraint coverage, calibration, and receipt quality independently.
+
+---
+
 ## 8. Freshness and validity model
 
 ### 8.1 Time dimensions
@@ -1181,6 +1276,12 @@ Initial targets should be calibrated per domain, but the platform must measure:
 
 - `tests/test_freshness_pipeline.py` — decay, web grading, contamination, badges
 - `tests/test_wiki_retrieval.py` — `test_w6l`–`test_w6o` freshness-intent and answerability cases
+- `tests/test_temporal_golden.py` + `golden_questions/temporal.yaml` — INT-T-GOLD deterministic temporal corpus
+- `ke/studio/tutor/temporal_eval.py` — YAML receipt grader for temporal gold cases
+
+**Planned (DGLC — §7.11):**
+
+- `golden_questions/dglc.yaml` — policy, placement, deduction, boss-battle cases with typed facts and receipt grading
 
 ### 15.2 Integration tests
 
@@ -1237,13 +1338,16 @@ Examples:
 - Temporal response and citation-validity graders.
 - Advisory client parser with canonical backend reconciliation.
 
-**Status:** Shipped in Knowledge Exchange — `temporal_engine.py` (business-day traversal,
-fiscal calendar default October, pluggable calendars), `POST /api/v1/temporal/resolve`,
-tenant defaults via `temporal_config.py` and `product.json` `temporal` block, advisory
-client parser (`shared/js/temporal-advisory.js`) with backend reconciliation in Chat Orb.
-Freshness decay and web snippet dating also shipped (`freshness_pipeline.py`). Timezone-aware
-anchors (`reference_instant`, IANA workspace TZ, `at 5pm`) shipped in v1.1; full cross-TZ
-conversion grammar and SQL/graph retrieval compiler remain planned.
+**Status:** Shipped in Knowledge Exchange — `temporal_engine.py` (`temporal-engine/1.3.0`:
+business-day traversal, fiscal calendar default October, pluggable calendars, birthday recurrence,
+leap-day observance, month/day span, cross-timezone conversion, nth-weekday, ISO week, fiscal-quarter
+membership, calendar-month “last month”, yesterday intervals, `needs_clarification` / `invalid_date`),
+`POST /api/v1/temporal/resolve`, tenant defaults via `temporal_config.py` and `product.json`
+`temporal` block, advisory client parser (`shared/js/temporal-advisory.js`) with backend
+reconciliation in Chat Orb. Golden corpus: `tests/fixtures/chat/golden_questions/temporal.yaml`
+(INT-T-GOLD, 47 active cases); gate: `make temporal-eval` in `make ci`. Freshness decay and web
+snippet dating also shipped (`freshness_pipeline.py`). Remaining: DST elapsed-time multi-step,
+multi-turn temporal state chains, full SQL/graph retrieval compiler backend execution.
 
 **Shipped v0.2 additions:** temporal retrieval compiler execution (`temporal_compiler.py`),
 `named_weekday_time` grammar, stream temporal grading, policy deny UX, graph lift metrics,
@@ -1270,12 +1374,26 @@ UX and audit views planned.
 
 ### Phase 5: Continuous improvement
 
-- Curated failure corpus (`scripts/chat_intelligence_eval.py` — INT-E*).
+- Curated failure corpus (`scripts/chat_intelligence_eval.py` — INT-E01–E19).
+- Temporal golden corpus (`scripts/temporal_eval.py`, `temporal.yaml` — INT-T-GOLD).
 - Automated regression gates (`benchmark_chat_intelligence.py --check`,
-  `coverage_chat_intelligence.py` ≥80% branch/condition).
+  `coverage_chat_intelligence.py` ≥80% branch/condition, `temporal_eval.py --check`).
 
-**Status:** Benchmark, coverage, and eval corpus gates wired into `make ci`.
+**Status:** Benchmark, coverage, INT-E, and INT-T-GOLD gates wired into `make ci`.
+DGLC golden corpus (`dglc.yaml`) and placement/policy boss-battle regressions planned.
 Online telemetry and A/B experiments remain planned.
+
+### Phase 6: Deterministic Grounded Latent Composition (DGLC)
+
+- Three-valued outcome contract across policy, solver, and deduction engines.
+- `dglc.yaml` executable corpus (quantifier traps, nested policy, power-domain placement,
+  ADR supersession, boss battles).
+- Policy AST v2 with deny-overrides-permit and typed facts.
+- CP-SAT placement solver with binding-constraint and minimal-relaxation receipts.
+- Receipt composition layer before LLM synthesis.
+
+**Status:** Architecture specified in §7.11; temporal `unknown`/`needs_clarification` pattern
+established; full DGLC pipeline planned.
 
 ---
 

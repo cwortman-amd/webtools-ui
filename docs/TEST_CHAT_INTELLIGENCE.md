@@ -60,6 +60,8 @@ related:
 | INT-T11 | L3 Client | Advisory parser + backend reconciliation | `js/temporal-advisory.test.mjs`, `tests/ui/chat-intelligence-temporal.spec.js` | Active |
 | INT-T12 | L3 Temporal | DST, leap-year, `reference_instant` anchors | `test_temporal_int_t12.py` | Active |
 | INT-T13 | L3 Temporal | Retrieval compiler execution (vault + graph) | `test_chat_intelligence_tiers.py` | Active |
+| INT-T-GOLD | L3 Temporal | Golden corpus — birthday, leap, duration, adversarial | `tests/fixtures/chat/golden_questions/temporal.yaml`, `test_temporal_golden.py` | Active (47 active / 10 planned) |
+| INT-DGLC | L5–L6 DGLC | Deduction, policy precedence, placement infeasibility | `golden_questions/dglc.yaml` (planned) | Planned |
 | INT-V01 | L5 Solver | GPU memory feasibility | `test_chat_intelligence_tiers.py` | Active |
 | INT-W01 | L4 Workflow | Research handoff workflow receipt | `test_workflow_engine.py`, `ask.py` | Active |
 | INT-G01 | L10 Grading | Temporal consistency grader | `test_temporal_engine.py` | Active |
@@ -84,6 +86,12 @@ python3 -m pytest tests/test_wiki_retrieval.py -k "w6l or w6m or w6n or w6o" -v
 # Platform contract (webtools-ui)
 cd webtools-ui
 node --test tests/lib/chat-intelligence-contract.test.mjs
+
+# Temporal golden corpus + continuous eval
+cd knowledge-exchange
+python3 -m pytest tests/test_temporal_golden.py -v
+make temporal-eval   # INT-T-GOLD golden corpus (--check for CI)
+make chat-intelligence-eval  # INT-E01–E19 continuous eval
 ```
 
 ## Phased gates (not yet active)
@@ -92,7 +100,51 @@ node --test tests/lib/chat-intelligence-contract.test.mjs
 | --- | --- | --- |
 | Phase 3 | Graph + policy + solvers | INT-G02, INT-P01 active; evidence API; INT-V* planned |
 | Phase 4 | Durable workflows + approvals | INT-W01 workflow scaffold; full UX planned |
-| Phase 5 | Continuous eval regression | INT-E01–E12 in `chat_intelligence_eval.py` |
+| Phase 5 | Continuous eval regression | INT-E01–E19, INT-T-GOLD in `make ci` |
+| Phase 6 | DGLC composition | INT-DGLC corpus + policy/placement solvers (planned) |
+
+## Temporal golden corpus (INT-T-GOLD)
+
+Canonical prompts live at `tests/fixtures/chat/golden_questions/temporal.yaml`. Every **active**
+case pins `reference_time` (default `2026-08-31T09:56:00-04:00`) so expressions like “next year”
+are deterministic. Suites mirror temporal-reasoning benchmark categories: birthday recurrence,
+leap-century rules, calendar vs elapsed duration, boundaries, named weekdays, fiscal/ISO, business
+calendars, timezone/DST (planned), multi-turn (planned), temporal RAG, and adversarial traps.
+
+Example receipt for the birthday prompt:
+
+```json
+{
+  "reference_date": "2026-08-31",
+  "birthday_month_day": "07-02",
+  "target_year": 2027,
+  "target_date": "2027-07-02",
+  "weekday": "Friday"
+}
+```
+
+Birth year is graded as **ignored input** unless the question asks for birth-weekday or age.
+Ask-path grading checks `required_answer_facts` and `forbidden_claims` (e.g. must not invent age).
+
+**Engine v1.3 additions (active gold):** cross-timezone meeting conversion, nth-weekday of month,
+calendar-month “last month” (not trailing 30 days), yesterday vault intervals, ISO week queries,
+fiscal-quarter membership on a named date, quarter countdown, explicit `needs_clarification` and
+`invalid_date` outcomes.
+
+## DGLC evaluation corpus (INT-DGLC — planned)
+
+Deterministic Grounded Latent Composition cases live in `tests/fixtures/chat/golden_questions/dglc.yaml`
+(see CHAT_INTELLIGENCE §7.11). Each case specifies typed `facts`, expected engine receipts,
+`binding_constraints`, `distractors`, and `prohibited_claims`. Initial archetypes:
+
+- Quantifier / scope traps → `unknown` when open-world
+- Nested policy deny-overrides-permit → `deny` + reason codes
+- Power-domain placement → `infeasible` + binding constraint (not aggregate GPU count)
+- ADR supersession chain → governing protocol by scope
+- Boss battles combining policy + graph + capacity + state
+
+Grader dimensions: final outcome, entity grounding, distractor isolation, constraint coverage,
+intermediate receipt validity, calibration, cross-paraphrase consistency.
 
 ## Property-based targets (§15.4)
 
