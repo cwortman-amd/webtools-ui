@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cwortman-amd/webtools-ui/schemas/agent-knowledge-defaults.schema.json",
+  "title": "Agent Knowledge Defaults",
+  "type": "object",
+  "required": ["version", "keHubUrl", "sharedCorpora"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "description": { "type": "string" },
+    "keHubUrl": { "type": "string" },
+    "keAskPath": { "type": "string" },
+    "federatedRetrievePath": { "type": "string" },
+    "sharedCorpora": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "productCorpora": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  }
+}

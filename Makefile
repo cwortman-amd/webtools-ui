@@ -20,7 +20,8 @@ help:
 	@echo "  make coverage-snapshot         statement/branch/condition table by core module (80% loop floor)"
 	@echo "  make check-plugins         validate community plugin manifests"
 	@echo "  make check-plugins-strict  fail on missing sibling manifests"
-	@echo "  make sync-plugin-registry  copy plugins.registry.json to demo-portal/data/"
+	@echo "  make sync-plugin-registry  sync registry from manifests + demo-portal snapshot"
+	@echo "  make sync-registry-from-manifests  refresh plugins.registry.json from consumer manifests"
 
 test-shared:
 	@node --test tests/lib/*.test.mjs
@@ -70,5 +71,8 @@ check-plugins:
 check-plugins-strict:
 	@python3 scripts/check_plugin_manifests.py --strict
 
-sync-plugin-registry:
-	@python3 scripts/sync_plugin_registry_snapshot.py
+sync-registry-from-manifests:
+	@python3 scripts/sync_registry_from_manifests.py
+
+sync-plugin-registry: sync-registry-from-manifests
+	@python3 scripts/sync_plugin_registry_snapshot.py --workspace "$(abspath ..)"

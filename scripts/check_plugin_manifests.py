@@ -20,6 +20,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "plugins.registry.json"
 SCHEMA = ROOT / "schemas" / "plugin.manifest.schema.json"
+AGENT_DEFAULTS = ROOT / "data" / "agent-knowledge-defaults.json"
 
 REQUIRED_MANIFEST_KEYS = ("id", "name", "version", "minWebtoolsVersion", "type", "entry")
 VALID_TYPES = {"dashboard", "catalog", "hub"}
@@ -50,6 +51,40 @@ def check_manifest(manifest: dict, path: Path) -> list[str]:
     return errors
 
 
+def check_agent_harmonization(manifest: dict, path: Path, defaults: dict) -> list[str]:
+    """Ensure dashboard agents share the platform knowledge base."""
+    errors: list[str] = []
+    pid = manifest.get("id") or ""
+    if pid == "knowledge-exchange":
+        return errors
+    services = (manifest.get("contributes") or {}).get("services") or {}
+    agent = services.get("agent")
+    if not agent or agent is False:
+        return errors
+    if agent is True:
+        errors.append(f"{path}: agent enabled but missing harmonized corpora block")
+        return errors
+    corpora = list(agent.get("corpora") or [])
+    shared = list(defaults.get("sharedCorpora") or [])
+    missing = [c for c in shared if c not in corpora]
+    if missing:
+        errors.append(f"{path}: agent.corpora missing shared corpora {missing!r}")
+    expected_product = list((defaults.get("productCorpora") or {}).get(pid) or [])
+    missing_product = [c for c in expected_product if c not in corpora]
+    if missing_product:
+        errors.append(f"{path}: agent.corpora missing product corpora {missing_product!r}")
+    if not agent.get("keHubUrl"):
+        errors.append(f"{path}: agent.keHubUrl required for harmonized KE hub access")
+    reg_knowledge = list((manifest.get("registrations") or {}).get("knowledge") or [])
+    if reg_knowledge:
+        reg_missing = [c for c in corpora if c not in reg_knowledge]
+        if reg_missing:
+            errors.append(
+                f"{path}: registrations.knowledge missing agent corpora {reg_missing!r}"
+            )
+    return errors
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--strict", action="store_true", help="Treat missing sibling manifests as errors")
@@ -74,6 +109,11 @@ def main(argv: list[str] | None = None) -> int:
     errors: list[str] = []
     warnings: list[str] = []
     seen_ids: set[str] = set()
+    agent_defaults: dict = {}
+    if AGENT_DEFAULTS.is_file():
+        agent_defaults = load_json(AGENT_DEFAULTS)
+    else:
+        warnings.append(f"agent defaults not found: {AGENT_DEFAULTS}")
 
     for entry in plugins:
         pid = entry.get("id")
@@ -100,9 +140,25 @@ def main(argv: list[str] | None = None) -> int:
 
         manifest = load_json(resolved)
         errors.extend(check_manifest(manifest, resolved))
+        if agent_defaults:
+            errors.extend(check_agent_harmonization(manifest, resolved, agent_defaults))
 
         if manifest.get("id") != pid:
             errors.append(f"{pid}: registry id != manifest id ({manifest.get('id')!r})")
+
+        reg_wt = entry.get("webtools") or {}
+        man_wt = manifest.get("webtools") or {}
+        for key in ("defaultSkin", "shellLayout"):
+            rv, mv = reg_wt.get(key), man_wt.get(key)
+            if rv is not None and mv is not None and rv != mv:
+                errors.append(f"{pid}: registry webtools.{key}={rv!r} != manifest {mv!r}")
+
+        reg_mods = set((entry.get("dependencies") or {}).get("webtoolsModules") or [])
+        man_mods = set((manifest.get("dependencies") or {}).get("webtoolsModules") or [])
+        if reg_mods != man_mods:
+            errors.append(
+                f"{pid}: registry webtoolsModules {sorted(reg_mods)!r} != manifest {sorted(man_mods)!r}"
+            )
 
         reg_repo = entry.get("repository")
         man_repo = manifest.get("repository")

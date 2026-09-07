@@ -9,12 +9,24 @@
   "use strict";
 
   var REGISTRY_URL = "../shared/data/knowledge-registry.json";
+  var DEFAULTS_URL = "../shared/data/agent-knowledge-defaults.json";
+  var WIKI_INDEX_MANIFEST_URL = "../shared/data/llm-wiki-index-manifest.json";
+  var FALLBACK_SHARED_CORPORA = [
+    "ke-curriculum",
+    "amd-rocm-docs",
+    "amd-instinct-docs",
+    "amd-rocm-blogs",
+  ];
   var config = {
     enabled: false,
     productId: "",
     corpora: [],
     keAskUrl: "",
+    keHubUrl: "",
+    federatedRetrieveUrl: "",
+    federatedHost: false,
     registry: null,
+    knowledgeDefaults: null,
   };
 
   var LEARN_RE = /\b(how|why|what|explain|learn|training|course|wiki|curriculum|module|lesson)\b/i;
@@ -57,15 +69,243 @@
     return config.registry.corpora[id] || null;
   }
 
+  function keHubBase() {
+    var base = config.keHubUrl || (global.WT_KE_HUB_URL || "http://127.0.0.1:8765");
+    return String(base).replace(/\/$/, "");
+  }
+
+  function loadKnowledgeDefaults(url) {
+    url = url || DEFAULTS_URL;
+    if (config.knowledgeDefaults) {
+      return Promise.resolve(config.knowledgeDefaults);
+    }
+    return fetch(url, { cache: "no-cache" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("defaults HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        config.knowledgeDefaults = data;
+        return data;
+      })
+      .catch(function (err) {
+        warn("agent knowledge defaults unavailable: " + (err && err.message ? err.message : err));
+        return {
+          sharedCorpora: FALLBACK_SHARED_CORPORA,
+          keHubUrl: "http://127.0.0.1:8765",
+          keAskPath: "/api/ask",
+          federatedRetrievePath: "/api/federated/retrieve",
+          productCorpora: {},
+        };
+      });
+  }
+
+  function loadWikiIndexManifest(url) {
+    url = url || WIKI_INDEX_MANIFEST_URL;
+    return fetch(url, { cache: "no-cache" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("wiki index manifest HTTP " + r.status);
+        return r.json();
+      })
+      .catch(function (err) {
+        warn("llm-wiki index manifest unavailable: " + (err && err.message ? err.message : err));
+        return { githubRepos: [], siteUrls: [] };
+      });
+  }
+
+  function wikiCorpusIds(manifest) {
+    var ids = [];
+    (manifest.githubRepos || []).forEach(function (repo) {
+      if (repo && repo.corpusId) ids.push(repo.corpusId);
+    });
+    return ids;
+  }
+
+  function mergeCorpora(manifestCorpora, productId, defaults, wikiManifest) {
+    var shared = (defaults && defaults.sharedCorpora) || FALLBACK_SHARED_CORPORA;
+    var wikiIds = wikiCorpusIds(wikiManifest || {});
+    var product = (defaults && defaults.productCorpora && defaults.productCorpora[productId]) || [];
+    var out = [];
+    var seen = {};
+    function add(id) {
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      out.push(id);
+    }
+    shared.forEach(add);
+    wikiIds.forEach(add);
+    product.forEach(add);
+    (manifestCorpora || []).forEach(add);
+    return out;
+  }
+
+  function resolveKeAskUrl(defaults) {
+    var url = config.keAskUrl || "";
+    if (url && url.indexOf("http") === 0) return url;
+    var path = (defaults && defaults.keAskPath) || "/api/ask";
+    if (url && url.indexOf("/") === 0) path = url;
+    return keHubBase() + path;
+  }
+
+  function applyHarmonizedAgentConfig(manifest, svc, federatedHost, defaults, wikiManifest) {
+    var corpora = mergeCorpora(svc && svc.corpora, manifest.id, defaults, wikiManifest);
+    if (!federatedHost) {
+      if (!config.keHubUrl) {
+        config.keHubUrl = (defaults && defaults.keHubUrl) || keHubBase();
+      }
+      if (corpora.indexOf("ke-curriculum") >= 0 && !config.keAskUrl) {
+        config.keAskUrl = resolveKeAskUrl(defaults);
+      }
+    }
+    config.corpora = corpora;
+  }
+
+  function retrieveFromKeHub(corpusId, text) {
+    if (!global.fetch) return Promise.resolve(null);
+    var corpus = resolveCorpus(corpusId) || {};
+    var path = corpus.httpFederated || "/api/federated/retrieve";
+    var url = path.indexOf("http") === 0 ? path : keHubBase() + path;
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: text, corpora: [corpusId], limit: 3 }),
+    }).then(function (r) {
+      if (!r.ok) return null;
+      return r.json();
+    }).then(function (payload) {
+      if (!payload || !payload.hits || !payload.hits.length) return null;
+      return {
+        corpus: corpusId,
+        hits: payload.hits,
+        answer: payload.hits.map(function (h) {
+          return (h.title || h.path) + ": " + (h.excerpt || "");
+        }).join("\n"),
+      };
+    }).catch(function () {
+      return null;
+    });
+  }
+
+  function retrieveCorpus(corpusId, text) {
+    if (corpusId === "ke-curriculum" && config.keAskUrl) {
+      return retrieveFromKe(text);
+    }
+    if (!config.federatedHost && corpusId.indexOf("amd-") === 0) {
+      return retrieveFromKeHub(corpusId, text);
+    }
+    var corpus = resolveCorpus(corpusId);
+    if (!corpus && config.federatedRetrieveUrl && global.fetch) {
+      return fetch(config.federatedRetrieveUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text, corpora: [corpusId], limit: 3 }),
+      }).then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      }).then(function (payload) {
+        if (!payload || !payload.hits || !payload.hits.length) return null;
+        return {
+          corpus: corpusId,
+          hits: payload.hits,
+          answer: payload.hits.map(function (h) {
+            return (h.title || h.path) + ": " + (h.excerpt || "");
+          }).join("\n"),
+        };
+      }).catch(function () {
+        return null;
+      });
+    }
+    if (!corpus) return Promise.resolve(null);
+    if (config.federatedRetrieveUrl && global.fetch) {
+      return fetch(config.federatedRetrieveUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text, corpora: [corpusId], limit: 3 }),
+      }).then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      }).then(function (payload) {
+        if (!payload || !payload.hits || !payload.hits.length) return null;
+        return {
+          corpus: corpusId,
+          hits: payload.hits,
+          answer: payload.hits.map(function (h) {
+            return (h.title || h.path) + ": " + (h.excerpt || "");
+          }).join("\n"),
+        };
+      }).catch(function () {
+        return null;
+      });
+    }
+    if (corpus.mcpTool && global.WebtoolsMcp && typeof global.WebtoolsMcp.callTool === "function") {
+      return global.WebtoolsMcp.callTool(corpus.mcpTool, {
+        q: text,
+        query: text,
+        question: text,
+      }).then(function (result) {
+        return { corpus: corpusId, result: result };
+      }).catch(function () {
+        return null;
+      });
+    }
+    if (corpus.httpAsk && global.fetch) {
+      return fetch(corpus.httpAsk, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text, mode: "answer" }),
+      }).then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      }).catch(function () {
+        return null;
+      });
+    }
+    return Promise.resolve(null);
+  }
+
+  function mergeRetrieveResults(results) {
+    var replies = [];
+    var sources = [];
+    (results || []).forEach(function (item) {
+      if (!item) return;
+      if (item.answer) replies.push(String(item.answer));
+      if (item.reply) replies.push(String(item.reply));
+      if (item.hits && item.hits.length) {
+        item.hits.forEach(function (h) { sources.push(h); });
+      }
+      if (item.sources) {
+        item.sources.forEach(function (s) { sources.push(s); });
+      }
+      if (item.citations) {
+        item.citations.forEach(function (c) { sources.push(c); });
+      }
+    });
+    if (!replies.length) return null;
+    return {
+      answer: replies.join("\n\n"),
+      sources: sources,
+      scope: "federated",
+    };
+  }
+
   function retrieve(text) {
-    return retrieveFromKe(text);
+    var ids = config.corpora && config.corpora.length
+      ? config.corpora.slice()
+      : ["ke-curriculum"];
+    if (ids.length === 1) {
+      return retrieveCorpus(ids[0], text);
+    }
+    return Promise.all(ids.map(function (id) {
+      return retrieveCorpus(id, text);
+    })).then(mergeRetrieveResults);
   }
 
   function retrieveFromKe(text) {
-    if (!config.keAskUrl || !global.fetch) {
+    var askUrl = resolveKeAskUrl(config.knowledgeDefaults);
+    if (!askUrl || !global.fetch) {
       return Promise.resolve(null);
     }
-    return fetch(config.keAskUrl, {
+    return fetch(askUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: text, mode: "plan" }),
@@ -133,6 +373,9 @@
     config.productId = opts.productId || config.productId;
     config.corpora = Array.isArray(opts.corpora) ? opts.corpora.slice() : config.corpora;
     config.keAskUrl = opts.keAskUrl || config.keAskUrl || "";
+    config.keHubUrl = opts.keHubUrl || config.keHubUrl || "";
+    config.federatedRetrieveUrl = opts.federatedRetrieveUrl || config.federatedRetrieveUrl || "";
+    config.federatedHost = !!opts.federatedHost;
     if (opts.registry) config.registry = opts.registry;
     return config;
   }
@@ -148,19 +391,40 @@
       enabled = svc.enabled !== false;
       corpora = svc.corpora || [];
       if (svc.keAskUrl) config.keAskUrl = svc.keAskUrl;
+      if (svc.keHubUrl) config.keHubUrl = svc.keHubUrl;
+      if (svc.federatedRetrieveUrl) config.federatedRetrieveUrl = svc.federatedRetrieveUrl;
     }
+    var federatedHost = false;
     if (manifest.id === "knowledge-exchange") {
-      enabled = false;
-    }
-    configure({ productId: manifest.id, enabled: enabled, corpora: corpora });
-    return loadRegistry().then(function () {
-      if (!config.keAskUrl && corpora.indexOf("ke-curriculum") >= 0) {
-        var ke = resolveCorpus("ke-curriculum");
-        if (ke && ke.httpAsk) {
-          config.keAskUrl = ke.httpAsk;
+      if (svc && typeof svc === "object" && svc.federated) {
+        federatedHost = true;
+        enabled = svc.enabled !== false;
+        if (!config.federatedRetrieveUrl) {
+          config.federatedRetrieveUrl = "/api/federated/retrieve";
         }
+      } else {
+        enabled = false;
       }
-      return config;
+    }
+    configure({
+      productId: manifest.id,
+      enabled: enabled,
+      corpora: corpora,
+      federatedHost: federatedHost,
+    });
+    return loadKnowledgeDefaults().then(function (defaults) {
+      return loadWikiIndexManifest().then(function (wikiManifest) {
+        applyHarmonizedAgentConfig(manifest, svc, federatedHost, defaults, wikiManifest);
+        return loadRegistry().then(function () {
+          if (!config.keAskUrl && corpora.indexOf("ke-curriculum") >= 0 && federatedHost) {
+            var ke = resolveCorpus("ke-curriculum");
+            if (ke && ke.httpAsk) {
+              config.keAskUrl = ke.httpAsk;
+            }
+          }
+          return config;
+        });
+      });
     });
   }
 
@@ -171,24 +435,49 @@
     if (!config.enabled) {
       return Promise.resolve({ intent: intent, handled: false });
     }
+    if (config.federatedHost && (intent === "learn" || intent === "hybrid")) {
+      return Promise.resolve({
+        intent: intent,
+        handled: false,
+        note: "KE native /api/ask (federated server-side)",
+      });
+    }
     if (intent === "learn" || intent === "hybrid") {
-      if (config.corpora.indexOf("ke-curriculum") >= 0) {
-        return retrieveFromKe(text).then(function (payload) {
-          if (payload && payload.answer) {
-            return {
-              intent: intent,
-              handled: true,
-              reply: payload.answer,
-              sources: payload.sources || payload.citations || [],
-              scope: payload.scope || "curriculum",
-            };
-          }
-          if (intent === "hybrid") {
-            return act(ctx);
-          }
-          return { intent: intent, handled: false, note: "KE unavailable — use local agent." };
-        });
-      }
+      var corpora = config.corpora && config.corpora.length
+        ? config.corpora
+        : ["ke-curriculum"];
+      return retrieve(text).then(function (payload) {
+        if (payload && payload.answer) {
+          return {
+            intent: intent,
+            handled: true,
+            reply: payload.answer,
+            sources: payload.sources || payload.citations || payload.hits || [],
+            scope: payload.scope || "federated",
+          };
+        }
+        if (corpora.indexOf("ke-curriculum") >= 0) {
+          return retrieveFromKe(text).then(function (kePayload) {
+            if (kePayload && kePayload.answer) {
+              return {
+                intent: intent,
+                handled: true,
+                reply: kePayload.answer,
+                sources: kePayload.sources || kePayload.citations || [],
+                scope: kePayload.scope || "curriculum",
+              };
+            }
+            if (intent === "hybrid") {
+              return act(ctx);
+            }
+            return { intent: intent, handled: false, note: "KE unavailable — use local agent." };
+          });
+        }
+        if (intent === "hybrid") {
+          return act(ctx);
+        }
+        return { intent: intent, handled: false, note: "No federated corpora matched." };
+      });
     }
     if (intent === "act" || intent === "hybrid") {
       return act(ctx);
@@ -216,6 +505,7 @@
     loadFromManifest: loadFromManifest,
     classify: classify,
     retrieve: retrieve,
+    retrieveCorpus: retrieveCorpus,
     retrieveFromKe: retrieveFromKe,
     route: route,
     act: act,

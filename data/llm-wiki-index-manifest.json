@@ -1,0 +1,60 @@
+{
+  "$schema": "../schemas/llm-wiki-index-manifest.schema.json",
+  "version": 1,
+  "description": "User-editable LLM-wiki index manifest. Add GitHub repos and published site URLs here; run `make llm-wiki-sync` then `make amd-docs-ingest` in knowledge-exchange.",
+  "githubRepos": [
+    {
+      "id": "rocm-docs",
+      "corpusId": "amd-rocm-docs",
+      "label": "ROCm documentation",
+      "github": "https://github.com/ROCm/rocm-docs",
+      "ref": "develop",
+      "sparse_paths": ["docs"],
+      "include_globs": ["docs/**/*.rst", "docs/**/*.md"],
+      "exclude_globs": ["docs/_static/**", "docs/_templates/**"],
+      "published_base": "https://rocm.docs.amd.com/en/latest/",
+      "source_strip_prefix": "docs/"
+    },
+    {
+      "id": "instinct-docs",
+      "corpusId": "amd-instinct-docs",
+      "label": "AMD Instinct documentation",
+      "github": "https://github.com/ROCm/instinct-docs",
+      "ref": "develop",
+      "sparse_paths": ["docs"],
+      "include_globs": ["docs/**/*.rst", "docs/**/*.md"],
+      "exclude_globs": ["docs/_static/**", "docs/_templates/**", "docs/images/**"],
+      "published_base": "https://instinct.docs.amd.com/latest/",
+      "source_strip_prefix": "docs/"
+    },
+    {
+      "id": "rocm-blogs",
+      "corpusId": "amd-rocm-blogs",
+      "label": "ROCm technical blogs",
+      "github": "https://github.com/ROCm/rocm-blogs",
+      "ref": "release",
+      "sparse_paths": ["blogs"],
+      "include_globs": ["blogs/**/*.md", "blogs/**/*.rst"],
+      "exclude_globs": [],
+      "published_base": "https://rocm.blogs.amd.com/",
+      "source_strip_prefix": "blogs/"
+    }
+  ],
+  "siteUrls": [
+    {
+      "id": "instinct-docs-portal",
+      "label": "AMD Instinct documentation (live portal)",
+      "url": "https://instinct.docs.amd.com/latest/",
+      "inventory_path": "wiki/docs-inventory/amd-instinct.json",
+      "mapped_domain": "system-bringup",
+      "crawl": true
+    },
+    {
+      "id": "rocm-docs-portal",
+      "label": "ROCm documentation (live portal)",
+      "url": "https://rocm.docs.amd.com/en/latest/",
+      "crawl": false,
+      "notes": "Prefer Git ingest (rocm-docs repo above). Set crawl=true to refresh a live inventory."
+    }
+  ]
+}

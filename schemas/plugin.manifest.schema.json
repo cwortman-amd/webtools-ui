@@ -190,7 +190,19 @@
                       "type": "array",
                       "items": { "type": "string" }
                     },
-                    "keAskUrl": { "type": "string" }
+                    "keAskUrl": { "type": "string" },
+                    "keHubUrl": {
+                      "type": "string",
+                      "description": "Knowledge Exchange hub base URL for shared corpora (amd-docs, federated retrieve). Default http://127.0.0.1:8765."
+                    },
+                    "federated": {
+                      "type": "boolean",
+                      "description": "When true on knowledge-exchange, learn intents stay on native /api/ask with server-side federation."
+                    },
+                    "federatedRetrieveUrl": {
+                      "type": "string",
+                      "description": "Same-origin federated retrieval endpoint (KE hub default /api/federated/retrieve)."
+                    }
                   }
                 }
               ]

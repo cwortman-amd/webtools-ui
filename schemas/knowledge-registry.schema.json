@@ -25,7 +25,15 @@
           "resource": { "type": "string" },
           "browserBridge": { "type": "string" },
           "stdio": { "type": "string" },
-          "path": { "type": "string" }
+          "path": { "type": "string" },
+          "httpFederated": {
+            "type": "string",
+            "description": "KE hub federated retrieval path (default /api/federated/retrieve)."
+          },
+          "amdRepoId": {
+            "type": "string",
+            "description": "AMD Git repo id when corpus is served from the shared KE amd-docs index."
+          }
         }
       }
     }

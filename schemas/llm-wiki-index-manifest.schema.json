@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cwortman-amd/webtools-ui/schemas/llm-wiki-index-manifest.schema.json",
+  "title": "LLM Wiki Index Manifest",
+  "type": "object",
+  "required": ["version", "githubRepos", "siteUrls"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "description": { "type": "string" },
+    "githubRepos": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/githubRepo" }
+    },
+    "siteUrls": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/siteUrl" }
+    }
+  },
+  "$defs": {
+    "githubRepo": {
+      "type": "object",
+      "required": ["id", "corpusId", "label", "github"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Stable repo id used in search-index pages (repo_id)."
+        },
+        "corpusId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Federated corpus id (must exist in knowledge-registry.json after sync)."
+        },
+        "label": { "type": "string" },
+        "github": {
+          "type": "string",
+          "format": "uri",
+          "description": "GitHub repository URL (https://github.com/org/repo)."
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch or tag to clone (default develop)."
+        },
+        "sparse_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "git sparse-checkout paths (omit for full clone)."
+        },
+        "include_globs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "exclude_globs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "published_base": {
+          "type": "string",
+          "format": "uri",
+          "description": "Published docs site base URL for citation links."
+        },
+        "source_strip_prefix": {
+          "type": "string",
+          "description": "Path prefix stripped when mapping repo files to published URLs."
+        }
+      },
+      "additionalProperties": false
+    },
+    "siteUrl": {
+      "type": "object",
+      "required": ["id", "label", "url"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "label": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "inventory_path": {
+          "type": "string",
+          "description": "KE wiki path for living inventory JSON (optional)."
+        },
+        "mapped_domain": {
+          "type": "string",
+          "description": "Default KE curriculum domain for promotion backlog."
+        },
+        "crawl": {
+          "type": "boolean",
+          "description": "When true, included in `make docs-refresh REFRESH=1` live crawls."
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

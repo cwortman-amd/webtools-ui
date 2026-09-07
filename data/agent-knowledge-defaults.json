@@ -1,0 +1,29 @@
+{
+  "$schema": "../schemas/agent-knowledge-defaults.schema.json",
+  "version": 1,
+  "description": "Harmonized agent knowledge base for all webtools plugins. AMD Git corpora are listed in shared/data/llm-wiki-index-manifest.json — run make llm-wiki-sync after edits.",
+  "keHubUrl": "http://127.0.0.1:8765",
+  "keAskPath": "/api/ask",
+  "federatedRetrievePath": "/api/federated/retrieve",
+  "sharedCorpora": [
+    "ke-curriculum",
+    "amd-rocm-docs",
+    "amd-instinct-docs",
+    "amd-rocm-blogs"
+  ],
+  "productCorpora": {
+    "cluster-manager": ["cm-ops"],
+    "dc-planner": ["dc-planner-domain"],
+    "llm-benchmark": ["lb-docs"],
+    "demo-portal": ["demo-catalog"],
+    "slide-presenter": ["slides-deck"],
+    "knowledge-exchange": [
+      "ke-portal-manifest",
+      "cm-ops",
+      "lb-docs",
+      "dc-planner-domain",
+      "demo-catalog",
+      "slides-deck"
+    ]
+  }
+}

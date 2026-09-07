@@ -47,9 +47,34 @@
     "slides-deck": {
       "label": "Active slide deck and notes",
       "owner": "slide-presenter",
-      "transport": ["http", "stdio"],
+      "transport": ["browser", "http", "stdio"],
+      "browserBridge": "js/agent-bridge.js",
       "httpMcp": "/mcp",
       "stdio": "scripts/mcp_stdio_bridge.py"
+    },
+    "amd-rocm-docs": {
+      "label": "ROCm documentation (Git)",
+      "owner": "knowledge-exchange",
+      "transport": ["http"],
+      "httpFederated": "/api/federated/retrieve",
+      "amdRepoId": "rocm-docs",
+      "resource": "ke://amd-docs/rocm-docs"
+    },
+    "amd-instinct-docs": {
+      "label": "AMD Instinct documentation (Git)",
+      "owner": "knowledge-exchange",
+      "transport": ["http"],
+      "httpFederated": "/api/federated/retrieve",
+      "amdRepoId": "instinct-docs",
+      "resource": "ke://amd-docs/instinct-docs"
+    },
+    "amd-rocm-blogs": {
+      "label": "ROCm technical blogs (Git)",
+      "owner": "knowledge-exchange",
+      "transport": ["http"],
+      "httpFederated": "/api/federated/retrieve",
+      "amdRepoId": "rocm-blogs",
+      "resource": "ke://amd-docs/rocm-blogs"
     }
   }
 }
