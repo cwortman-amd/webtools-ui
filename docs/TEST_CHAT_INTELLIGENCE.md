@@ -26,7 +26,7 @@ audience:
 - architecture
 - platform
 - ai-ml
-updated: 2026-08-31
+updated: 2026-09-11
 related:
 - '[[CHAT_INTELLIGENCE]]'
 - '[[KNOWLEDGE_CHAT]]'
@@ -37,11 +37,11 @@ related:
 
 # Chat Intelligence Layers — Test Program
 
-**Status:** Draft, 2026-08-31. Binds to [`CHAT_INTELLIGENCE.md`](./CHAT_INTELLIGENCE.md).
+**Status:** Draft, 2026-09-11. Binds to [`CHAT_INTELLIGENCE.md`](./CHAT_INTELLIGENCE.md).
 
 | Consumer | Implementation | Test suites |
 | --- | --- | --- |
-| Knowledge Exchange | `ke/studio/tutor/temporal_engine.py`, `freshness_pipeline.py`, `wikiqa.py` | `tests/test_temporal_engine.py`, `tests/test_freshness_pipeline.py`, `tests/test_wiki_retrieval.py` (w6l–w6o) |
+| Knowledge Exchange | `ke/studio/tutor/temporal_engine.py`, `unit_engine.py`, `reasoning_plan.py`, `challenge_router.py`, `freshness_pipeline.py`, `wikiqa.py` | `tests/test_temporal_engine.py`, `tests/test_unit_engine.py`, `tests/test_reasoning_challenge.py`, `tests/test_freshness_pipeline.py`, `tests/test_wiki_retrieval.py` (w6l–w6o) |
 
 ## Active suites (Phase 1–2)
 
@@ -60,7 +60,9 @@ related:
 | INT-T11 | L3 Client | Advisory parser + backend reconciliation | `js/temporal-advisory.test.mjs`, `tests/ui/chat-intelligence-temporal.spec.js` | Active |
 | INT-T12 | L3 Temporal | DST, leap-year, `reference_instant` anchors | `test_temporal_int_t12.py` | Active |
 | INT-T13 | L3 Temporal | Retrieval compiler execution (vault + graph) | `test_chat_intelligence_tiers.py` | Active |
-| INT-T-GOLD | L3 Temporal | Golden corpus — birthday, leap, duration, adversarial | `tests/fixtures/chat/golden_questions/temporal.yaml`, `test_temporal_golden.py` | Active (51 active / 6 planned) |
+| INT-T-GOLD | L3 Temporal | Golden corpus — birthday, leap, duration, adversarial | `tests/fixtures/chat/golden_questions/temporal.yaml`, `test_temporal_golden.py` | Active (54 active / 6 planned) |
+| INT-UNIT | L1 Unit | Throughput capacity, BER expected errors, assumption ledger | `tests/fixtures/chat/golden_questions/unit.yaml`, `test_unit_golden.py` | Active (4 active) |
+| INT-ESC | L0+L1 Challenge | Answer verification escalation (`retry`/`rewrite`/`explain`) | `test_reasoning_challenge.py`, `intent.yaml` INT-ESC-* | Active |
 | INT-DGLC | L5–L6 DGLC | Policy facts, quantifier deduction, placement, compose | `tests/fixtures/chat/golden_questions/dglc.yaml`, `test_dglc_golden.py` | Active (15 active) |
 | INT-V01 | L5 Solver | GPU memory feasibility | `test_chat_intelligence_tiers.py` | Active |
 | INT-W01 | L4 Workflow | Research handoff workflow receipt | `test_workflow_engine.py`, `ask.py` | Active |
@@ -91,6 +93,7 @@ node --test tests/lib/chat-intelligence-contract.test.mjs
 cd knowledge-exchange
 python3 -m pytest tests/test_temporal_golden.py -v
 make temporal-eval   # INT-T-GOLD golden corpus (--check for CI)
+make unit-eval       # INT-UNIT throughput/BER golden corpus (--check for CI)
 make dglc-eval       # INT-DGLC golden corpus (--check for CI)
 make chat-intelligence-eval  # INT-E01–E19 continuous eval
 make coverage-chat-intelligence  # ≥80% branch/condition per module
@@ -145,6 +148,42 @@ Deterministic Grounded Latent Composition cases live in `tests/fixtures/chat/gol
 - Compose merge → deny short-circuits downstream engines (`dglc_engine.py` v2)
 
 **Planned:** CP-SAT MUS, ADR supersession, multi-turn ledger, paraphrase battery.
+
+## Unit arithmetic golden corpus (INT-UNIT)
+
+Closed-world rate × duration cases live in `tests/fixtures/chat/golden_questions/unit.yaml`.
+The `unit_engine.py` calculator handles:
+
+- **Throughput:** `At 212Gbps how much data can transfer in a month` → ~68.7 PB (30-day default)
+- **BER:** `At 212Gbps with a 10-15BER how many errors do I see in a month` → ~550 expected errors
+
+Each ask-path case grades `required_answer_facts` and an explicit **assumption ledger** (decimal Gbps,
+30-day month, 100% utilization, pre-FEC BER, Poisson mean). Negative cases assert `resolve_none`
+when quantifiers or rates are missing.
+
+**Quality framing:** report closed-world pass rate on the versioned suite — not “zero hallucination.”
+
+## Answer challenge escalation (INT-ESC)
+
+Verification is a first-class workflow, not “regenerate.” Natural-language triggers:
+
+| Trigger | Mode | Level |
+| --- | --- | --- |
+| `retry`, verify phrases | `verify_answer` | 1 |
+| `rewrite` | `deep_investigate` | 3 |
+| `explain` | `explain_assumptions` | 1 |
+
+Implementation: `challenge_router.py`, `challenge_executor.py`, `wikiqa.answer()` escalation hook
+(before session short-circuit). Verdicts: Verified, Corrected, Partially supported, Inconclusive.
+
+Golden intent cases: `INT-ESC-001`–`INT-ESC-003` in `intent.yaml`. Planned HTTP:
+`POST /api/v1/chat/answers/{answer_id}/challenge`.
+
+## Reasoning Plan contract (INT-RP)
+
+`reasoning_plan.py` compiles inspectable multi-step plans (`ReasoningMode`, `ReasoningStep`,
+`answer_contract`) for composite prompts spanning temporal + policy + placement + retrieval.
+Rules-first routing; model assistance only when classification is ambiguous.
 
 ## Property-based targets (§15.4)
 

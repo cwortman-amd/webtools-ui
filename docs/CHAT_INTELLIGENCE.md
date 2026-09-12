@@ -37,7 +37,7 @@ audience:
 - security
 - sre
 - qa
-updated: 2026-08-31
+updated: 2026-09-11
 related:
 - '[[KNOWLEDGE_CHAT]]'
 - '[[TEST_KNOWLEDGE_CHAT]]'
@@ -51,7 +51,7 @@ related:
 
 # Chat Intelligence Layers — Architecture PRD
 
-**Status:** Draft v0.2 · **Last updated:** 2026-08-31  
+**Status:** Draft v0.3 · **Last updated:** 2026-09-11  
 **Owner:** Chat Platform / AI Architecture  
 **Audience:** Product, AI Platform, Backend, Search/RAG, Knowledge Engineering, Security, SRE, QA
 
@@ -88,6 +88,70 @@ over time and state, validate proposed actions, and safely coordinate multi-step
 
 > The LLM interprets and explains; authoritative systems, deterministic logic, validation, and
 > governed workflows establish what is true, allowed, feasible, and executed.
+
+### 1.1 ViXCi governed hybrid architecture (System 0 / 1 / 2)
+
+ViXCi is a **governed hybrid intelligence plane**, not an LLM that “thinks harder.” Requests compile
+into typed **Reasoning Plans** with routing rationale, risk class, expected evidence, tool permissions,
+and quality gates — not an opaque solver-vs-agent switch.
+
+| Plane | Role | Examples |
+| --- | --- | --- |
+| **System 0 — Governance & verification** | Control plane on every path | Policy boundary, schema/evidence validator, audit trace |
+| **System 1 — Deterministic reflex** | Closed-world, verifiable compute | Temporal engine, unit/BER calculator, placement solver, policy engine |
+| **System 2 — Grounded multi-hop** | Context-dependent synthesis | Hybrid retrieval, graph traversal, causal hypothesis evaluator, bounded web |
+
+**System 1 admission criteria:** closed-world inputs, deterministic outputs, verifiable receipts,
+narrow scope, safe without free-form model judgment.
+
+**Latency framing:** solver microbenchmarks (sub-ms) are **not** end-to-end product SLOs. Report
+separately: in-process solver time, router decision time, graph query time (with storage), policy
+evaluation (cached vs uncached), and ingress-to-response latency.
+
+**Quality claims:** Do **not** claim “zero hallucination” as a general property. Report:
+
+> Closed-world benchmark pass rate: *N/N* on the versioned golden suite under recorded model,
+> retrieval index, solver, policy bundle, prompt, and environment configuration.
+
+Axes include: deterministic solver exactness (100% on supported inputs), policy correctness,
+constraint feasibility vs oracle, citation entailment precision, superseded-source leakage (zero for
+high-risk current answers), temporal exact match, clarification precision, unauthorized action rate,
+and calibration of unsupported certainty.
+
+### 1.2 Reasoning Plan contract
+
+The router emits an inspectable plan (see `ke/studio/tutor/reasoning_plan.py`):
+
+- `ReasoningMode`: `direct_deterministic`, `grounded_retrieval`, `multi_hop_graph`,
+  `policy_decision`, `constraint_solving`, `causal_analysis`, `composite`, `clarify`
+- `ReasoningStep`: tool, inputs, authorization/freshness/citation requirements, pre/postconditions
+- `ReasoningPlan`: normalized query, risk level, steps, `answer_contract` (`must_include`,
+  `must_not_claim`), routing rationale
+
+Composite prompts (e.g. “add 8 GPUs next Tuesday without affecting tenants”) compile multiple System 1
+and System 2 steps under one plan.
+
+### 1.3 Answer challenge & escalation (verify, not regenerate)
+
+Users must not need to repeat questions or rely on “try harder” prompting. Escalation is a
+first-class **Answer Challenge** workflow bound to the prior answer ID, claims, citations, tool
+receipts, and temporal context.
+
+**Triggers (natural language):** `retry`, `rewrite`, `explain`, verify phrases, and slash commands
+(`/verify`, `/deep`, `/latest`). **UI equivalents:** Verify answer, Recheck latest, Deep investigate,
+Report issue — not unlabeled “Regenerate.”
+
+| Trigger | Mode | Level | Behavior |
+| --- | --- | --- | --- |
+| `retry`, verify phrases | `verify_answer` | 1 | Recompute deterministic values; validate citations |
+| `rewrite` | `deep_investigate` | 3 | Bounded multi-hop plan; richer synthesis |
+| `explain` | `explain_assumptions` | 1 | Assumption ledger + evidence trace; deeper detail |
+
+Verdicts: **Verified**, **Corrected**, **Partially supported**, **Inconclusive**, **Escalated**.
+Corrections show evidence delta; prior answer is preserved, not silently overwritten.
+
+Implementation: `challenge_router.py`, `challenge_executor.py`, `wikiqa.answer()` escalation hook.
+Planned HTTP: `POST /api/v1/chat/answers/{answer_id}/challenge`.
 
 ---
 
@@ -844,7 +908,7 @@ The assistant must not collapse `unknown` or `conflicted` into a helpful-soundin
 | Non-monotonic multi-turn state | Event-sourced entity ledger | Planned |
 | Recursive / fixed-point rules | Cycle-aware policy evaluation | Planned |
 | Minimal-change repair | MUS / minimal relaxations from solver | Partial (`placement_solver.py` minimal_relaxations receipt) |
-| Cross-domain unit traps | Unit-aware calculator + assumption ledger | Planned |
+| Cross-domain unit traps | Unit-aware calculator + assumption ledger | Shipped (`unit_engine.py` v1.0; INT-UNIT gold) |
 | Prompt injection in evidence | Instruction/data separation | Shipped (L9) |
 | Meta-consistency across paraphrases | Shared policy service + paraphrase battery | Planned |
 
@@ -860,6 +924,7 @@ executable gold lives in Knowledge Exchange:
 - `tests/fixtures/chat/golden_questions/temporal.yaml` — INT-T-GOLD (shipped)
 - `tests/fixtures/chat/golden_questions/mechanism.yaml` — route/evidence (shipped)
 - `tests/fixtures/chat/golden_questions/dglc.yaml` — INT-DGLC (15 active: policy, placement, deduction, compose)
+- `tests/fixtures/chat/golden_questions/unit.yaml` — INT-UNIT (throughput, BER, negative cases)
 
 Each DGLC case stores: typed `facts`, `expected` receipts, `binding_constraints`, `distractors`,
 `prohibited_claims`, and paraphrase variants for robustness grading.
