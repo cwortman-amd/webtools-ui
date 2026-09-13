@@ -1510,9 +1510,9 @@ body.suite-page {
   .suite-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    max-width: 360px;
+    max-width: min(100%, 390px);
     margin: 0 auto;
-    gap: 6px;
+    gap: 8px;
     padding: 0 0 6px;
     width: 100%;
     box-sizing: border-box;
@@ -1524,7 +1524,7 @@ body.suite-page {
     aspect-ratio: 1 / 1;
     min-width: 0;
     max-width: 100%;
-    border-radius: 9px;
+    border-radius: 10px;
     padding: 2px 0;
     transform: none !important;
   }
@@ -1535,32 +1535,37 @@ body.suite-page {
   }
 
   .suite-tool-card__top {
-    padding: 4px 4px 0;
-    gap: 3px;
+    padding: 6px 6px 0;
+    gap: 5px;
   }
 
   .suite-tool-card__icon {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
   }
 
   .suite-tool-card__title {
-    font-size: 0.6rem;
-    line-height: 1.1;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.15;
   }
 
   .suite-tool-card__pills {
-    padding: 0 3px 3px;
-    gap: 3px;
+    padding: 2px 4px 6px;
+    gap: 6px;
+    justify-content: center;
   }
 
   .suite-pill {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
   }
 
   .suite-pill__icon {
-    font-size: 15px !important;
+    font-size: 19px !important;
   }
 }
 
