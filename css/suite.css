@@ -48,9 +48,9 @@ body.suite-page {
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
   min-height: 0;
-  padding-top: clamp(4px, 0.8vh, 12px);
+  padding-top: clamp(6px, 1.2vh, 14px);
   padding-bottom: clamp(2px, 0.4vh, 6px);
 }
 
@@ -175,7 +175,7 @@ body.suite-page {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: clamp(4px, 0.5vw, 6px);
   margin: 0;
   padding: 0;
   background: transparent;
@@ -187,30 +187,30 @@ body.suite-page {
 .suite-workflows-label {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: clamp(0.72rem, 0.85vw, 0.78rem);
+  gap: 4px;
+  font-size: clamp(0.66rem, 0.76vw, 0.72rem);
   font-weight: 700;
   color: var(--ui-accent, #c1a968);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-right: 4px;
+  margin-right: 2px;
 }
 
 .suite-workflows-label .material-symbols-outlined {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .suite-workflow-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
+  gap: 4px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--ui-text-muted, #aaa);
   font-family: inherit;
-  font-size: clamp(0.66rem, 0.8vw, 0.74rem);
+  font-size: clamp(0.63rem, 0.72vw, 0.69rem);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.16s ease;
@@ -402,7 +402,7 @@ body.suite-page {
   height: 100%;
   min-height: 0;
   column-gap: clamp(6px, 0.8vw, 12px);
-  padding: clamp(34px, 4.8vh, 46px) clamp(8px, 1vw, 14px) clamp(40px, 5.8vh, 52px);
+  padding: clamp(36px, 5vh, 48px) clamp(8px, 1vw, 14px) clamp(38px, 5.2vh, 50px);
   box-sizing: border-box;
 }
 
@@ -790,15 +790,15 @@ body.suite-page {
 .suite-tool-card__top {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
-  padding: 8px clamp(8px, 0.9vw, 10px) 0;
+  padding: 6px clamp(6px, 0.8vw, 9px) 0;
 }
 
 .suite-tool-card__icon {
   flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 4px;
   object-fit: contain;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
@@ -806,7 +806,7 @@ body.suite-page {
 
 .suite-tool-card__title {
   margin: 0;
-  font-size: clamp(0.66rem, 0.85vw, 0.78rem);
+  font-size: clamp(0.64rem, 0.8vw, 0.75rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -825,8 +825,8 @@ body.suite-page {
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  padding: 6px 8px 10px;
+  gap: clamp(6px, 0.8vw, 10px);
+  padding: 4px 6px 6px;
   margin-top: auto;
 }
 
@@ -835,8 +835,8 @@ body.suite-page {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: clamp(24px, 2.5vw, 30px);
+  height: clamp(24px, 2.5vw, 30px);
   padding: 0;
   border-radius: 6px;
   background: transparent !important;
