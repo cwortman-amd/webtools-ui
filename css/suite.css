@@ -235,33 +235,33 @@ body.suite-page {
 .suite-dataflow {
   flex: 0 0 auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(8px, 1.2vw, 16px);
+  gap: clamp(6px, 1vh, 10px);
   margin: auto 0;
-  padding: clamp(4px, 0.8vh, 10px) 0;
+  padding: clamp(2px, 0.5vh, 6px) 0;
   background: transparent;
   border: none;
   box-shadow: none;
   backdrop-filter: none;
   overflow: visible;
+  width: 100%;
 }
 
 .suite-dataflow-tagline {
-  font-size: clamp(1.08rem, 1.55vw, 1.42rem);
+  font-size: clamp(1.05rem, 1.45vw, 1.35rem);
   font-weight: 700;
   color: var(--ui-text, #fff);
   letter-spacing: -0.02em;
   line-height: 1.2;
-  padding-left: clamp(4px, 0.8vw, 12px);
-  padding-right: clamp(10px, 1.5vw, 20px);
-  margin-right: clamp(6px, 1vw, 16px);
-  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0 8px;
+  margin: 0;
+  border-right: none;
   white-space: normal;
   text-wrap: balance;
   text-align: center;
-  flex: 0 1 auto;
+  width: 100%;
 }
 
 .suite-dataflow-nodes {
