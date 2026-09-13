@@ -40,8 +40,8 @@ body.suite-page {
   margin: 0 auto;
   padding: 0 clamp(16px, 2.2vw, 32px);
   box-sizing: border-box;
-  --suite-card-min: 112px;
-  --suite-card-max: 150px;
+  --suite-card-min: 100px;
+  --suite-card-max: clamp(120px, 14.5vh, 142px);
 }
 
 .suite-frame--head {
@@ -50,20 +50,20 @@ body.suite-page {
   flex-direction: column;
   justify-content: space-between;
   min-height: 0;
-  padding-top: clamp(8px, 1.4vh, 20px);
-  padding-bottom: clamp(6px, 1vh, 14px);
+  padding-top: clamp(6px, 1.2vh, 16px);
+  padding-bottom: clamp(4px, 0.8vh, 10px);
 }
 
 .suite-frame--body {
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
   min-height: 0;
-  gap: clamp(4px, 0.9vh, 12px);
-  padding-top: clamp(6px, 1vh, 14px);
-  padding-bottom: clamp(8px, 1.4vh, 20px);
+  gap: clamp(4px, 1.2vh, 16px);
+  padding: clamp(4px, 1vh, 16px) clamp(16px, 2.2vw, 32px);
+  box-sizing: border-box;
 }
 
 /* ── Header ── */
@@ -177,7 +177,7 @@ body.suite-page {
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
-  padding: 0;
+  padding: clamp(3px, 0.6vh, 8px) 0;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -325,8 +325,8 @@ body.suite-page {
   position: relative;
   z-index: 1;
   width: 100%;
-  height: min(440px, 39vh);
-  max-height: 440px;
+  height: min(410px, 37vh);
+  max-height: 420px;
   min-height: 180px;
   margin: 0;
   box-sizing: border-box;
@@ -681,10 +681,12 @@ body.suite-page {
   flex: 0 0 auto;
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   gap: 7px;
   min-height: 0;
   margin: 0;
+  padding: clamp(2px, 0.4vh, 6px) 0;
 }
 
 .suite-dot {
@@ -716,6 +718,7 @@ body.suite-page {
   align-content: center;
   gap: clamp(8px, 1vw, 12px);
   margin: 0;
+  padding: clamp(2px, 0.6vh, 10px) 0;
 }
 
 .suite-tool-card {
