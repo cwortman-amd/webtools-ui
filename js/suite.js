@@ -574,7 +574,7 @@
     if (!dataflow) return;
 
     dataflow.querySelectorAll(".suite-dataflow-node").forEach(function (node) {
-      node.addEventListener("click", function () {
+      function triggerNode() {
         var stageId = node.getAttribute("data-id");
         var idx = state.plugins.findIndex(function (p) { return p.id === stageId; });
         if (idx >= 0) {
@@ -586,6 +586,14 @@
               card.scrollIntoView({ behavior: "smooth", block: "nearest" });
             }
           }
+        }
+      }
+
+      node.addEventListener("click", triggerNode);
+      node.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          triggerNode();
         }
       });
     });
