@@ -120,36 +120,38 @@
   <!-- Interactive Architecture Dataflow Visualizer -->
   <div aria-label="End-to-End AI Lifecycle Dataflow" class="suite-dataflow" id="suite-dataflow">
     <span class="suite-dataflow-tagline">Tools for designing, proving, and scaling AI infrastructure.</span>
-    <div class="suite-dataflow-node is-active" data-id="dc-planner" data-stage="01" role="button" tabindex="0">
-<span>01 Plan</span>
-<span class="suite-dataflow-artifact">BOM &amp; Topology</span>
-</div>
-<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
-<div class="suite-dataflow-node" data-id="cluster-manager" data-stage="02" role="button" tabindex="0">
-<span>02 Deploy</span>
-<span class="suite-dataflow-artifact">Ansible &amp; RoCEv2</span>
-</div>
-<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
-<div class="suite-dataflow-node" data-id="llm-benchmark" data-stage="03" role="button" tabindex="0">
-<span>03 Validate</span>
-<span class="suite-dataflow-artifact">vLLM &amp; Latency</span>
-</div>
-<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
-<div class="suite-dataflow-node" data-id="demo-portal" data-stage="04" role="button" tabindex="0">
-<span>04 Demonstrate</span>
-<span class="suite-dataflow-artifact">Runnable Demos</span>
-</div>
-<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
-<div class="suite-dataflow-node" data-id="slide-presenter" data-stage="05" role="button" tabindex="0">
-<span>05 Communicate</span>
-<span class="suite-dataflow-artifact">Visual Decks</span>
-</div>
-<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
-<div class="suite-dataflow-node" data-id="knowledge-exchange" data-stage="06" role="button" tabindex="0">
-<span>06 Learn</span>
-<span class="suite-dataflow-artifact">Wiki &amp; Runbooks</span>
-</div>
-</div>
+    <div class="suite-dataflow-nodes">
+      <div class="suite-dataflow-node is-active" data-id="dc-planner" data-stage="01" role="button" tabindex="0">
+        <span>01 Plan</span>
+        <span class="suite-dataflow-artifact">BOM &amp; Topology</span>
+      </div>
+      <span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+      <div class="suite-dataflow-node" data-id="cluster-manager" data-stage="02" role="button" tabindex="0">
+        <span>02 Deploy</span>
+        <span class="suite-dataflow-artifact">Ansible &amp; RoCEv2</span>
+      </div>
+      <span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+      <div class="suite-dataflow-node" data-id="llm-benchmark" data-stage="03" role="button" tabindex="0">
+        <span>03 Validate</span>
+        <span class="suite-dataflow-artifact">vLLM &amp; Latency</span>
+      </div>
+      <span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+      <div class="suite-dataflow-node" data-id="demo-portal" data-stage="04" role="button" tabindex="0">
+        <span>04 Demonstrate</span>
+        <span class="suite-dataflow-artifact">Runnable Demos</span>
+      </div>
+      <span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+      <div class="suite-dataflow-node" data-id="slide-presenter" data-stage="05" role="button" tabindex="0">
+        <span>05 Communicate</span>
+        <span class="suite-dataflow-artifact">Visual Decks</span>
+      </div>
+      <span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+      <div class="suite-dataflow-node" data-id="knowledge-exchange" data-stage="06" role="button" tabindex="0">
+        <span>06 Learn</span>
+        <span class="suite-dataflow-artifact">Wiki &amp; Runbooks</span>
+      </div>
+    </div>
+  </div>
 </div>
 <section aria-label="Application screenshots showcase" class="suite-banner">
 <button aria-label="Previous application" class="suite-nav" id="suite-prev" type="button">
