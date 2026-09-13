@@ -151,28 +151,48 @@ body.suite-page {
   opacity: 0.85;
 }
 
-/* ── Workflow & Stack Finder ── */
+/* ── Use Cases & Workflow Finder ── */
 .suite-workflows {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-  margin-bottom: 2px;
+  gap: 8px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+
+.suite-workflows-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: clamp(0.72rem, 0.85vw, 0.78rem);
+  font-weight: 700;
+  color: var(--ui-accent, #c1a968);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 4px;
+}
+
+.suite-workflows-label .material-symbols-outlined {
+  font-size: 15px;
 }
 
 .suite-workflow-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--ui-text-muted, #aaa);
   font-family: inherit;
-  font-size: clamp(0.64rem, 0.8vw, 0.72rem);
+  font-size: clamp(0.66rem, 0.8vw, 0.74rem);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.16s ease;
