@@ -483,17 +483,14 @@
       "</button>" +
       "</div>" +
       '<div class="suite-tool-card__pills">' +
-      '<a class="suite-pill suite-pill--tool" href="' + esc(appUrl) + '" title="Launch ' + esc(name) + '" aria-label="Open tool">' +
-      '<img class="suite-pill__favicon" src="' + esc(icon) + '" alt="" width="14" height="14" decoding="async" />' +
-      '<span class="suite-pill__label">Tool</span>' +
+      '<a class="suite-pill suite-pill--tool" href="' + esc(appUrl) + '" title="Launch ' + esc(name) + '" aria-label="Launch ' + esc(name) + '">' +
+      '<span class="material-symbols-outlined suite-pill__icon" aria-hidden="true">open_in_new</span>' +
       '<span class="suite-pill__tip">Launch Tool</span></a>' +
       '<a class="suite-pill suite-pill--overview" href="' + esc(pitchUrl) + '" title="Overview & Pitch" aria-label="Open overview">' +
       '<span class="material-symbols-outlined suite-pill__icon" aria-hidden="true">slideshow</span>' +
-      '<span class="suite-pill__label">Pitch</span>' +
       '<span class="suite-pill__tip">Overview</span></a>' +
       '<button type="button" class="suite-pill suite-pill--install" data-install-id="' + esc(plugin.id) + '" title="Download & Install" aria-label="Download or Install">' +
       '<span class="material-symbols-outlined suite-pill__icon" aria-hidden="true">download</span>' +
-      '<span class="suite-pill__label">Get</span>' +
       '<span class="suite-pill__tip">Install</span></button>' +
       "</div></article>"
     );
