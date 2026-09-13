@@ -14,6 +14,13 @@ body.suite-page {
   color: var(--ui-text, #fff);
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
 }
 
 .suite-backdrop {
@@ -31,27 +38,37 @@ body.suite-page {
   z-index: 1;
   width: min(100vw, calc(100vh * 16 / 9));
   margin: 0 auto;
-  padding: 16px clamp(16px, 2.2vw, 32px) 12px;
+  padding: 0 clamp(16px, 2.2vw, 32px);
   box-sizing: border-box;
   --suite-card-min: 112px;
   --suite-card-max: 150px;
 }
 
 .suite-frame--head {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  padding-left: 12px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  padding-top: clamp(8px, 1.4vh, 20px);
+  padding-bottom: clamp(6px, 1vh, 14px);
 }
 
 .suite-frame--body {
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 8px;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  gap: clamp(4px, 0.9vh, 12px);
+  padding-top: clamp(6px, 1vh, 14px);
+  padding-bottom: clamp(8px, 1.4vh, 20px);
 }
 
 /* ── Header ── */
 .suite-header {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -153,14 +170,14 @@ body.suite-page {
 
 /* ── Use Cases & Workflow Finder ── */
 .suite-workflows {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 18px;
-  margin-bottom: 8px;
-  padding: 4px 0;
+  margin: 0;
+  padding: 0;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -216,13 +233,13 @@ body.suite-page {
 
 /* ── Interactive Architecture Dataflow Visualizer ── */
 .suite-dataflow {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: 16px;
-  margin-bottom: 16px;
-  padding: 6px 0;
+  margin: auto 0;
+  padding: clamp(4px, 0.8vh, 10px) 0;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -293,6 +310,7 @@ body.suite-page {
 
 /* ── Banner carousel (full-bleed edge to edge) ── */
 .suite-banner {
+  flex: 0 0 auto;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -621,13 +639,13 @@ body.suite-page {
 
 /* ── Dots ── */
 .suite-dots {
+  flex: 0 0 auto;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 7px;
   min-height: 0;
-  margin-top: 6px;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .suite-dot {
@@ -648,6 +666,7 @@ body.suite-page {
 
 /* ── 1:1 square tool cards (min/max size, centered — not full-bleed) ── */
 .suite-grid {
+  flex: 0 0 auto;
   min-height: 0;
   width: 100%;
   min-width: 0;
@@ -655,8 +674,9 @@ body.suite-page {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-content: start;
+  align-content: center;
   gap: clamp(8px, 1vw, 12px);
+  margin: 0;
 }
 
 .suite-tool-card {
@@ -1294,7 +1314,7 @@ body.suite-page {
 }
 
 @media (max-width: 960px) {
-  html, body {
+  html, body, body.suite-page {
     height: auto;
     min-height: 0;
     overflow: auto;
