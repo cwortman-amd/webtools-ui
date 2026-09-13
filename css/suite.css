@@ -1559,6 +1559,28 @@ body.suite-page {
   .suite-banner-wing[data-depth="3"] {
     display: none;
   }
+
+  .suite-banner-focus:nth-child(1) {
+    transform: scale(0.9);
+    transform-origin: center right;
+    margin-right: -clamp(14px, 3.5vw, 40px);
+    z-index: 2;
+    opacity: 0.7;
+  }
+
+  .suite-banner-focus.is-center {
+    z-index: 4;
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .suite-banner-focus:nth-child(3) {
+    transform: scale(0.9);
+    transform-origin: center left;
+    margin-left: -clamp(14px, 3.5vw, 40px);
+    z-index: 2;
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1572,6 +1594,7 @@ body.suite-page {
 
   .suite-banner-stage {
     grid-template-columns: 1fr;
+    padding: 26px 8px 44px;
   }
 
   .suite-banner-core {
@@ -1579,6 +1602,7 @@ body.suite-page {
     justify-content: center;
     grid-column: 1;
     width: 100%;
+    overflow: visible;
   }
 
   .suite-banner-trio {
@@ -1588,6 +1612,7 @@ body.suite-page {
     gap: 0;
     width: 100%;
     position: relative;
+    overflow: visible;
   }
 
   .suite-banner-focus:nth-child(1),
@@ -1600,31 +1625,31 @@ body.suite-page {
 
   .suite-banner-focus {
     height: auto;
-    flex: 0 0 38%;
+    flex: 0 0 68%;
     min-width: 0;
     max-height: 100%;
     z-index: 1;
     transform: scale(0.9);
-    opacity: 0.72;
-    transition: transform 0.22s ease, opacity 0.22s ease;
+    opacity: 0.55;
+    transition: transform 0.25s ease, opacity 0.25s ease;
   }
 
   .suite-banner-focus:nth-child(1) {
     transform-origin: center right;
-    margin-right: -4%;
+    margin-right: -58%;
   }
 
   .suite-banner-focus.is-center {
-    flex: 0 0 48%;
+    flex: 0 0 76%;
     z-index: 3;
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(193, 169, 104, 0.25);
   }
 
   .suite-banner-focus:nth-child(3) {
     transform-origin: center left;
-    margin-left: -4%;
+    margin-left: -58%;
   }
 }
 
