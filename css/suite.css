@@ -218,15 +218,28 @@ body.suite-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   margin-top: 8px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   backdrop-filter: blur(8px);
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+.suite-dataflow-tagline {
+  font-size: clamp(1.15rem, 1.6vw, 1.42rem);
+  font-weight: 700;
+  color: var(--ui-text, #fff);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-right: clamp(8px, 1.1vw, 14px);
+  padding-right: clamp(8px, 1.1vw, 14px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .suite-dataflow::-webkit-scrollbar {
