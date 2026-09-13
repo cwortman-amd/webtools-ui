@@ -462,17 +462,9 @@
     var pitchUrl = pitchHref(plugin);
     var icon = faviconSrc(plugin);
     var name = nameFor(plugin);
-    var tagline = taglineFor(plugin);
-    var meta = metaFor(plugin);
-    var stack = meta.stack || [];
-    var prompt = meta.prompts || ("Ask about " + name);
     var bgStyle =
       "background-image:url('" + shot.replace(/'/g, "%27") + "'),url('" +
       legacy.replace(/'/g, "%27") + "'),url('" + fallback.replace(/'/g, "%27") + "')";
-
-    var stackBadgesHtml = stack.map(function (tech) {
-      return '<span class="suite-stack-badge">' + esc(tech) + "</span>";
-    }).join("");
 
     return (
       '<article class="suite-tool-card' + (idx === state.index ? " is-active" : "") + '" ' +
@@ -484,13 +476,6 @@
       '<div class="suite-tool-card__top">' +
       '<img class="suite-tool-card__icon" src="' + esc(icon) + '" alt="" width="20" height="20" decoding="async" />' +
       '<h2 class="suite-tool-card__title">' + esc(name) + "</h2>" +
-      "</div>" +
-      (stackBadgesHtml ? '<div class="suite-card-stack" aria-label="Technology stack">' + stackBadgesHtml + "</div>" : "") +
-      '<div class="suite-tool-card__prompts">' +
-      '<button type="button" class="suite-prompt-pill" data-prompt="' + esc(prompt) + '" title="Ask ViXCi AI Assistant">' +
-      '<span class="material-symbols-outlined suite-prompt-pill__icon" aria-hidden="true">smart_toy</span>' +
-      '<span class="suite-prompt-pill__text">' + esc(prompt) + "</span>" +
-      "</button>" +
       "</div>" +
       '<div class="suite-tool-card__pills">' +
       '<a class="suite-pill suite-pill--tool" href="' + esc(appUrl) + '" title="Launch ' + esc(name) + '" aria-label="Launch ' + esc(name) + '">' +
@@ -944,13 +929,7 @@
       var activePlugin = plugins[state.index];
       var activeMeta = metaFor(activePlugin);
       var newDesc = activeMeta.tagline || (activePlugin.description ? (activePlugin.description.short || activePlugin.description) : "") || activePlugin.tagline || "";
-      if (captionTextEl.textContent !== newDesc) {
-        captionTextEl.classList.add("is-updating");
-        setTimeout(function () {
-          captionTextEl.textContent = newDesc;
-          captionTextEl.classList.remove("is-updating");
-        }, 120);
-      }
+      captionTextEl.textContent = newDesc;
     }
 
     if (syncHash && global.history && global.history.replaceState && plugins[state.index]) {
