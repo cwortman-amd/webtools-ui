@@ -211,6 +211,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="On match, print nothing. On mismatch, still print the diff.",
     )
+    p.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="Automatically overwrite index.html to match the canonical template without prompting.",
+    )
     return p.parse_args(argv)
 
 
@@ -275,6 +280,25 @@ def main(argv: list[str]) -> int:
         actual_label=os.path.relpath(index_html, repo),
     )
     sys.stderr.write(diff + "\n")
+    
+    if args.yes or sys.stdin.isatty():
+        choice = 'y' if args.yes else input("\nOverwrite index.html to match the canonical template? [y/N]: ").strip().lower()
+        if choice == 'y':
+            # read index.html, find sentinel, replace top part with rendered
+            text = index_html.read_text(encoding="utf-8")
+            lines = text.split("\n")
+            end_idx = None
+            for i, line in enumerate(lines):
+                if line.strip() == SKELETON_END_SENTINEL:
+                    end_idx = i
+                    break
+            
+            if end_idx is not None:
+                new_text = rendered + "\n" + "\n".join(lines[end_idx + 1:])
+                index_html.write_text(new_text, encoding="utf-8")
+                sys.stdout.write(f"\nSuccessfully updated {os.path.relpath(index_html, repo)}.\n")
+                return 0
+
     sys.stderr.write(
         "\nTo align: either update pages/index.html to match the rendered "
         "template, or (if the divergence is intentional) update "

@@ -267,6 +267,16 @@ body.suite-page {
   opacity: 1;
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48);
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.suite-banner-focus:hover,
+.suite-banner-focus:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.62);
+  outline: none;
 }
 
 .suite-banner-focus.is-center {
@@ -279,9 +289,26 @@ body.suite-page {
   z-index: 3;
 }
 
+.suite-banner-focus.is-center:hover,
+.suite-banner-focus.is-center:focus-visible {
+  transform: translateY(-4px) scale(1.015);
+  border-color: var(--ui-accent, #c1a968);
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.72),
+    0 0 0 2px rgba(193, 169, 104, 0.55),
+    0 0 24px rgba(193, 169, 104, 0.25);
+  outline: none;
+}
+
 .suite-banner-focus img {
   opacity: 1;
   filter: none;
+  transition: transform 0.25s ease;
+}
+
+.suite-banner-focus:hover img,
+.suite-banner-focus:focus-visible img {
+  transform: scale(1.008);
 }
 
 .suite-banner-wing {
@@ -289,6 +316,14 @@ body.suite-page {
   z-index: 1;
   height: min(54%, 185px);
   overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.suite-banner-wing:hover,
+.suite-banner-wing:focus-visible {
+  transform: scale(1.02);
+  outline: none;
 }
 
 .suite-banner-wing::after {
@@ -459,6 +494,7 @@ body.suite-page {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-align: left;

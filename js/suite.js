@@ -288,14 +288,18 @@
     opts = opts || {};
     var src = tabScreenshotSrc(plugin, tab);
     var legacy = legacyScreenshotSrc(plugin);
+    var appUrl = appHref(plugin);
     var cls = "suite-banner-panel";
     if (opts.focus) cls += " suite-banner-focus";
     if (opts.center) cls += " is-center";
     if (opts.wing === "left") cls += " suite-banner-wing suite-banner-wing--left";
     if (opts.wing === "right") cls += " suite-banner-wing suite-banner-wing--right";
     var depthAttr = opts.depth != null ? ' data-depth="' + opts.depth + '"' : "";
+    var roleAttr = opts.focus
+      ? ' role="link" tabindex="0" title="Open ' + esc(plugin.name || plugin.id) + '" aria-label="Open ' + esc(plugin.name || plugin.id) + '"'
+      : ' role="button" aria-label="Show ' + esc(plugin.name || plugin.id) + '"';
     return (
-      '<div class="' + cls + '"' + depthAttr + ' data-tool-id="' + esc(plugin.id) + '">' +
+      '<div class="' + cls + '"' + depthAttr + ' data-tool-id="' + esc(plugin.id) + '" data-app-href="' + esc(appUrl) + '"' + roleAttr + '>' +
       '<img src="' + esc(src) + '" alt="' + esc(plugin.name + " — " + tab) + '" ' +
       'onerror="this.onerror=null;this.src=\'' + esc(legacy) + '\';" /></div>'
     );
@@ -455,6 +459,30 @@
         var id = btn.getAttribute("data-install-id");
         var plugin = state.plugins.find(function (p) { return p.id === id; });
         if (plugin) openInstallModal(plugin);
+      });
+    });
+
+    document.querySelectorAll(".suite-banner-panel").forEach(function (panel) {
+      panel.addEventListener("click", function (e) {
+        var isWing = panel.classList.contains("suite-banner-wing");
+        var toolId = panel.getAttribute("data-tool-id");
+        if (isWing && toolId) {
+          var targetIdx = state.plugins.findIndex(function (p) { return p.id === toolId; });
+          if (targetIdx >= 0) {
+            goTo(targetIdx);
+            return;
+          }
+        }
+        var href = panel.getAttribute("data-app-href");
+        if (!href && state.plugins[state.index]) {
+          href = appHref(state.plugins[state.index]);
+        }
+        if (href) global.location.href = href;
+      });
+      panel.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        panel.click();
       });
     });
   }

@@ -1,0 +1,1 @@
+../tools/install-demo-portal.sh

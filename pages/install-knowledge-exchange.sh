@@ -1,0 +1,1 @@
+../tools/install-knowledge-exchange.sh
