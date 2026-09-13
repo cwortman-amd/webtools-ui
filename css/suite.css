@@ -443,6 +443,36 @@ body.suite-page {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
 }
 
+.suite-banner-foot {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 92%;
+  max-width: 960px;
+  padding: 0 16px 14px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  pointer-events: none;
+  text-align: center;
+}
+
+.suite-banner-desc {
+  margin: 0;
+  font-size: clamp(1.23rem, 1.65vw, 1.5rem);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
+}
+
 .suite-banner-panel {
   position: relative;
   flex: 0 0 auto;
@@ -559,21 +589,24 @@ body.suite-page {
   justify-content: center;
   gap: 8px;
   max-width: 900px;
-  margin: 10px auto 4px auto;
+  margin: 10px auto 14px auto;
   padding: 0 16px;
   text-align: center;
   min-height: 28px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   box-sizing: border-box;
 }
 
 .suite-banner-caption-text {
   margin: 0;
-  font-size: clamp(0.85rem, 1.1vw, 1.02rem);
+  font-size: clamp(1.23rem, 1.65vw, 1.5rem);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.94);
   letter-spacing: 0.01em;
-  line-height: 1.4;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  line-height: 1.35;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
   transition: opacity 0.16s ease, transform 0.16s ease;
 }
 
@@ -589,7 +622,8 @@ body.suite-page {
   flex-wrap: wrap;
   gap: 7px;
   min-height: 0;
-  margin-top: 4px;
+  margin-top: 6px;
+  margin-bottom: 12px;
 }
 
 .suite-dot {

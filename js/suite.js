@@ -394,6 +394,16 @@
     );
   }
 
+  function bannerFootHtml(plugin) {
+    var meta = metaFor(plugin);
+    var desc = meta.tagline || (plugin.description ? (plugin.description.short || plugin.description) : "") || plugin.tagline || "";
+    return (
+      '<footer class="suite-banner-foot">' +
+      '<p class="suite-banner-desc">' + esc(desc) + "</p>" +
+      "</footer>"
+    );
+  }
+
   function wingTabFor(plugin) {
     return tabsFor(plugin)[0];
   }
@@ -437,6 +447,7 @@
       '<div class="suite-banner-wings suite-banner-wings--right">' +
       bannerWingsHtml(idx, plugins, "right", rightOffsets) +
       "</div>" +
+      bannerFootHtml(plugin) +
       "</div></figure>"
     );
   }
