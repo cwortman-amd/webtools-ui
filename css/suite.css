@@ -552,6 +552,36 @@ body.suite-page {
   object-position: top center;
 }
 
+/* ── Banner dynamic sentence description (below carousel images) ── */
+.suite-banner-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 900px;
+  margin: 10px auto 4px auto;
+  padding: 0 16px;
+  text-align: center;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+.suite-banner-caption-text {
+  margin: 0;
+  font-size: clamp(0.85rem, 1.1vw, 1.02rem);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.suite-banner-caption-text.is-updating {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
 /* ── Dots ── */
 .suite-dots {
   display: flex;
@@ -559,6 +589,7 @@ body.suite-page {
   flex-wrap: wrap;
   gap: 7px;
   min-height: 0;
+  margin-top: 4px;
 }
 
 .suite-dot {
@@ -603,8 +634,10 @@ body.suite-page {
   border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   color: inherit;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3px 0;
   transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
   background: #0d0d0d;
 }
@@ -645,7 +678,6 @@ body.suite-page {
 }
 
 .suite-tool-card__top,
-.suite-tool-card__desc,
 .suite-tool-card__pills {
   position: relative;
   z-index: 1;
@@ -676,22 +708,6 @@ body.suite-page {
   line-height: 1.15;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
   min-width: 0;
-}
-
-.suite-tool-card__desc {
-  margin: 0;
-  align-self: center;
-  padding: 0 clamp(9px, 1vw, 11px);
-  font-size: clamp(0.78rem, 1.08vw, 0.92rem);
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.86);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-align: left;
 }
 
 .suite-card-stack {

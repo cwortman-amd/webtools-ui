@@ -474,7 +474,6 @@
       '<img class="suite-tool-card__icon" src="' + esc(icon) + '" alt="" width="20" height="20" decoding="async" />' +
       '<h2 class="suite-tool-card__title">' + esc(name) + "</h2>" +
       "</div>" +
-      '<p class="suite-tool-card__desc">' + esc(tagline) + "</p>" +
       (stackBadgesHtml ? '<div class="suite-card-stack" aria-label="Technology stack">' + stackBadgesHtml + "</div>" : "") +
       '<div class="suite-tool-card__prompts">' +
       '<button type="button" class="suite-prompt-pill" data-prompt="' + esc(prompt) + '" title="Ask ViXCi AI Assistant">' +
@@ -928,6 +927,20 @@
     document.querySelectorAll(".suite-tool-card").forEach(function (card, i) {
       card.classList.toggle("is-active", i === state.index);
     });
+
+    var captionTextEl = byId("suite-banner-caption-text");
+    if (captionTextEl && plugins[state.index]) {
+      var activePlugin = plugins[state.index];
+      var activeMeta = metaFor(activePlugin);
+      var newDesc = activeMeta.tagline || (activePlugin.description ? (activePlugin.description.short || activePlugin.description) : "") || activePlugin.tagline || "";
+      if (captionTextEl.textContent !== newDesc) {
+        captionTextEl.classList.add("is-updating");
+        setTimeout(function () {
+          captionTextEl.textContent = newDesc;
+          captionTextEl.classList.remove("is-updating");
+        }, 120);
+      }
+    }
 
     if (syncHash && global.history && global.history.replaceState && plugins[state.index]) {
       global.history.replaceState(null, "", "#" + encodeURIComponent(plugins[state.index].id));
