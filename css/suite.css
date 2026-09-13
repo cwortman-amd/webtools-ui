@@ -62,7 +62,7 @@ body.suite-page {
   justify-content: center;
   align-items: center;
   min-height: 0;
-  gap: clamp(2px, 0.5vh, 6px);
+  gap: clamp(8px, 1.2vh, 15px);
   padding: clamp(2px, 0.5vh, 8px) clamp(16px, 2.2vw, 32px);
   box-sizing: border-box;
 }
