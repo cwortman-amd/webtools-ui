@@ -62,7 +62,7 @@ body.suite-page {
   align-items: center;
   min-height: 0;
   gap: clamp(6px, 1.4vh, 18px);
-  padding: clamp(8px, 1.8vh, 22px) clamp(16px, 2.2vw, 32px);
+  padding: clamp(4px, 0.9vh, 11px) clamp(16px, 2.2vw, 32px);
   box-sizing: border-box;
 }
 
@@ -177,7 +177,7 @@ body.suite-page {
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
-  padding: clamp(2px, 0.4vh, 6px) 0;
+  padding: clamp(1px, 0.2vh, 3px) 0;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -686,7 +686,7 @@ body.suite-page {
   gap: 7px;
   min-height: 0;
   margin: 0;
-  padding: clamp(2px, 0.4vh, 6px) 0;
+  padding: clamp(1px, 0.2vh, 3px) 0;
 }
 
 .suite-dot {
@@ -718,7 +718,7 @@ body.suite-page {
   align-content: center;
   gap: clamp(8px, 1vw, 12px);
   margin: 0;
-  padding: clamp(2px, 0.4vh, 6px) 0;
+  padding: clamp(1px, 0.2vh, 3px) 0;
 }
 
 .suite-tool-card {
