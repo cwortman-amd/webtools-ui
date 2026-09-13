@@ -58,11 +58,11 @@ body.suite-page {
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   min-height: 0;
-  gap: clamp(4px, 1.2vh, 16px);
-  padding: clamp(4px, 1vh, 16px) clamp(16px, 2.2vw, 32px);
+  gap: clamp(4px, 0.9vh, 10px);
+  padding: clamp(10px, 2vh, 26px) clamp(16px, 2.2vw, 32px);
   box-sizing: border-box;
 }
 
@@ -177,7 +177,7 @@ body.suite-page {
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
-  padding: clamp(3px, 0.6vh, 8px) 0;
+  padding: 0;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -686,7 +686,7 @@ body.suite-page {
   gap: 7px;
   min-height: 0;
   margin: 0;
-  padding: clamp(2px, 0.4vh, 6px) 0;
+  padding: 0;
 }
 
 .suite-dot {
@@ -718,7 +718,7 @@ body.suite-page {
   align-content: center;
   gap: clamp(8px, 1vw, 12px);
   margin: 0;
-  padding: clamp(2px, 0.6vh, 10px) 0;
+  padding: 0;
 }
 
 .suite-tool-card {
