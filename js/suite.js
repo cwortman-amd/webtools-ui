@@ -36,7 +36,7 @@
       name: "LLM Benchmark",
       stage: "03 — Validate",
       stageNum: "03",
-      tagline: "Measure model-serving, hardware, latency, throughput, or cost-performance outcomes",
+      tagline: "Measure model-serving, latency, throughput, or cost-performance outcomes",
       favicon: "/assets/suite/favicons/llm-benchmark.svg",
       tabs: ["plan", "queue", "view"],
       stack: ["vLLM / SGLang", "Triton Server", "Prometheus", "SLO Metrics"],
@@ -1008,7 +1008,7 @@
     plugins: [
       { id: "dc-planner", name: "Data Center Planner", localUrl: "/dc-planner/pages/index.html", description: "Design, size, and communicate data-center or AI infrastructure requirements" },
       { id: "cluster-manager", name: "Cluster Manager", localUrl: "/cluster-manager/pages/index.html", description: "Configure, manage, validate, or operationalize AI/HPC clusters" },
-      { id: "llm-benchmark", name: "LLM Benchmark", localUrl: "/llm-benchmark/pages/index.html", description: "Measure model-serving, hardware, latency, throughput, or cost-performance outcomes" },
+      { id: "llm-benchmark", name: "LLM Benchmark", localUrl: "/llm-benchmark/pages/index.html", description: "Measure model-serving, latency, throughput, or cost-performance outcomes" },
       { id: "demo-portal", name: "Demo Portal", localUrl: "/demo-portal/pages/index.html", description: "Deliver reusable technical demos and guided customer experiences" },
       { id: "slide-presenter", name: "Slide Presenter", localUrl: "/slide-presenter/pages/index.html", description: "Turn technical material into engaging interactive presentation experiences" },
       { id: "knowledge-exchange", name: "Knowledge Exchange", localUrl: "/knowledge-exchange/pages/index.html", description: "Capture, retrieve, exchange, and operationalize technical knowledge" },
