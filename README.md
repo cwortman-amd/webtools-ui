@@ -85,8 +85,8 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 | `docs/KNOWLEDGE_CHAT.md` | **Canonical** Universal Knowledge Chat PRD: vault registration, Markdown/PDF/Obsidian/OKF ingestion, trust-aware retrieval, citations, optional web research, human-approved writes. Read via `shared/`, never copied; each consumer's `docs/CHAT.md` covers orb UX and backend routing |
 | `docs/PLUGIN_CONTRACT.md` | Community plugin contract: manifest schema, lifecycle, platform API, registered consumers |
 | `plugins.registry.json` | Catalog of known community plugins (sibling repos) |
-| `pages/index.html` | **Tools suite landing** — screenshot banner carousel + translucent tool cards (Open / Overview pills) |
-| `css/suite.css` | Suite layout: fixed 16:9 stage, banner carousel, card grid |
+| `pages/index.html` | **Tools suite landing** — responsive cascading 3D screenshot carousel + tri-zone layout, dedicated hero tagline, architecture dataflow selectors, compact cards, single-row use-case chips, and thumb-friendly action buttons |
+| `css/suite.css` | Suite layout: fluid responsive tri-zone viewport, cascading 3D focus and flanking panels, dynamic whitespace balance, mobile-first card grid |
 | `js/suite.js` | Banner + card grid controller; loads `plugins.registry.json` |
 | `assets/suite/screenshots/*-{tab}.png` | Three 16:9 tab captures per tool (`node scripts/capture-suite-screenshots.mjs`) |
 | `assets/suite/*.svg` | Fallback preview art when a PNG is missing |
@@ -112,7 +112,11 @@ Each consumer mounts this repo at `shared/` (Phase 9, 2026-05-03 onward this is 
 
 ## Tools suite landing page
 
-A platform-owned showcase at `pages/index.html` — one fixed **16:9** viewport with a **three-up tab screenshot banner** (3 × 16:9 captures per tool) and **9:16 portrait cards** underneath (title top, description middle, Tool / Overview pills bottom).
+A platform-owned showcase at `pages/index.html` featuring:
+- **Cascading 3D Screenshot Carousel**: Hero center-focused card with 10% reduced flanking perspective panels, smooth depth layering, and direct-click tab activation.
+- **Dynamic Tri-Zone Layout**: Top hero brand with dedicated tagline on its own row, middle interactive carousel with balanced text-image spacing and dynamic captions, and bottom horizontal components (architecture dataflow selector, compact 3x2 responsive card grid, and full-width single-row use-case chips).
+- **Mobile & Touch Optimizations**: Generous 32×32px action icon targets with 19px icons on mobile viewports for easy thumb navigation, matching standard view readability.
+- **Integrated Action Flows**: Each tool card exposes direct links to open the live dashboard, view the overview slides, and an **Install** button with curl one-liners and `.zip` archive downloads. Deep linking via hash fragment (e.g. `#cluster-manager`).
 
 Refresh screenshots after UI changes:
 
