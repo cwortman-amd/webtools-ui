@@ -1,0 +1,14 @@
+# webtools-ui
+
+> Shared UI SDK and Design System for AI Systems Engineering Tools.
+
+ provides the canonical look-and-feel, CSS design tokens, multi-skin theme architecture, and shared components (sidebar shell, topnav, tool cards, lifecycle flow ribbons, and modal drawers) across the entire 6-tool suite.
+
+## Pages
+
+- [Component Catalog / Index](pages/index.html): UI Component catalog and interactive demo environment
+
+## SDK Architecture
+
+- CSS Design System (): Modern tokens, dark/light skins, typography, responsive grid
+- JavaScript Core (): Shared metadata catalog (), lifecycle flow navigation, carousel synchronization

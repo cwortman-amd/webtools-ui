@@ -1,49 +1,489 @@
 <!DOCTYPE html>
-<html lang="en" data-skin="amd-gold" data-theme="dark">
+
+<html data-skin="amd-gold" data-theme="dark" lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="Tools Hub — six applications on a shared platform." />
-  <title>Tools Hub</title>
-  <link rel="icon" href="../assets/suite/favicons/tools-hub.svg" type="image/svg+xml" />
-  <link rel="preload" href="../css/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="../css/material-symbols.css" />
-  <link rel="stylesheet" href="../css/tokens.css" />
-  <link rel="stylesheet" href="../css/base.css" />
-  <link rel="stylesheet" href="../css/skins/amd-gold.css" />
-  <link rel="stylesheet" href="../css/suite.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>AI Infrastructure &amp; Enablement Tools | Curt Wortman</title>
+<meta content="A field-tested AI systems toolkit for builders, architects, and technical teams. Plan data centers, operate GPU clusters, benchmark inference, deliver guided demos, present solutions, and scale field knowledge." name="description"/>
+<meta content="Curt Wortman" name="author"/>
+<meta content="index, follow" name="robots"/>
+<link href="https://curt.wortman.ai/tools/" rel="canonical"/>
+<!-- Open Graph -->
+<meta content="website" property="og:type"/>
+<meta content="Curt Wortman — AI Systems Architecture" property="og:site_name"/>
+<meta content="AI Infrastructure &amp; Enablement Tools | Curt Wortman" property="og:title"/>
+<meta content="A curated, opinionated toolkit for local LLMs, RAG, agents, GPU infrastructure, technical research, and AI-enabled workflows." property="og:description"/>
+<meta content="https://curt.wortman.ai/tools/" property="og:url"/>
+<meta content="https://curt.wortman.ai/assets/suite/tools-hub-og.png" property="og:image"/>
+<!-- Twitter Card -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="AI Infrastructure &amp; Enablement Tools | Curt Wortman" name="twitter:title"/>
+<meta content="Plan, deploy, validate, demonstrate, present, and learn — practical tools for AI solution teams." name="twitter:description"/>
+<meta content="https://curt.wortman.ai/assets/suite/tools-hub-og.png" name="twitter:image"/>
+<link href="/assets/suite/favicons/tools-hub.svg" rel="icon" type="image/svg+xml"/>
+<link as="font" crossorigin="" href="/css/fonts/material-symbols-outlined.woff2" rel="preload" type="font/woff2"/>
+<link href="/css/material-symbols.css" rel="stylesheet"/>
+<link href="/css/tokens.css" rel="stylesheet"/>
+<link href="/css/base.css" rel="stylesheet"/>
+<link href="/css/skins/amd-gold.css" rel="stylesheet"/>
+<link href="/css/suite.css" rel="stylesheet"/>
+<!-- Schema.org Structured Data -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "AI Infrastructure & Enablement Tools",
+    "description": "A field-tested AI systems toolkit for builders, architects, and technical teams. Plan data centers, operate GPU clusters, benchmark inference, deliver guided demos, present solutions, and scale field knowledge.",
+    "url": "https://curt.wortman.ai/tools/",
+    "creator": {
+      "@type": "Person",
+      "name": "Curt Wortman",
+      "jobTitle": "AI/ML Solutions Architect & Technical Trainer",
+      "url": "https://curt.wortman.ai/"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "AI Solution Lifecycle Tools",
+      "numberOfItems": 6,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Data Center Planner",
+          "description": "Design, size, and communicate data-center or AI infrastructure requirements.",
+          "url": "https://curt.wortman.ai/dc-planner/pages/index.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Cluster Manager",
+          "description": "Configure, manage, validate, or operationalize AI/HPC clusters.",
+          "url": "https://curt.wortman.ai/cluster-manager/pages/index.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "LLM Benchmark",
+          "description": "Measure model-serving, hardware, latency, throughput, or cost-performance outcomes.",
+          "url": "https://curt.wortman.ai/llm-benchmark/pages/index.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Demo Portal",
+          "description": "Deliver reusable technical demos and guided customer experiences.",
+          "url": "https://curt.wortman.ai/demo-portal/pages/index.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Slide Presenter",
+          "description": "Turn technical material into engaging interactive presentation experiences.",
+          "url": "https://curt.wortman.ai/slide-presenter/pages/index.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Knowledge Exchange",
+          "description": "Capture, retrieve, exchange, and operationalize technical knowledge.",
+          "url": "https://curt.wortman.ai/knowledge-exchange/pages/index.html"
+        }
+      ]
+    }
+  }
+  </script>
 </head>
 <body class="suite-page">
-  <div class="suite-backdrop" aria-hidden="true"></div>
-
-  <div class="suite-frame suite-frame--head">
-    <header class="suite-header">
-      <div class="suite-brand">
-        <span class="material-symbols-outlined suite-brand__icon" aria-hidden="true">construction</span>
-        <h1 class="suite-title">Tools Hub</h1>
-      </div>
-    </header>
-  </div>
-
-  <section class="suite-banner" aria-label="Application screenshots">
-    <button type="button" class="suite-nav" id="suite-prev" aria-label="Previous screenshot">
-      <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-    </button>
-
-    <div class="suite-banner-viewport" id="suite-banner-viewport">
-      <div class="suite-banner-track" id="suite-banner-track"></div>
-    </div>
-
-    <button type="button" class="suite-nav" id="suite-next" aria-label="Next screenshot">
-      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-    </button>
-  </section>
-
-  <div class="suite-frame suite-frame--body">
-    <div class="suite-dots" id="suite-dots" role="tablist" aria-label="Screenshot carousel"></div>
-    <section class="suite-grid" id="suite-grid" aria-label="All applications"></section>
-  </div>
-
-  <script src="../js/suite.js"></script>
+<div aria-hidden="true" class="suite-backdrop"></div>
+<div class="suite-frame suite-frame--head">
+<header class="suite-header">
+<div class="suite-brand">
+<span aria-hidden="true" class="material-symbols-outlined suite-brand__icon">terminal</span>
+<div>
+<h1 class="suite-title">Tools Hub <span style="font-weight:300;opacity:0.6;font-size:0.85em;">| AI Infrastructure &amp; Enablement</span></h1>
+<p class="suite-tagline">
+            Tools for designing, proving, and scaling AI infrastructure.
+          </p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;">
+<button class="suite-cmd-trigger" id="suite-cmd-trigger" title="Quick Search (Cmd+K)" type="button">
+<span aria-hidden="true" class="material-symbols-outlined" style="font-size:15px;">search</span>
+          Search <kbd>⌘K</kbd>
+</button>
+<a href="https://curt.wortman.ai" style="color:var(--ui-accent,#c1a968);text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:4px;" title="Back to curt.wortman.ai">
+<span class="material-symbols-outlined" style="font-size:18px;">home</span> Home
+        </a>
+<a href="https://curt.wortman.ai/portfolio.html" style="color:var(--ui-text-muted,#999);text-decoration:none;font-size:0.8rem;display:flex;align-items:center;gap:4px;" title="View Portfolio">
+<span class="material-symbols-outlined" style="font-size:18px;">folder</span> Portfolio
+        </a>
+</div>
+</header>
+<!-- Interactive Workflow & Solution Finder -->
+<div aria-label="Workflow &amp; Solutions Finder" class="suite-workflows" id="suite-workflows" role="tablist">
+<button aria-selected="true" class="suite-workflow-chip is-active" data-workflow="all" role="tab" type="button">
+<span aria-hidden="true" class="material-symbols-outlined" style="font-size:13px;">apps</span> All Workflows
+      </button>
+<button aria-selected="false" class="suite-workflow-chip" data-workflow="cluster-sizing" role="tab" type="button">
+<span aria-hidden="true" class="material-symbols-outlined" style="font-size:13px;">developer_board</span> Cluster Sizing &amp; SOT
+      </button>
+<button aria-selected="false" class="suite-workflow-chip" data-workflow="inference-bench" role="tab" type="button">
+<span aria-hidden="true" class="material-symbols-outlined" style="font-size:13px;">speed</span> Inference &amp; Benchmarking
+      </button>
+<button aria-selected="false" class="suite-workflow-chip" data-workflow="demos-briefing" role="tab" type="button">
+<span aria-hidden="true" class="material-symbols-outlined" style="font-size:13px;">co_present</span> Executive Demos &amp; Briefing
+      </button>
+<button aria-selected="false" class="suite-workflow-chip" data-workflow="knowledge-enable" role="tab" type="button">
+<span aria-hidden="true" class="material-symbols-outlined" style="font-size:13px;">school</span> Knowledge &amp; Team Enablement
+      </button>
+</div>
+<!-- Interactive 6-step lifecycle flow (Plan → Deploy → Validate → Demonstrate → Communicate → Learn) -->
+<nav aria-label="AI solution lifecycle navigation" class="suite-flow" id="suite-flow">
+<a aria-label="01 Plan: Data Center Planner" aria-selected="true" class="suite-flow-step is-active" data-id="dc-planner" data-index="0" href="#card-dc-planner" role="tab">
+<span class="suite-flow-num">01</span> Plan
+      </a>
+<span aria-hidden="true" class="suite-flow-arrow">→</span>
+<a aria-label="02 Deploy: Cluster Manager" aria-selected="false" class="suite-flow-step" data-id="cluster-manager" data-index="1" href="#card-cluster-manager" role="tab">
+<span class="suite-flow-num">02</span> Deploy
+      </a>
+<span aria-hidden="true" class="suite-flow-arrow">→</span>
+<a aria-label="03 Validate: LLM Benchmark" aria-selected="false" class="suite-flow-step" data-id="llm-benchmark" data-index="2" href="#card-llm-benchmark" role="tab">
+<span class="suite-flow-num">03</span> Validate
+      </a>
+<span aria-hidden="true" class="suite-flow-arrow">→</span>
+<a aria-label="04 Demonstrate: Demo Portal" aria-selected="false" class="suite-flow-step" data-id="demo-portal" data-index="3" href="#card-demo-portal" role="tab">
+<span class="suite-flow-num">04</span> Demonstrate
+      </a>
+<span aria-hidden="true" class="suite-flow-arrow">→</span>
+<a aria-label="05 Communicate: Slide Presenter" aria-selected="false" class="suite-flow-step" data-id="slide-presenter" data-index="4" href="#card-slide-presenter" role="tab">
+<span class="suite-flow-num">05</span> Communicate
+      </a>
+<span aria-hidden="true" class="suite-flow-arrow">→</span>
+<a aria-label="06 Learn: Knowledge Exchange" aria-selected="false" class="suite-flow-step" data-id="knowledge-exchange" data-index="5" href="#card-knowledge-exchange" role="tab">
+<span class="suite-flow-num">06</span> Learn
+      </a>
+</nav>
+<!-- Interactive Architecture Dataflow Visualizer -->
+<div aria-label="End-to-End AI Lifecycle Dataflow" class="suite-dataflow" id="suite-dataflow">
+<div class="suite-dataflow-node is-active" data-id="dc-planner" data-stage="01" role="button" tabindex="0">
+<span>01 Plan</span>
+<span class="suite-dataflow-artifact">BOM &amp; Topology</span>
+</div>
+<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+<div class="suite-dataflow-node" data-id="cluster-manager" data-stage="02" role="button" tabindex="0">
+<span>02 Deploy</span>
+<span class="suite-dataflow-artifact">Ansible &amp; RoCEv2</span>
+</div>
+<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+<div class="suite-dataflow-node" data-id="llm-benchmark" data-stage="03" role="button" tabindex="0">
+<span>03 Validate</span>
+<span class="suite-dataflow-artifact">vLLM &amp; Latency</span>
+</div>
+<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+<div class="suite-dataflow-node" data-id="demo-portal" data-stage="04" role="button" tabindex="0">
+<span>04 Demonstrate</span>
+<span class="suite-dataflow-artifact">Runnable Demos</span>
+</div>
+<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+<div class="suite-dataflow-node" data-id="slide-presenter" data-stage="05" role="button" tabindex="0">
+<span>05 Communicate</span>
+<span class="suite-dataflow-artifact">Visual Decks</span>
+</div>
+<span aria-hidden="true" class="suite-dataflow-arrow">→</span>
+<div class="suite-dataflow-node" data-id="knowledge-exchange" data-stage="06" role="button" tabindex="0">
+<span>06 Learn</span>
+<span class="suite-dataflow-artifact">Wiki &amp; Runbooks</span>
+</div>
+</div>
+</div>
+<section aria-label="Application screenshots showcase" class="suite-banner">
+<button aria-label="Previous application" class="suite-nav" id="suite-prev" type="button">
+<span aria-hidden="true" class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="suite-banner-viewport" id="suite-banner-viewport">
+<div class="suite-banner-track" id="suite-banner-track"></div>
+</div>
+<button aria-label="Next application" class="suite-nav" id="suite-next" type="button">
+<span aria-hidden="true" class="material-symbols-outlined">chevron_right</span>
+</button>
+</section>
+<div class="suite-frame suite-frame--body">
+<div aria-label="Application lifecycle navigation" class="suite-dots" id="suite-dots" role="tablist"></div>
+<!-- Crawlable, semantic HTML baseline for AI bots and search crawlers -->
+<section aria-label="All applications in the AI solution lifecycle" class="suite-grid" id="suite-grid">
+<!-- 01 Plan: Data Center Planner -->
+<article aria-label="Data Center Planner" class="suite-tool-card" data-app-href="/dc-planner/pages/index.html" data-id="dc-planner" data-index="0" id="card-dc-planner" role="group" tabindex="0"><div class="suite-tool-card__bg" style="background-image:url('/assets/suite/screenshots/dc-planner-workload.png'),url('/assets/suite/screenshots/dc-planner.png'),url('/assets/suite/dc-planner.svg');"></div>
+<div aria-hidden="true" class="suite-tool-card__shade"></div>
+<div class="suite-tool-card__top">
+<img alt="" class="suite-tool-card__icon" decoding="async" height="20" src="/assets/suite/favicons/dc-planner.svg" width="20"/>
+<h2 class="suite-tool-card__title">Data Center Planner</h2>
+</div>
+<p class="suite-tool-card__desc">
+          Design, size, and communicate data-center or AI infrastructure requirements.
+        </p>
+<div aria-label="Technology stack" class="suite-card-stack">
+<span class="suite-stack-badge">AMD MI300X/MI325X</span>
+<span class="suite-stack-badge">NVIDIA Hopper/Blackwell</span>
+<span class="suite-stack-badge">800G Leaf-Spine</span>
+<span class="suite-stack-badge">TCO Model</span>
+</div>
+<div class="suite-tool-card__prompts">
+<button class="suite-prompt-pill" data-prompt="Sizing &amp; power footprint for 64x MI300X cluster" title="Ask ViXCi AI Assistant" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-prompt-pill__icon">smart_toy</span>
+<span class="suite-prompt-pill__text">Sizing &amp; power footprint for 64x MI300X cluster</span>
+</button>
+</div>
+<div class="suite-tool-card__pills">
+<a aria-label="Open tool" class="suite-pill suite-pill--tool" href="/dc-planner/pages/index.html" title="Launch Data Center Planner">
+<img alt="" class="suite-pill__favicon" decoding="async" height="13" src="/assets/suite/favicons/dc-planner.svg" width="13"/>
+<span class="suite-pill__label">Tool</span>
+<span class="suite-pill__tip">Launch Tool</span>
+</a>
+<a aria-label="Open overview" class="suite-pill suite-pill--overview" href="/dc-planner/pages/pitch.html" title="Overview &amp; Pitch">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">slideshow</span>
+<span class="suite-pill__label">Pitch</span>
+<span class="suite-pill__tip">Overview</span>
+</a>
+<button aria-label="Download or Install" class="suite-pill suite-pill--install" data-install-id="dc-planner" title="Download &amp; Install" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">download</span>
+<span class="suite-pill__label">Get</span>
+<span class="suite-pill__tip">Install</span>
+</button>
+</div>
+</article>
+<!-- 02 Deploy: Cluster Manager -->
+<article aria-label="Cluster Manager" class="suite-tool-card" data-app-href="/cluster-manager/pages/index.html" data-id="cluster-manager" data-index="1" id="card-cluster-manager" role="group" tabindex="0"><div class="suite-tool-card__bg" style="background-image:url('/assets/suite/screenshots/cluster-manager-install.png'),url('/assets/suite/screenshots/cluster-manager.png'),url('/assets/suite/cluster-manager.svg');"></div>
+<div aria-hidden="true" class="suite-tool-card__shade"></div>
+<div class="suite-tool-card__top">
+<img alt="" class="suite-tool-card__icon" decoding="async" height="20" src="/assets/suite/favicons/cluster-manager.svg" width="20"/>
+<h2 class="suite-tool-card__title">Cluster Manager</h2>
+</div>
+<p class="suite-tool-card__desc">
+          Configure, manage, validate, or operationalize AI/HPC clusters.
+        </p>
+<div aria-label="Technology stack" class="suite-card-stack">
+<span class="suite-stack-badge">ROCm 6.x</span>
+<span class="suite-stack-badge">Pollara 400G AI-NIC</span>
+<span class="suite-stack-badge">Ansible</span>
+<span class="suite-stack-badge">RoCEv2 / IB</span>
+</div>
+<div class="suite-tool-card__prompts">
+<button class="suite-prompt-pill" data-prompt="Configure RoCEv2 priority flow control" title="Ask ViXCi AI Assistant" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-prompt-pill__icon">smart_toy</span>
+<span class="suite-prompt-pill__text">Configure RoCEv2 priority flow control</span>
+</button>
+</div>
+<div class="suite-tool-card__pills">
+<a aria-label="Open tool" class="suite-pill suite-pill--tool" href="/cluster-manager/pages/index.html" title="Launch Cluster Manager">
+<img alt="" class="suite-pill__favicon" decoding="async" height="13" src="/assets/suite/favicons/cluster-manager.svg" width="13"/>
+<span class="suite-pill__label">Tool</span>
+<span class="suite-pill__tip">Launch Tool</span>
+</a>
+<a aria-label="Open overview" class="suite-pill suite-pill--overview" href="/cluster-manager/pages/pitch.html" title="Overview &amp; Pitch">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">slideshow</span>
+<span class="suite-pill__label">Pitch</span>
+<span class="suite-pill__tip">Overview</span>
+</a>
+<button aria-label="Download or Install" class="suite-pill suite-pill--install" data-install-id="cluster-manager" title="Download &amp; Install" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">download</span>
+<span class="suite-pill__label">Get</span>
+<span class="suite-pill__tip">Install</span>
+</button>
+</div>
+</article>
+<!-- 03 Validate: LLM Benchmark -->
+<article aria-label="LLM Benchmark" class="suite-tool-card" data-app-href="/llm-benchmark/pages/index.html" data-id="llm-benchmark" data-index="2" id="card-llm-benchmark" role="group" tabindex="0"><div class="suite-tool-card__bg" style="background-image:url('/assets/suite/screenshots/llm-benchmark-plan.png'),url('/assets/suite/screenshots/llm-benchmark.png'),url('/assets/suite/llm-benchmark.svg');"></div>
+<div aria-hidden="true" class="suite-tool-card__shade"></div>
+<div class="suite-tool-card__top">
+<img alt="" class="suite-tool-card__icon" decoding="async" height="20" src="/assets/suite/favicons/llm-benchmark.svg" width="20"/>
+<h2 class="suite-tool-card__title">LLM Benchmark</h2>
+</div>
+<p class="suite-tool-card__desc">
+          Measure model-serving, hardware, latency, throughput, or cost-performance outcomes.
+        </p>
+<div aria-label="Technology stack" class="suite-card-stack">
+<span class="suite-stack-badge">vLLM / SGLang</span>
+<span class="suite-stack-badge">Triton Server</span>
+<span class="suite-stack-badge">Prometheus</span>
+<span class="suite-stack-badge">SLO Metrics</span>
+</div>
+<div class="suite-tool-card__prompts">
+<button class="suite-prompt-pill" data-prompt="Compare TTFT &amp; latency for vLLM vs SGLang" title="Ask ViXCi AI Assistant" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-prompt-pill__icon">smart_toy</span>
+<span class="suite-prompt-pill__text">Compare TTFT &amp; latency for vLLM vs SGLang</span>
+</button>
+</div>
+<div class="suite-tool-card__pills">
+<a aria-label="Open tool" class="suite-pill suite-pill--tool" href="/llm-benchmark/pages/index.html" title="Launch LLM Benchmark">
+<img alt="" class="suite-pill__favicon" decoding="async" height="13" src="/assets/suite/favicons/llm-benchmark.svg" width="13"/>
+<span class="suite-pill__label">Tool</span>
+<span class="suite-pill__tip">Launch Tool</span>
+</a>
+<a aria-label="Open overview" class="suite-pill suite-pill--overview" href="/llm-benchmark/pages/pitch.html" title="Overview &amp; Pitch">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">slideshow</span>
+<span class="suite-pill__label">Pitch</span>
+<span class="suite-pill__tip">Overview</span>
+</a>
+<button aria-label="Download or Install" class="suite-pill suite-pill--install" data-install-id="llm-benchmark" title="Download &amp; Install" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">download</span>
+<span class="suite-pill__label">Get</span>
+<span class="suite-pill__tip">Install</span>
+</button>
+</div>
+</article>
+<!-- 04 Demonstrate: Demo Portal -->
+<article aria-label="Demo Portal" class="suite-tool-card" data-app-href="/demo-portal/pages/index.html" data-id="demo-portal" data-index="3" id="card-demo-portal" role="group" tabindex="0"><div class="suite-tool-card__bg" style="background-image:url('/assets/suite/screenshots/demo-portal-catalog.png'),url('/assets/suite/screenshots/demo-portal.png'),url('/assets/suite/demo-portal.svg');"></div>
+<div aria-hidden="true" class="suite-tool-card__shade"></div>
+<div class="suite-tool-card__top">
+<img alt="" class="suite-tool-card__icon" decoding="async" height="20" src="/assets/suite/favicons/demo-portal.svg" width="20"/>
+<h2 class="suite-tool-card__title">Demo Portal</h2>
+</div>
+<p class="suite-tool-card__desc">
+          Deliver reusable technical demos and guided customer experiences.
+        </p>
+<div aria-label="Technology stack" class="suite-card-stack">
+<span class="suite-stack-badge">Docker / Podman</span>
+<span class="suite-stack-badge">JupyterLab</span>
+<span class="suite-stack-badge">Gradio / Streamlit</span>
+<span class="suite-stack-badge">Live Shell</span>
+</div>
+<div class="suite-tool-card__prompts">
+<button class="suite-prompt-pill" data-prompt="Launch AMD GPU live container walkthrough" title="Ask ViXCi AI Assistant" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-prompt-pill__icon">smart_toy</span>
+<span class="suite-prompt-pill__text">Launch AMD GPU live container walkthrough</span>
+</button>
+</div>
+<div class="suite-tool-card__pills">
+<a aria-label="Open tool" class="suite-pill suite-pill--tool" href="/demo-portal/pages/index.html" title="Launch Demo Portal">
+<img alt="" class="suite-pill__favicon" decoding="async" height="13" src="/assets/suite/favicons/demo-portal.svg" width="13"/>
+<span class="suite-pill__label">Tool</span>
+<span class="suite-pill__tip">Launch Tool</span>
+</a>
+<a aria-label="Open overview" class="suite-pill suite-pill--overview" href="/demo-portal/pages/pitch.html" title="Overview &amp; Pitch">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">slideshow</span>
+<span class="suite-pill__label">Pitch</span>
+<span class="suite-pill__tip">Overview</span>
+</a>
+<button aria-label="Download or Install" class="suite-pill suite-pill--install" data-install-id="demo-portal" title="Download &amp; Install" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">download</span>
+<span class="suite-pill__label">Get</span>
+<span class="suite-pill__tip">Install</span>
+</button>
+</div>
+</article>
+<!-- 05 Present: Slide Presenter -->
+<article aria-label="Slide Presenter" class="suite-tool-card" data-app-href="/slide-presenter/pages/index.html" data-id="slide-presenter" data-index="4" id="card-slide-presenter" role="group" tabindex="0"><div class="suite-tool-card__bg" style="background-image:url('/assets/suite/screenshots/slide-presenter-present.png'),url('/assets/suite/screenshots/slide-presenter.png'),url('/assets/suite/slide-presenter.svg');"></div>
+<div aria-hidden="true" class="suite-tool-card__shade"></div>
+<div class="suite-tool-card__top">
+<img alt="" class="suite-tool-card__icon" decoding="async" height="20" src="/assets/suite/favicons/slide-presenter.svg" width="20"/>
+<h2 class="suite-tool-card__title">Slide Presenter</h2>
+</div>
+<p class="suite-tool-card__desc">
+          Turn technical material into engaging interactive presentation experiences.
+        </p>
+<div aria-label="Technology stack" class="suite-card-stack">
+<span class="suite-stack-badge">PPTX / PDF Parser</span>
+<span class="suite-stack-badge">Markdown Decks</span>
+<span class="suite-stack-badge">Dual-Screen Console</span>
+</div>
+<div class="suite-tool-card__prompts">
+<button class="suite-prompt-pill" data-prompt="Generate customer executive deck for AI cluster" title="Ask ViXCi AI Assistant" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-prompt-pill__icon">smart_toy</span>
+<span class="suite-prompt-pill__text">Generate customer executive deck for AI cluster</span>
+</button>
+</div>
+<div class="suite-tool-card__pills">
+<a aria-label="Open tool" class="suite-pill suite-pill--tool" href="/slide-presenter/pages/index.html" title="Launch Slide Presenter">
+<img alt="" class="suite-pill__favicon" decoding="async" height="13" src="/assets/suite/favicons/slide-presenter.svg" width="13"/>
+<span class="suite-pill__label">Tool</span>
+<span class="suite-pill__tip">Launch Tool</span>
+</a>
+<a aria-label="Open overview" class="suite-pill suite-pill--overview" href="/slide-presenter/pages/pitch.html" title="Overview &amp; Pitch">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">slideshow</span>
+<span class="suite-pill__label">Pitch</span>
+<span class="suite-pill__tip">Overview</span>
+</a>
+<button aria-label="Download or Install" class="suite-pill suite-pill--install" data-install-id="slide-presenter" title="Download &amp; Install" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">download</span>
+<span class="suite-pill__label">Get</span>
+<span class="suite-pill__tip">Install</span>
+</button>
+</div>
+</article>
+<!-- 06 Learn: Knowledge Exchange -->
+<article aria-label="Knowledge Exchange" class="suite-tool-card" data-app-href="/knowledge-exchange/pages/index.html" data-id="knowledge-exchange" data-index="5" id="card-knowledge-exchange" role="group" tabindex="0"><div class="suite-tool-card__bg" style="background-image:url('/assets/suite/screenshots/knowledge-exchange-paths.png'),url('/assets/suite/screenshots/knowledge-exchange.png'),url('/assets/suite/knowledge-exchange.svg');"></div>
+<div aria-hidden="true" class="suite-tool-card__shade"></div>
+<div class="suite-tool-card__top">
+<img alt="" class="suite-tool-card__icon" decoding="async" height="20" src="/assets/suite/favicons/knowledge-exchange.svg" width="20"/>
+<h2 class="suite-tool-card__title">Knowledge Exchange</h2>
+</div>
+<p class="suite-tool-card__desc">
+          Capture, retrieve, exchange, and operationalize technical knowledge.
+        </p>
+<div aria-label="Technology stack" class="suite-card-stack">
+<span class="suite-stack-badge">LLM Wiki Graph</span>
+<span class="suite-stack-badge">Interactive SVG</span>
+<span class="suite-stack-badge">Curriculum Engine</span>
+</div>
+<div class="suite-tool-card__prompts">
+<button class="suite-prompt-pill" data-prompt="Open ROCm memory management training module" title="Ask ViXCi AI Assistant" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-prompt-pill__icon">smart_toy</span>
+<span class="suite-prompt-pill__text">Open ROCm memory management training module</span>
+</button>
+</div>
+<div class="suite-tool-card__pills">
+<a aria-label="Open tool" class="suite-pill suite-pill--tool" href="/knowledge-exchange/pages/index.html" title="Launch Knowledge Exchange">
+<img alt="" class="suite-pill__favicon" decoding="async" height="13" src="/assets/suite/favicons/knowledge-exchange.svg" width="13"/>
+<span class="suite-pill__label">Tool</span>
+<span class="suite-pill__tip">Launch Tool</span>
+</a>
+<a aria-label="Open overview" class="suite-pill suite-pill--overview" href="/knowledge-exchange/pages/pitch.html" title="Overview &amp; Pitch">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">slideshow</span>
+<span class="suite-pill__label">Pitch</span>
+<span class="suite-pill__tip">Overview</span>
+</a>
+<button aria-label="Download or Install" class="suite-pill suite-pill--install" data-install-id="knowledge-exchange" title="Download &amp; Install" type="button">
+<span aria-hidden="true" class="material-symbols-outlined suite-pill__icon">download</span>
+<span class="suite-pill__label">Get</span>
+<span class="suite-pill__tip">Install</span>
+</button>
+</div>
+</article>
+</section>
+<!-- No-Script Fallback -->
+<noscript>
+<section style="padding:24px;background:rgba(255,255,255,0.05);border-radius:8px;margin-top:20px;">
+<h2>The AI Solution Lifecycle Suite</h2>
+<p>Explore six dedicated tools for modern AI infrastructure, performance validation, and technical enablement:</p>
+<ul>
+<li><a href="/dc-planner/pages/index.html"><strong>01 — Data Center Planner:</strong> Design, size, and communicate data-center or AI infrastructure requirements</a></li>
+<li><a href="/cluster-manager/pages/index.html"><strong>02 — Cluster Manager:</strong> Configure, manage, validate, or operationalize AI/HPC clusters</a></li>
+<li><a href="/llm-benchmark/pages/index.html"><strong>03 — LLM Benchmark:</strong> Measure model-serving, hardware, latency, throughput, or cost-performance outcomes</a></li>
+<li><a href="/demo-portal/pages/index.html"><strong>04 — Demo Portal:</strong> Deliver reusable technical demos and guided customer experiences</a></li>
+<li><a href="/slide-presenter/pages/index.html"><strong>05 — Slide Presenter:</strong> Turn technical material into engaging interactive presentation experiences</a></li>
+<li><a href="/knowledge-exchange/pages/index.html"><strong>06 — Knowledge Exchange:</strong> Capture, retrieve, exchange, and operationalize technical knowledge</a></li>
+</ul>
+</section>
+</noscript>
+</div>
+<!-- Command Palette Modal Container -->
+<div aria-hidden="true" class="suite-cmd-palette" id="suite-cmd-palette">
+<div class="suite-cmd-palette-backdrop"></div>
+<div aria-label="Command Palette" aria-modal="true" class="suite-cmd-palette-dialog" role="dialog">
+<div class="suite-cmd-palette-search">
+<span aria-hidden="true" class="material-symbols-outlined suite-cmd-palette-icon">search</span>
+<input autocomplete="off" class="suite-cmd-palette-input" placeholder="Search tools, stages, or features... (e.g. Plan, RoCEv2, vLLM, Pitch)" type="text"/>
+<kbd class="suite-cmd-palette-kbd">ESC</kbd>
+</div>
+<div class="suite-cmd-palette-results" role="listbox"></div>
+<div class="suite-cmd-palette-foot">
+<span>Navigation: <strong>↑↓</strong></span>
+<span>Open: <strong>↵</strong></span>
+<span>Close: <strong>ESC</strong></span>
+</div>
+</div>
+</div>
+<script src="/js/suite.js"></script>
 </body>
 </html>
